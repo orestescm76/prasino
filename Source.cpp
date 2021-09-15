@@ -1,66 +1,19 @@
+/*
+* @author orestescm76
+* @brief main
+* VERSION 0.2.0
+*/
+
 #include <iostream>
+#include "Renderer.h"
 //en este orden que si no la jodemos
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-namespace PAR
-{
-	class Renderer
-	{
-	private:
-		static double r, g, b, a;
-	public:
-		static void refrescar_ventana(GLFWwindow* window)
-		{
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-			glfwSwapBuffers(window);
-		}
-		static void rueda_raton_callback(GLFWwindow* window, double xoffset, double yoffset)
-		{
-			if (yoffset > 0)
-				sumar_color();
-			else restar_color();
-			configurar_color();
-			refrescar_ventana(window);
-		}
-		static void configurar_color()
-		{
-			glClearColor(r,g,b,a);
-		}
-		static void sumar_color()
-		{
-			r += .05;
-			g += .05;
-			b += .05;
-			if (r >= 1.0)
-				r = 1.0;
-			if (g >= 1.0)
-				g = 1.0;
-			if (b >= 1.0)
-				b = 1.0;
-		}
-		static void restar_color()
-		{
-			r -= .05;
-			g -= .05;
-			b -= .05;
-			if (r <= 0.0)
-				r = 0.0;
-			if (g <= 0.0)
-				g = 0.0;
-			if(b <= 0.0)
-				b = 0.0;
-		}
-	};
-	double Renderer::r = .6;
-	double Renderer::g = .6;
-	double Renderer::b = .6;
-	double Renderer::a = 1.0;
-}
 //callback de redibujar
 void window_refresh_callback(GLFWwindow* window)
 {
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	PAG::Renderer::getInstancia()->refrescar_ventana();
 	glfwSwapBuffers(window);
 	std::cout << "Ventana redibujada" << std::endl;
 }
@@ -97,13 +50,14 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 	std::cout << "Movida la rueda del raton " << xoffset
 		<< " Unidades en horizontal y " << yoffset << " unidades en vertical"
 		<< std::endl;
+	PAG::Renderer::getInstancia()->cambiar_color(yoffset);
+	window_refresh_callback(window);
 }
 
 int main()
 {
 	std::cout << "iniciando graficas 1" << std::endl;
-	// - pongo el renderer aquí, no sé si está ok
-	PAR::Renderer render;
+	PAG::Renderer* render = PAG::Renderer::getInstancia();
 	// - Inicializa GLFW. Es un proceso que sólo debe realizarse una vez en la aplicación
 	if (glfwInit() != GLFW_TRUE)
 	{
@@ -144,20 +98,16 @@ int main()
 		glfwTerminate();
 		return -3;
 	}
-	// - Información de OpenGL
-	std::cout << "RENDERER: " << glGetString(GL_RENDERER) << std::endl
-		<< "VENDOR: " << glGetString(GL_VENDOR) << std::endl
-		<< "VERSION: " << glGetString(GL_VERSION) << std::endl
-		<< "SHADING LANGUAGE VERSION: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
+
 	//registrar callbacks
-	glfwSetWindowRefreshCallback(window, render.refrescar_ventana);	
+	glfwSetWindowRefreshCallback(window, window_refresh_callback);	
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 	glfwSetKeyCallback(window, key_callback);
 	glfwSetMouseButtonCallback(window, mouse_button_callback);
-	glfwSetScrollCallback(window, render.rueda_raton_callback);
+	glfwSetScrollCallback(window, scroll_callback);
 	
 	//establecer un gris
-	render.configurar_color();
+	render->configurar_color();
 	// - Le decimos a OpenGL que tenga en cuenta la profundidad a la hora de dibujar.
     //   No tiene por qué ejecutarse en cada paso por el ciclo de eventos.
 	glEnable(GL_DEPTH_TEST);
