@@ -6,16 +6,18 @@ namespace PAG
 	{
 	private:
 		static Renderer* instancia;
-		static double r, g, b, a;
+		double r, g, b, a;
 		Renderer();
 	public:
 		virtual ~Renderer();
-		static Renderer* getInstancia();
-		static void refrescar_ventana();
-		static void cambiar_color(double yoffset);
-		static void configurar_color();
-		static void sumar_color();
-		static void restar_color();
+		// Lo único que necesito estático de la clase Renderer es la instancia y el método de la instancia
+		// ya que así o creo una instancia y hago render->getInstancia() o PAG::Renderer::getInstancia(), lo mismo da.
+		static Renderer* getInstancia(); 
+		void refrescar_ventana();
+		void cambiar_color(double yoffset);
+		void configurar_color();
+		void sumar_color();
+		void restar_color();
 		void imprimirInformacion();
 	};
 }

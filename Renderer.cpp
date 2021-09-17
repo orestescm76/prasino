@@ -9,14 +9,13 @@
 #include "Renderer.h"
 
 PAG::Renderer* PAG::Renderer::instancia = nullptr;
-double PAG::Renderer::r = .6;
-double PAG::Renderer::g = .6;
-double PAG::Renderer::b = .6;
-double PAG::Renderer::a = 1.0;
 
 PAG::Renderer::Renderer()
 {
-
+	r = .6;
+	g = .6;
+	b = .6;
+	a = 1.0;
 }
 
 PAG::Renderer::~Renderer()

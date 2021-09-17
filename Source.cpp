@@ -1,7 +1,7 @@
 /*
 * @author orestescm76
 * @brief main
-* VERSION 0.2.0
+* VERSION 0.2.1
 */
 
 #include <iostream>
@@ -56,7 +56,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 
 int main()
 {
-	std::cout << "iniciando graficas 1" << std::endl;
+	std::cout << "Iniciando PAG2122 0.2.0" << std::endl;
 	PAG::Renderer* render = PAG::Renderer::getInstancia();
 	// - Inicializa GLFW. Es un proceso que sólo debe realizarse una vez en la aplicación
 	if (glfwInit() != GLFW_TRUE)
@@ -98,7 +98,7 @@ int main()
 		glfwTerminate();
 		return -3;
 	}
-
+	render->imprimirInformacion();
 	//registrar callbacks
 	glfwSetWindowRefreshCallback(window, window_refresh_callback);	
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
@@ -116,8 +116,9 @@ int main()
 	{
 		glfwPollEvents();
 	}
-	std::cout << "graficas1 ha terminao"<<std::endl;
 	glfwDestroyWindow(window);
 	window = nullptr;
 	glfwTerminate();
+	std::cout << "PAR2122 is finished!" << std::endl;
+	std::cin.get();
 }
