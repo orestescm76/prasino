@@ -9,7 +9,7 @@
 #include "Renderer.h"
 
 PAG::Renderer* PAG::Renderer::instancia = nullptr;
-
+const char* PAG::Renderer::version = "0.2.1";
 PAG::Renderer::Renderer()
 {
 	r = .6;

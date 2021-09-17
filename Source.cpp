@@ -56,8 +56,8 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 
 int main()
 {
-	std::cout << "Iniciando PAG2122 0.2.0" << std::endl;
 	PAG::Renderer* render = PAG::Renderer::getInstancia();
+	std::cout << "Iniciando PAG2122 " << render->version << std::endl;
 	// - Inicializa GLFW. Es un proceso que sólo debe realizarse una vez en la aplicación
 	if (glfwInit() != GLFW_TRUE)
 	{

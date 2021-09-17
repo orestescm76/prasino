@@ -9,6 +9,7 @@ namespace PAG
 		double r, g, b, a;
 		Renderer();
 	public:
+		static const char* version;
 		virtual ~Renderer();
 		// Lo único que necesito estático de la clase Renderer es la instancia y el método de la instancia
 		// ya que así o creo una instancia y hago render->getInstancia() o PAG::Renderer::getInstancia(), lo mismo da.
