@@ -1,4 +1,7 @@
 #pragma once
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
+#include <string>
 
 namespace PAG
 {
@@ -7,6 +10,13 @@ namespace PAG
 	private:
 		static Renderer* instancia;
 		double r, g, b, a;
+		//IDENTIFICADORES
+		GLuint idVS = 0;
+		GLuint idFS = 0;
+		GLuint idSP = 0;
+		GLuint idVAO = 0;
+		GLuint idVBO = 0;
+		GLuint idIBO = 0;
 		Renderer();
 	public:
 		static const char* version;
@@ -16,9 +26,11 @@ namespace PAG
 		static Renderer* getInstancia(); 
 		void refrescar_ventana();
 		void cambiar_color(double yoffset);
-		void configurar_color();
+		void inicializar();
 		void sumar_color();
 		void restar_color();
 		void imprimirInformacion();
+		void crearModelo();
+		void crearShader(std::string vsfile, std::string fsfile);
 	};
 }

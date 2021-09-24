@@ -1,7 +1,7 @@
 /*
 * @author orestescm76
 * @brief main
-* VERSION 0.2.1
+* VERSION 0.3.0
 */
 
 #include <iostream>
@@ -21,7 +21,7 @@ void window_refresh_callback(GLFWwindow* window)
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
 	glViewport(0, 0, width, height);
-	std::cout << "Ventana redimensionada" << std::endl;
+	std::cout << "Ventana redimensionada: " << width << "x" << height << std::endl;
 }
 //callback al pulsar una tecla
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -56,14 +56,15 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 
 int main()
 {
-	PAG::Renderer* render = PAG::Renderer::getInstancia();
-	std::cout << "Iniciando PAG2122 " << render->version << std::endl;
+
+
 	// - Inicializa GLFW. Es un proceso que sólo debe realizarse una vez en la aplicación
 	if (glfwInit() != GLFW_TRUE)
 	{
 		std::cout << "Failed to initialize GLFW" << std::endl;
 		return -1;
 	}
+
 	// - Definimos las características que queremos que tenga el contexto gráfico
 	//   OpenGL de la ventana que vamos a crear. Por ejemplo, el número de muestras o el
 	//   modo Core Profile.
@@ -98,6 +99,8 @@ int main()
 		glfwTerminate();
 		return -3;
 	}
+	PAG::Renderer* render = PAG::Renderer::getInstancia();
+	std::cout << "Iniciando PAG2122 " << render->version << std::endl;
 	render->imprimirInformacion();
 	//registrar callbacks
 	glfwSetWindowRefreshCallback(window, window_refresh_callback);	
@@ -107,10 +110,8 @@ int main()
 	glfwSetScrollCallback(window, scroll_callback);
 	
 	//establecer un gris
-	render->configurar_color();
-	// - Le decimos a OpenGL que tenga en cuenta la profundidad a la hora de dibujar.
-    //   No tiene por qué ejecutarse en cada paso por el ciclo de eventos.
-	glEnable(GL_DEPTH_TEST);
+	render->inicializar();
+
 	//Ciclo de eventos
 	while (!glfwWindowShouldClose(window))
 	{
