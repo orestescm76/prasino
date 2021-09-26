@@ -1,7 +1,7 @@
 /*
 * @author orestescm76
 * @brief main
-* VERSION 0.3.0
+* VERSION 0.3.1
 */
 
 #include <iostream>
@@ -15,49 +15,45 @@ void window_refresh_callback(GLFWwindow* window)
 {
 	PAG::Renderer::getInstancia()->refrescar_ventana();
 	glfwSwapBuffers(window);
-	std::cout << "Ventana redibujada" << std::endl;
+	//std::cout << "Ventana redibujada" << std::endl;
 }
 //callback al redimensionar ventana
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
-	glViewport(0, 0, width, height);
-	std::cout << "Ventana redimensionada: " << width << "x" << height << std::endl;
+	PAG::Renderer::getInstancia()->configurar_viewport(width, height);
+	//std::cout << "Ventana redimensionada: " << width << "x" << height << std::endl;
 }
 //callback al pulsar una tecla
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-	{
 		glfwSetWindowShouldClose(window, GLFW_TRUE);
-	}
-	std::cout << "Key callback called" << std::endl;
+	//std::cout << "Key callback called" << std::endl;
 }
 //callback de botones del ratón
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
 	if (action == GLFW_PRESS)
 	{
-		std::cout << "Se ha pulsado " << button << std::endl;
+		//std::cout << "Se ha pulsado " << button << std::endl;
 	}
 	else if (action == GLFW_RELEASE)
 	{
-		std::cout << "Se ha soltado " << button << std::endl;
+		//std::cout << "Se ha soltado " << button << std::endl;
 	}
 }
 //callback rueda ratón
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
-	std::cout << "Movida la rueda del raton " << xoffset
-		<< " Unidades en horizontal y " << yoffset << " unidades en vertical"
-		<< std::endl;
+	//std::cout << "Movida la rueda del raton " << xoffset
+	//	<< " Unidades en horizontal y " << yoffset << " unidades en vertical"
+	//	<< std::endl;
 	PAG::Renderer::getInstancia()->cambiar_color(yoffset);
 	window_refresh_callback(window);
 }
 
 int main()
 {
-
-
 	// - Inicializa GLFW. Es un proceso que sólo debe realizarse una vez en la aplicación
 	if (glfwInit() != GLFW_TRUE)
 	{
@@ -72,11 +68,9 @@ int main()
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); // - Esta y las 2
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4); // siguientes activan un contexto
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1); // OpenGL Core Profile 4.1
-	// - Definimos el puntero para guardar la dirección de la ventana de la aplicación y
-    //   la creamos
+	// - Definimos el puntero para guardar la dirección de la ventana de la aplicación y la creamos
 	GLFWwindow* window;
-	// - Tamaño, título de la ventana, en ventana y no en pantalla completa,
-    //   sin compartir recursos con otras ventanas.
+	// - Tamaño, título de la ventana, en ventana y no en pantalla completa, sin compartir recursos con otras ventanas.
 	window = glfwCreateWindow(1024, 576, "PAG2122-[ColominaMonsalve-Orestes]", nullptr, nullptr);
 	//¿salió bien?
 	if (!window)
@@ -99,9 +93,8 @@ int main()
 		glfwTerminate();
 		return -3;
 	}
-	PAG::Renderer* render = PAG::Renderer::getInstancia();
-	std::cout << "Iniciando PAG2122 " << render->version << std::endl;
-	render->imprimirInformacion();
+	std::cout << "Iniciando PAG2122 " << PAG::Renderer::getInstancia()->version << std::endl;
+	PAG::Renderer::getInstancia()->imprimirInformacion();
 	//registrar callbacks
 	glfwSetWindowRefreshCallback(window, window_refresh_callback);	
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
@@ -110,7 +103,9 @@ int main()
 	glfwSetScrollCallback(window, scroll_callback);
 	
 	//establecer un gris
-	render->inicializar();
+	PAG::Renderer::getInstancia()->configurar_color();
+	//configurar zbuffer y tal
+	PAG::Renderer::getInstancia()->inicializar();
 
 	//Ciclo de eventos
 	while (!glfwWindowShouldClose(window))

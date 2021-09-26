@@ -4,12 +4,11 @@
 */
 
 #include <iostream>
-
-
 #include "Renderer.h"
 
 PAG::Renderer* PAG::Renderer::instancia = nullptr;
-const char* PAG::Renderer::version = "0.3.0";
+
+const char* PAG::Renderer::version = "0.3.1";
 PAG::Renderer::Renderer()
 {
 	crearShader("", "");
@@ -22,7 +21,7 @@ PAG::Renderer::Renderer()
 
 PAG::Renderer::~Renderer()
 {
-	delete instancia;
+
 }
 
 PAG::Renderer* PAG::Renderer::getInstancia()
@@ -52,9 +51,8 @@ void PAG::Renderer::cambiar_color(double yoffset)
 
 void PAG::Renderer::inicializar()
 {
-	glClearColor(r, g, b, a);
 	// - Le decimos a OpenGL que tenga en cuenta la profundidad a la hora de dibujar.
-//   No tiene por qué ejecutarse en cada paso por el ciclo de eventos.
+	//   No tiene por qué ejecutarse en cada paso por el ciclo de eventos.
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_MULTISAMPLE);
 }
@@ -115,6 +113,11 @@ void PAG::Renderer::crearModelo()
 		GL_STATIC_DRAW);
 }
 
+void PAG::Renderer::configurar_viewport(int width, int height)
+{
+	glViewport(0, 0, width, height);
+}
+
 void PAG::Renderer::crearShader(std::string vsfile, std::string fsfile)
 {
 	//TEMP
@@ -144,4 +147,9 @@ void PAG::Renderer::crearShader(std::string vsfile, std::string fsfile)
 	glAttachShader(idSP, idVS);
 	glAttachShader(idSP, idFS);
 	glLinkProgram(idSP);
+}
+
+void PAG::Renderer::configurar_color()
+{
+	glClearColor(r, g, b, a);
 }

@@ -26,11 +26,13 @@ namespace PAG
 		static Renderer* getInstancia(); 
 		void refrescar_ventana();
 		void cambiar_color(double yoffset);
+		void configurar_color();
 		void inicializar();
 		void sumar_color();
 		void restar_color();
-		void imprimirInformacion();
+		void configurar_viewport(int width, int height);
 		void crearModelo();
 		void crearShader(std::string vsfile, std::string fsfile);
+		void imprimirInformacion();
 	};
 }
