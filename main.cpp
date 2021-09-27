@@ -1,7 +1,7 @@
 /*
 * @author orestescm76
 * @brief main
-* VERSION 0.3.1
+* VERSION 0.3.3
 */
 
 #include <iostream>
@@ -102,9 +102,7 @@ int main()
 	glfwSetMouseButtonCallback(window, mouse_button_callback);
 	glfwSetScrollCallback(window, scroll_callback);
 	
-	//establecer un gris
-	PAG::Renderer::getInstancia()->configurar_color();
-	//configurar zbuffer y tal
+	//configurar OpenGL
 	PAG::Renderer::getInstancia()->inicializar();
 
 	//Ciclo de eventos
@@ -115,6 +113,7 @@ int main()
 	glfwDestroyWindow(window);
 	window = nullptr;
 	glfwTerminate();
-	std::cout << "PAR2122 is finished!" << std::endl;
+	std::cout << "PAR2122 is finished!" << std::endl
+		<< "Press enter to continue..." << std::endl;
 	std::cin.get();
 }

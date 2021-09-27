@@ -9,15 +9,17 @@ namespace PAG
 	{
 	private:
 		static Renderer* instancia;
-		double r, g, b, a;
+		GLfloat r, g, b, a;
 		//IDENTIFICADORES
 		GLuint idVS = 0;
 		GLuint idFS = 0;
 		GLuint idSP = 0;
 		GLuint idVAO = 0;
 		GLuint idVBO = 0;
+		GLuint idVBOColor = 0;
 		GLuint idIBO = 0;
 		Renderer();
+		void configurar_color(GLfloat r, GLfloat g, GLfloat b, GLfloat a);
 	public:
 		static const char* version;
 		virtual ~Renderer();
@@ -26,13 +28,14 @@ namespace PAG
 		static Renderer* getInstancia(); 
 		void refrescar_ventana();
 		void cambiar_color(double yoffset);
-		void configurar_color();
 		void inicializar();
+		void activarZBuffer();
 		void sumar_color();
 		void restar_color();
 		void configurar_viewport(int width, int height);
 		void crearModelo();
 		void crearShader(std::string vsfile, std::string fsfile);
+		std::string loadShader(std::string file);
 		void imprimirInformacion();
 	};
 }
