@@ -36,6 +36,7 @@ namespace PAG
 		void crearModelo();
 		void crearShader(std::string vsfile, std::string fsfile);
 		std::string loadShader(std::string file);
+		void comprobarErrores(GLint status, GLint shader, std::string msg, bool isShader);
 		void imprimirInformacion();
 	};
 }

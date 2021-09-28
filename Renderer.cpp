@@ -10,7 +10,7 @@
 
 PAG::Renderer* PAG::Renderer::instancia = nullptr;
 
-const char* PAG::Renderer::version = "0.3.3";
+const char* PAG::Renderer::version = "0.3.4";
 PAG::Renderer::Renderer()
 {
 	crearShader("pag03-vs.glsl", "pag03-fs.glsl");
@@ -55,6 +55,11 @@ void PAG::Renderer::inicializar()
 {
 	configurar_color(r,g,b,a);
 	activarZBuffer();
+	//Polilínea, sólidos de revolución
+	//glPrimitiveRestartIndex(0xFFFF);
+	//glEnable(GL_PRIMITIVE_RESTART);
+	
+	glEnable(GL_PROGRAM_POINT_SIZE);
 	glEnable(GL_MULTISAMPLE);
 }
 
@@ -145,8 +150,6 @@ void PAG::Renderer::crearModelo()
 	//glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), nullptr);
 	//glEnableVertexAttribArray(0);
 
-	//glGenBuffers(1, &idVBOColor);
-	//glBindBuffer(GL_ARRAY_BUFFER, idVBOColor);
 	//glBufferData(GL_ARRAY_BUFFER, sizeof(vboentrelazado), vboentrelazado, GL_STATIC_DRAW);
 	//glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLfloat*)NULL+3);
 	//glEnableVertexAttribArray(1);
@@ -166,6 +169,9 @@ void PAG::Renderer::crearShader(std::string vsfile, std::string fsfile)
 {
 	std::string miVertexShader = "";
 	std::string miFragmentShader = "";
+	GLint statusfs = 0;
+	GLint statusvs = 0;
+	GLint status = 0;
 	try
 	{
 		miVertexShader = loadShader(vsfile);
@@ -176,18 +182,29 @@ void PAG::Renderer::crearShader(std::string vsfile, std::string fsfile)
 		std::cout << e.what() << std::endl;
 		return;
 	}
+	//Crear shader
 	idVS = glCreateShader(GL_VERTEX_SHADER);
-	const GLchar* fuenteVS = miVertexShader.c_str();
-	glShaderSource(idVS, 1, &fuenteVS, nullptr);
-	glCompileShader(idVS);
 	idFS = glCreateShader(GL_FRAGMENT_SHADER);
-	const GLchar* fuenteFS = miFragmentShader.c_str();
-	glShaderSource(idFS, 1, &fuenteFS, nullptr);
-	glCompileShader(idFS);
 	idSP = glCreateProgram();
+	//Attach shaders
 	glAttachShader(idSP, idVS);
 	glAttachShader(idSP, idFS);
+	//Lectura de shaders
+	const GLchar* fuenteVS = miVertexShader.c_str();
+	const GLchar* fuenteFS = miFragmentShader.c_str();
+	glShaderSource(idVS, 1, &fuenteVS, nullptr);
+	glShaderSource(idFS, 1, &fuenteFS, nullptr);
+	//Compilar shaders
+	glCompileShader(idVS);
+	glGetShaderiv(idVS, GL_COMPILE_STATUS, &statusvs);
+	comprobarErrores(statusvs, idVS, "Error al compilar el vertex shader", true);
+	glCompileShader(idFS);
+	glGetShaderiv(idFS, GL_COMPILE_STATUS, &statusvs);
+	comprobarErrores(statusvs, idFS, "Error al compilar el fragment shader", true);
+	//Linkear shader (enlazar)
 	glLinkProgram(idSP);
+	glGetProgramiv(idSP, GL_LINK_STATUS, &status);
+	comprobarErrores(status, idSP, "Error al enlazar los shaders", false);
 }
 std::string PAG::Renderer::loadShader(std::string file)
 {
@@ -200,4 +217,19 @@ std::string PAG::Renderer::loadShader(std::string file)
 	std::stringstream ssVs;
 	ssVs << input.rdbuf();
 	return ssVs.str();
+}
+
+void PAG::Renderer::comprobarErrores(GLint status, GLint shader, std::string msg, bool isShader)
+{
+	if (status == GL_FALSE)
+	{
+		std::cout << msg << std::endl;
+		char log[1024];
+		GLsizei buff;
+		if (isShader)
+			glGetShaderInfoLog(shader, sizeof(log), &buff, log);
+		else
+			glGetProgramInfoLog(shader, sizeof(log), &buff, log);
+		std::cout << log << std::endl;
+	}
 }
