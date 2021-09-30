@@ -1,11 +1,12 @@
 /*
 * @author orestescm76
 * @brief main
-* VERSION 0.3.4
+* VERSION 0.3.5
 */
 
 #include <iostream>
 #include "Renderer.h"
+#include "Log.h"
 //en este orden que si no la jodemos
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -13,14 +14,14 @@
 //callback de redibujar
 void window_refresh_callback(GLFWwindow* window)
 {
-	PAG::Renderer::getInstancia()->refrescar_ventana();
+	PAG::Renderer::getInstance()->refreshWindow();
 	glfwSwapBuffers(window);
 	//std::cout << "Ventana redibujada" << std::endl;
 }
 //callback al redimensionar ventana
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
-	PAG::Renderer::getInstancia()->configurar_viewport(width, height);
+	PAG::Renderer::getInstance()->configViewport(width, height);
 	//std::cout << "Ventana redimensionada: " << width << "x" << height << std::endl;
 }
 //callback al pulsar una tecla
@@ -48,16 +49,17 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 	//std::cout << "Movida la rueda del raton " << xoffset
 	//	<< " Unidades en horizontal y " << yoffset << " unidades en vertical"
 	//	<< std::endl;
-	PAG::Renderer::getInstancia()->cambiar_color(yoffset);
+	PAG::Renderer::getInstance()->changeColor(yoffset);
 	window_refresh_callback(window);
 }
 
 int main()
 {
+	PAG::Log* log = PAG::Log::getInstance();
 	// - Inicializa GLFW. Es un proceso que sólo debe realizarse una vez en la aplicación
 	if (glfwInit() != GLFW_TRUE)
 	{
-		std::cout << "Failed to initialize GLFW" << std::endl;
+		log->printMessage(PAG::msgType::ERROR, "Failed to initialize GLFW");
 		return -1;
 	}
 
@@ -75,26 +77,26 @@ int main()
 	//¿salió bien?
 	if (!window)
 	{
-		std::cout << "Failed to open GLFW window" << std::endl;
+		log->printMessage(PAG::msgType::ERROR, "Failed to open GLFW window");
 		glfwTerminate();
 		return -2;
 	}
 	// - Hace que el contexto OpenGL asociado a la ventana que acabamos de crear pase a
     //   ser el contexto actual de OpenGL para las siguientes llamadas a la biblioteca
-	glfwMakeContextCurrent(window);
+ 	glfwMakeContextCurrent(window);
 	// - Ahora inicializamos GLEW.
     //   IMPORTANTE: GLEW debe inicializarse siempre DESPUÉS de que se haya
     //               inicializado GLFW y creado la ventana
 	glewExperimental = true;
 	if (glewInit() != GLEW_OK)
 	{
-		std::cout << "Failed to initialize GLEW" << std::endl;
+		log->printMessage(PAG::msgType::ERROR, "Failed to initialize GLEW");
 		glfwDestroyWindow(window);
 		glfwTerminate();
 		return -3;
 	}
-	std::cout << "Iniciando PAG2122 " << PAG::Renderer::getInstancia()->version << std::endl;
-	PAG::Renderer::getInstancia()->imprimirInformacion();
+	log->printMessage(PAG::msgType::INFO, "Starting PAG 2122 " + PAG::Renderer::getInstance()->version);
+	PAG::Renderer::getInstance()->printInfo();
 	//registrar callbacks
 	glfwSetWindowRefreshCallback(window, window_refresh_callback);	
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
@@ -103,7 +105,7 @@ int main()
 	glfwSetScrollCallback(window, scroll_callback);
 	
 	//configurar OpenGL
-	PAG::Renderer::getInstancia()->inicializar();
+	PAG::Renderer::getInstance()->start();
 
 	//Ciclo de eventos
 	while (!glfwWindowShouldClose(window))
@@ -113,7 +115,7 @@ int main()
 	glfwDestroyWindow(window);
 	window = nullptr;
 	glfwTerminate();
-	std::cout << "PAR2122 is finished!" << std::endl
-		<< "Press enter to continue..." << std::endl;
+	log->printMessage(PAG::msgType::INFO, "PAR2122 is finished!");
+	std::cout << "Press enter to continue..." << std::endl;
 	std::cin.get();
 }

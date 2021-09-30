@@ -19,24 +19,25 @@ namespace PAG
 		GLuint idVBOColor = 0;
 		GLuint idIBO = 0;
 		Renderer();
-		void configurar_color(GLfloat r, GLfloat g, GLfloat b, GLfloat a);
-	public:
-		static const char* version;
 		virtual ~Renderer();
+		void configBackColor(GLfloat r, GLfloat g, GLfloat b, GLfloat a);
+	public:
+		static const std::string version;
 		// Lo único que necesito estático de la clase Renderer es la instancia y el método de la instancia
 		// ya que así o creo una instancia y hago render->getInstancia() o PAG::Renderer::getInstancia(), lo mismo da.
-		static Renderer* getInstancia(); 
-		void refrescar_ventana();
-		void cambiar_color(double yoffset);
-		void inicializar();
-		void activarZBuffer();
-		void sumar_color();
-		void restar_color();
-		void configurar_viewport(int width, int height);
-		void crearModelo();
-		void crearShader(std::string vsfile, std::string fsfile);
+		static Renderer* getInstance(); 
+		void refreshWindow();
+		void changeColor(double yoffset);
+		void start();
+		void activeZBuffer();
+		void addColor();
+		void minusColor();
+		void configViewport(int width, int height);
+		void createModel();
+		void createShader(std::string vsfile, std::string fsfile);
 		std::string loadShader(std::string file);
-		void comprobarErrores(GLint status, GLint shader, std::string msg, bool isShader);
-		void imprimirInformacion();
+		//Checks and returns the error log messages if there's anything wrong.
+		void checkErrors(GLint status, GLint id, std::string msg, bool isShader);
+		void printInfo();
 	};
 }

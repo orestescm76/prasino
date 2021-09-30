@@ -367,4 +367,5 @@ FodyWeavers.xsd
 
 *.sln
 *.filters
-*.vcxproj
+PAR2122.vcxproj
+log.txt

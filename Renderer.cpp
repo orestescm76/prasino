@@ -7,14 +7,15 @@
 #include <fstream>
 #include <sstream>
 #include "Renderer.h"
+#include "Log.h"
 
 PAG::Renderer* PAG::Renderer::instancia = nullptr;
+const std::string PAG::Renderer::version = "0.3.5";
 
-const char* PAG::Renderer::version = "0.3.4";
 PAG::Renderer::Renderer()
 {
-	crearShader("pag03-vs.glsl", "pag03-fs.glsl");
-	crearModelo();
+	createShader("pag03-vs.glsl", "pag03-fs.glsl");
+	createModel();
 	r = .6f;
 	g = .6f;
 	b = .6f;
@@ -26,14 +27,14 @@ PAG::Renderer::~Renderer()
 
 }
 
-PAG::Renderer* PAG::Renderer::getInstancia()
+PAG::Renderer* PAG::Renderer::getInstance()
 {
 	if (!instancia)
 		instancia = new Renderer();
 	return instancia;
 }
 
-void PAG::Renderer::refrescar_ventana()
+void PAG::Renderer::refreshWindow()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -43,18 +44,18 @@ void PAG::Renderer::refrescar_ventana()
 	glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, nullptr);
 }
 
-void PAG::Renderer::cambiar_color(double yoffset)
+void PAG::Renderer::changeColor(double yoffset)
 {
 	if (yoffset > 0)
-		sumar_color();
-	else restar_color();
-	configurar_color(r, g, b, a);
+		addColor();
+	else minusColor();
+	configBackColor(r, g, b, a);
 }
 
-void PAG::Renderer::inicializar()
+void PAG::Renderer::start()
 {
-	configurar_color(r,g,b,a);
-	activarZBuffer();
+	configBackColor(r,g,b,a);
+	activeZBuffer();
 	//Polilínea, sólidos de revolución
 	//glPrimitiveRestartIndex(0xFFFF);
 	//glEnable(GL_PRIMITIVE_RESTART);
@@ -63,14 +64,14 @@ void PAG::Renderer::inicializar()
 	glEnable(GL_MULTISAMPLE);
 }
 
-void PAG::Renderer::activarZBuffer()
+void PAG::Renderer::activeZBuffer()
 {
 	// - Le decimos a OpenGL que tenga en cuenta la profundidad a la hora de dibujar.
 	//   No tiene por qué ejecutarse en cada paso por el ciclo de eventos.
 	glEnable(GL_DEPTH_TEST);
 }
 
-void PAG::Renderer::sumar_color()
+void PAG::Renderer::addColor()
 {
 	r += .05f;
 	g += .05f;
@@ -83,7 +84,7 @@ void PAG::Renderer::sumar_color()
 		b = 1.0f;
 }
 
-void PAG::Renderer::restar_color()
+void PAG::Renderer::minusColor()
 {
 	r -= .05f;
 	g -= .05f;
@@ -96,21 +97,24 @@ void PAG::Renderer::restar_color()
 		b = 0.0f;
 }
 
-void PAG::Renderer::configurar_color(GLfloat r, GLfloat g, GLfloat b, GLfloat a)
+void PAG::Renderer::configBackColor(GLfloat r, GLfloat g, GLfloat b, GLfloat a)
 {
 	glClearColor(r, g, b, a);
 }
 
-void PAG::Renderer::imprimirInformacion()
+void PAG::Renderer::printInfo()
 {
-	// - Información de OpenGL
-	std::cout << "RENDERER: " << glGetString(GL_RENDERER) << std::endl
-		<< "VENDOR: " << glGetString(GL_VENDOR) << std::endl
-		<< "VERSION: " << glGetString(GL_VERSION) << std::endl
-		<< "SHADING LANGUAGE VERSION: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
+	std::string renderer((const char*)glGetString(GL_RENDERER));
+	std::string vendor = (const char*)glGetString(GL_VENDOR);
+	std::string version = (const char*)glGetString(GL_VERSION);
+	std::string shadingVersion = (const char*)glGetString(GL_SHADING_LANGUAGE_VERSION);
+	Log::getInstance()->printMessage(PAG::msgType::INFO, "RENDERER: " + renderer);
+	Log::getInstance()->printMessage(PAG::msgType::INFO, "VENDOR: " + vendor);
+	Log::getInstance()->printMessage(PAG::msgType::INFO, "VERSION: " + version);
+	Log::getInstance()->printMessage(PAG::msgType::INFO, "SHADING LANGUAGE VERSION: " + shadingVersion);
 }
 
-void PAG::Renderer::crearModelo()
+void PAG::Renderer::createModel()
 {
 	//vertices del triangulo
 	GLfloat vertices[] = { -.5, -.5, 0,
@@ -127,9 +131,11 @@ void PAG::Renderer::crearModelo()
 								 .5, -.5, 0, 0.835, 0.188, 0.196, 
 								 .0,  .5, 0, 0.114, 0.118, 0.2 };
 	//generamos el vao y la vinculamos
+	Log::getInstance()->printMessage(msgType::INFO, "Creating VAO");
 	glGenVertexArrays(1, &idVAO);
 	glBindVertexArray(idVAO);
 	//SIN ENTRELAZAR
+	Log::getInstance()->printMessage(msgType::INFO, "Creating VBO");
 	glGenBuffers(1, &idVBO);
 	glBindBuffer(GL_ARRAY_BUFFER, idVBO);
 	glBufferData(GL_ARRAY_BUFFER, 9 * sizeof(GLfloat), vertices,
@@ -154,18 +160,19 @@ void PAG::Renderer::crearModelo()
 	//glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLfloat*)NULL+3);
 	//glEnableVertexAttribArray(1);
 	//indices
+	Log::getInstance()->printMessage(msgType::INFO, "Creating IBO");
 	glGenBuffers(1, &idIBO);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, idIBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, 3 * sizeof(GLuint), indices,
 		GL_STATIC_DRAW);
 }
 
-void PAG::Renderer::configurar_viewport(int width, int height)
+void PAG::Renderer::configViewport(int width, int height)
 {
 	glViewport(0, 0, width, height);
 }
 
-void PAG::Renderer::crearShader(std::string vsfile, std::string fsfile)
+void PAG::Renderer::createShader(std::string vsfile, std::string fsfile)
 {
 	std::string miVertexShader = "";
 	std::string miFragmentShader = "";
@@ -179,14 +186,16 @@ void PAG::Renderer::crearShader(std::string vsfile, std::string fsfile)
 	}
 	catch (const std::exception& e)
 	{
-		std::cout << e.what() << std::endl;
+		Log::getInstance()->printMessage(msgType::WARNING, e.what());
 		return;
 	}
 	//Crear shader
+	Log::getInstance()->printMessage(msgType::INFO, "Creating shader");
 	idVS = glCreateShader(GL_VERTEX_SHADER);
 	idFS = glCreateShader(GL_FRAGMENT_SHADER);
 	idSP = glCreateProgram();
 	//Attach shaders
+	Log::getInstance()->printMessage(msgType::INFO, "Attaching shader");
 	glAttachShader(idSP, idVS);
 	glAttachShader(idSP, idFS);
 	//Lectura de shaders
@@ -195,19 +204,22 @@ void PAG::Renderer::crearShader(std::string vsfile, std::string fsfile)
 	glShaderSource(idVS, 1, &fuenteVS, nullptr);
 	glShaderSource(idFS, 1, &fuenteFS, nullptr);
 	//Compilar shaders
+	Log::getInstance()->printMessage(msgType::INFO, "Compiling shader");
 	glCompileShader(idVS);
 	glGetShaderiv(idVS, GL_COMPILE_STATUS, &statusvs);
-	comprobarErrores(statusvs, idVS, "Error al compilar el vertex shader", true);
+	checkErrors(statusvs, idVS, "Vertex shader wasn't compiled", true);
 	glCompileShader(idFS);
 	glGetShaderiv(idFS, GL_COMPILE_STATUS, &statusvs);
-	comprobarErrores(statusvs, idFS, "Error al compilar el fragment shader", true);
+	checkErrors(statusvs, idFS, "Fragment shader wasn't compiled", true);
 	//Linkear shader (enlazar)
+	Log::getInstance()->printMessage(msgType::INFO, "Linking shader");
 	glLinkProgram(idSP);
 	glGetProgramiv(idSP, GL_LINK_STATUS, &status);
-	comprobarErrores(status, idSP, "Error al enlazar los shaders", false);
+	checkErrors(status, idSP, "Couldn't link the shaders", false);
 }
 std::string PAG::Renderer::loadShader(std::string file)
 {
+	Log::getInstance()->printMessage(msgType::INFO, "Opening "+ file);
 	std::ifstream input;
 	input.open(file, std::ifstream::in);
 	if (!input.is_open())
@@ -216,20 +228,22 @@ std::string PAG::Renderer::loadShader(std::string file)
 	}
 	std::stringstream ssVs;
 	ssVs << input.rdbuf();
+	input.close();
+	Log::getInstance()->printMessage(msgType::OK, "Read ok");
 	return ssVs.str();
 }
 
-void PAG::Renderer::comprobarErrores(GLint status, GLint shader, std::string msg, bool isShader)
+void PAG::Renderer::checkErrors(GLint status, GLint id, std::string msg, bool isShader)
 {
 	if (status == GL_FALSE)
 	{
-		std::cout << msg << std::endl;
+		Log::getInstance()->printMessage(msgType::ERROR, msg);
 		char log[1024];
 		GLsizei buff;
 		if (isShader)
-			glGetShaderInfoLog(shader, sizeof(log), &buff, log);
+			glGetShaderInfoLog(id, sizeof(log), &buff, log);
 		else
-			glGetProgramInfoLog(shader, sizeof(log), &buff, log);
-		std::cout << log << std::endl;
+			glGetProgramInfoLog(id, sizeof(log), &buff, log);
+		Log::getInstance()->printMessage(msgType::ERROR, log);
 	}
 }
