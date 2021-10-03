@@ -19,7 +19,6 @@ PAG::Log* PAG::Log::getInstance()
 		instance = new Log();
 		instance->printMessage(msgType::INFO, "Log started");
 	}
-
 	return instance;
 }
 
