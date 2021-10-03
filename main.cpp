@@ -1,7 +1,7 @@
 /*
 * @author orestescm76
 * @brief main
-* VERSION 0.4.0
+* VERSION 0.4.1
 */
 
 #include <iostream>
@@ -95,7 +95,16 @@ int main()
 		glfwTerminate();
 		return -3;
 	}
-	log->printMessage(PAG::msgType::INFO, "Starting PAG 2122 " + PAG::Renderer::getInstance()->version);
+	try
+	{
+		log->printMessage(PAG::msgType::INFO, "Starting PAG 2122 " + PAG::Renderer::getInstance()->version);
+	}
+	catch (const std::exception& e)
+	{
+		log->printMessage(PAG::msgType::ERROR, e.what());
+		return -1;
+	}
+	
 	PAG::Renderer::getInstance()->printInfo();
 	//registrar callbacks
 	glfwSetWindowRefreshCallback(window, window_refresh_callback);	
@@ -115,6 +124,7 @@ int main()
 	glfwDestroyWindow(window);
 	window = nullptr;
 	glfwTerminate();
+	delete PAG::Renderer::getInstance();
 	log->printMessage(PAG::msgType::INFO, "PAR2122 is finished!");
 	std::cout << "Press enter to continue..." << std::endl;
 	std::cin.get();

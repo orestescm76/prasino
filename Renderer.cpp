@@ -8,7 +8,7 @@
 #include "Log.h"
 
 PAG::Renderer* PAG::Renderer::instancia = nullptr;
-const std::string PAG::Renderer::version = "0.4.0";
+const std::string PAG::Renderer::version = "0.4.1";
 
 PAG::Renderer::Renderer(): sp()
 {
@@ -21,13 +21,25 @@ PAG::Renderer::Renderer(): sp()
 
 PAG::Renderer::~Renderer()
 {
-
+	glDeleteVertexArrays(1, &idVBO);
+	glDeleteVertexArrays(1, &idVBOColor);
+	glDeleteVertexArrays(1, &idIBO);
+	glDeleteVertexArrays(1, &idVAO);
 }
 
 PAG::Renderer* PAG::Renderer::getInstance()
 {
 	if (!instancia)
-		instancia = new Renderer();
+	{
+		try
+		{
+			instancia = new Renderer();
+		}
+		catch (const std::exception& e)
+		{
+			throw std::runtime_error("Renderer::getInstance() -> " + (std::string)e.what());
+		}
+	}
 	return instancia;
 }
 
@@ -123,10 +135,11 @@ void PAG::Renderer::createModel()
 	GLfloat colores[] = { 0.0, 0.733, 0.176, 
 						0.835, 0.188, 0.196,
 						0.114, 0.118, 0.2 };
-
+	/*
 	GLfloat vboentrelazado[] = {-.5, -.5, 0, 0.0, 0.733, 0.176, 
 								 .5, -.5, 0, 0.835, 0.188, 0.196, 
 								 .0,  .5, 0, 0.114, 0.118, 0.2 };
+	*/
 	//generamos el vao y la vinculamos
 	Log::getInstance()->printMessage(msgType::INFO, "Creating VAO");
 	glGenVertexArrays(1, &idVAO);
@@ -140,7 +153,7 @@ void PAG::Renderer::createModel()
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat),
 		nullptr);
 	glEnableVertexAttribArray(0);
-	//generamos el VBO de los colores, con ID 1 para luego especificarlo en el shader
+	//generamos el VBO de los colores, pongo 1 para luego especificarlo en el layout del shader	
 	glGenBuffers(1, &idVBOColor);
 	glBindBuffer(GL_ARRAY_BUFFER, idVBOColor);
 	glBufferData(GL_ARRAY_BUFFER, 9 * sizeof(GLfloat), colores, GL_STATIC_DRAW);
@@ -153,7 +166,6 @@ void PAG::Renderer::createModel()
 	//glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), nullptr);
 	//glEnableVertexAttribArray(0);
 
-	//glBufferData(GL_ARRAY_BUFFER, sizeof(vboentrelazado), vboentrelazado, GL_STATIC_DRAW);
 	//glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLfloat*)NULL+3);
 	//glEnableVertexAttribArray(1);
 	//indices

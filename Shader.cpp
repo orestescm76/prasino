@@ -13,9 +13,13 @@ PAG::Shader::Shader(std::string path, std::string name, GLenum type) : filename(
 	}
 	catch (const std::exception& e)
 	{
-		Log::getInstance()->printMessage(msgType::WARNING, e.what());
-		throw; //object shouldn't finish creating....
+		throw std::runtime_error("Shader::Shader -> " + (std::string)e.what()); //object shouldn't finish creating....
 	}
+}
+
+PAG::Shader::~Shader()
+{
+	glDeleteShader(id);
 }
 
 std::string PAG::Shader::loadShader()
@@ -25,7 +29,7 @@ std::string PAG::Shader::loadShader()
 	input.open(filename, std::ifstream::in);
 	if (!input.is_open())
 	{
-		throw std::invalid_argument("Cannot open " + filename);
+		throw std::invalid_argument("Shader::loadShader() -> Cannot open " + filename);
 	}
 	std::stringstream ssVs;
 	ssVs << input.rdbuf();

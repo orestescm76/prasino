@@ -16,6 +16,7 @@ namespace PAG
 	public:
 		Shader(): id(0) {}
 		Shader(std::string path, std::string name, GLenum type);
+		~Shader();
 		void createShader()
 		{
 			id = glCreateShader(shaderType);

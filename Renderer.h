@@ -17,7 +17,6 @@ namespace PAG
 		GLuint idVBOColor = 0;
 		GLuint idIBO = 0;
 		Renderer();
-		virtual ~Renderer();
 		void configBackColor(GLfloat r, GLfloat g, GLfloat b, GLfloat a);
 		//void createShaders();
 		ShaderProgram sp;
@@ -35,5 +34,6 @@ namespace PAG
 		void configViewport(int width, int height);
 		void createModel();
 		void printInfo();
+		virtual ~Renderer();
 	};
 }

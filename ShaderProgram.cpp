@@ -8,15 +8,19 @@ PAG::ShaderProgram::ShaderProgram() : idSP(0)
 	{
 		vertexShader = Shader("pag03-vs.glsl", "Vertex shader", GL_VERTEX_SHADER);
 		fragmentShader = Shader("pag03-fs.glsl", "Fragment shader", GL_FRAGMENT_SHADER);
+		//Todo bien, los creamos
+		idSP = glCreateProgram();
+		createShader(vertexShader);
+		createShader(fragmentShader);
 	}
-	catch (const std::exception&)
+	catch (const std::exception& e)
 	{
-		Log::getInstance()->printMessage(msgType::ERROR, "Couldn't create the shaders...");
+		throw std::runtime_error("ShaderProgram::ShaderProgram -> " + (std::string)e.what());
 	}
-	//Todo bien, los creamos
-	idSP = glCreateProgram();
-	createShader(vertexShader);
-	createShader(fragmentShader);
+}
+PAG::ShaderProgram::~ShaderProgram()
+{
+	glDeleteProgram(idSP);
 }
 
 void PAG::ShaderProgram::createShader(Shader& shader)
@@ -29,22 +33,30 @@ void PAG::ShaderProgram::createShader(Shader& shader)
 	Log::getInstance()->printMessage(msgType::INFO, "Creating shader");
 	shader.createShader();
 	GLint idShader = shader.getId();
-	//Attach shaders
-	Log::getInstance()->printMessage(msgType::INFO, "Attaching shader");
-	glAttachShader(idSP, idShader);
-	//Lectura de shaders
-	const GLchar* src = shader.getSrc().c_str();
-	glShaderSource(idShader, 1, &src, nullptr);
-	//Compilar shaders
-	Log::getInstance()->printMessage(msgType::INFO, "Compiling shader");
-	glCompileShader(idShader);
-	glGetShaderiv(idShader, GL_COMPILE_STATUS, &statusvs);
-	checkErrors(statusvs, idShader, shader.getName() + " wasn't compiled", true);
-	//Linkear shader (enlazar)
-	Log::getInstance()->printMessage(msgType::INFO, "Linking shader");
-	glLinkProgram(idSP);
-	glGetProgramiv(idSP, GL_LINK_STATUS, &status);
-	checkErrors(status, idSP, "Couldn't link the shaders", false);
+	try
+	{
+		//Lectura de shaders
+		const GLchar* src = shader.getSrc().c_str();
+		glShaderSource(idShader, 1, &src, nullptr);
+		//Compilar shaders
+		Log::getInstance()->printMessage(msgType::INFO, "Compiling shader");
+		glCompileShader(idShader);
+		glGetShaderiv(idShader, GL_COMPILE_STATUS, &statusvs);
+		checkErrors(statusvs, idShader, shader.getName() + " wasn't compiled", true);
+		//Attach shaders
+		Log::getInstance()->printMessage(msgType::INFO, "Attaching shader");
+		glAttachShader(idSP, idShader);
+		//Enlazar shader (link)
+		Log::getInstance()->printMessage(msgType::INFO, "Linking shader");
+		glLinkProgram(idSP);
+		glGetProgramiv(idSP, GL_LINK_STATUS, &status);
+		checkErrors(status, idSP, "Couldn't link the shaders", false);
+	}
+	catch (const std::runtime_error& e)
+	{
+		throw std::runtime_error("ShaderProgram::createShader -> "+ (std::string)e.what());
+	}
+
 }
 
 void PAG::ShaderProgram::checkErrors(GLint status, GLint id, std::string msg, bool isShader)
@@ -58,7 +70,8 @@ void PAG::ShaderProgram::checkErrors(GLint status, GLint id, std::string msg, bo
 			glGetShaderInfoLog(id, sizeof(log), &buff, log);
 		else
 			glGetProgramInfoLog(id, sizeof(log), &buff, log);
-		Log::getInstance()->printMessage(msgType::ERROR, log);
+		std::string logs(log);
+		throw std::runtime_error("ShaderProgram::checkErrors -> " + logs);
 	}
 }
 

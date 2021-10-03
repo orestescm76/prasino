@@ -12,7 +12,7 @@ namespace PAG
 		Shader vertexShader;
 	public:
 		ShaderProgram();
-		~ShaderProgram() {}
+		~ShaderProgram();
 		//Creates the shader from shader data
 		void createShader(Shader& shader);
 		//Checks and returns the error log messages if there's anything wrong.
