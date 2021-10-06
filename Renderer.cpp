@@ -21,10 +21,7 @@ PAG::Renderer::Renderer(): sp()
 
 PAG::Renderer::~Renderer()
 {
-	glDeleteVertexArrays(1, &idVBO);
-	glDeleteVertexArrays(1, &idVBOColor);
-	glDeleteVertexArrays(1, &idIBO);
-	glDeleteVertexArrays(1, &idVAO);
+
 }
 
 PAG::Renderer* PAG::Renderer::getInstance()

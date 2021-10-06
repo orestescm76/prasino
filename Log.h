@@ -4,7 +4,7 @@
 
 namespace PAG
 {
-	static enum class msgType
+	enum class msgType
 	{
 		INFO,
 		WARNING,

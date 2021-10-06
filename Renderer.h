@@ -11,15 +11,11 @@ namespace PAG
 	private:
 		static Renderer* instancia;
 		GLfloat r, g, b, a;
-		//IDENTIFICADORES
-		GLuint idVAO = 0;
-		GLuint idVBO = 0;
-		GLuint idVBOColor = 0;
-		GLuint idIBO = 0;
+
 		Renderer();
 		void configBackColor(GLfloat r, GLfloat g, GLfloat b, GLfloat a);
 		//void createShaders();
-		ShaderProgram sp;
+
 	public:
 		static const std::string version;
 		// Lo único que necesito estático de la clase Renderer es la instancia y el método de la instancia
