@@ -1,13 +1,13 @@
 #include "Log.h"
 #include "ShaderProgram.h"
 
-PAG::ShaderProgram::ShaderProgram() : idSP(0)
+PAG::ShaderProgram::ShaderProgram(std::string filevs, std::string filefs) : idSP(0)
 {
 	//Intentamos cargar los shaders
 	try
 	{
-		vertexShader = Shader("pag03-vs.glsl", "Vertex shader", GL_VERTEX_SHADER);
-		fragmentShader = Shader("pag03-fs.glsl", "Fragment shader", GL_FRAGMENT_SHADER);
+		vertexShader = Shader(filevs, "Vertex shader", GL_VERTEX_SHADER);
+		fragmentShader = Shader(filefs, "Fragment shader", GL_FRAGMENT_SHADER);
 		//Todo bien, los creamos
 		idSP = glCreateProgram();
 		createShader(vertexShader);

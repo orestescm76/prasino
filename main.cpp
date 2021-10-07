@@ -1,7 +1,7 @@
 /*
 * @author orestescm76
 * @brief main
-* VERSION 0.4.1
+* VERSION 0.5.0
 */
 
 #include <iostream>

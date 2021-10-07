@@ -14,7 +14,7 @@ namespace PAG
 		//Returns the source code from a shader file
 		std::string loadShader();
 	public:
-		Shader(): id(0) {}
+		Shader(): id(0), shaderType(0) {}
 		Shader(std::string path, std::string name, GLenum type);
 		~Shader();
 		void createShader()

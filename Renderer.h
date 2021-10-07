@@ -1,5 +1,5 @@
 #pragma once
-#include "ShaderProgram.h"
+#include "Model.h"
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <string>
@@ -9,9 +9,9 @@ namespace PAG
 	class Renderer
 	{
 	private:
-		static Renderer* instancia;
+		static Renderer* instance;
 		GLfloat r, g, b, a;
-
+		Model* triangle;
 		Renderer();
 		void configBackColor(GLfloat r, GLfloat g, GLfloat b, GLfloat a);
 		//void createShaders();
@@ -28,7 +28,6 @@ namespace PAG
 		void addColor();
 		void minusColor();
 		void configViewport(int width, int height);
-		void createModel();
 		void printInfo();
 		virtual ~Renderer();
 	};

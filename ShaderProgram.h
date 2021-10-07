@@ -1,6 +1,7 @@
 #pragma once
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include <string>
 #include "Shader.h"
 namespace PAG
 {
@@ -11,7 +12,8 @@ namespace PAG
 		Shader fragmentShader;
 		Shader vertexShader;
 	public:
-		ShaderProgram();
+		ShaderProgram(): idSP(0) {}
+		ShaderProgram(std::string filevs, std::string filefs);
 		~ShaderProgram();
 		//Creates the shader from shader data
 		void createShader(Shader& shader);

@@ -7,6 +7,9 @@ namespace PAG
 {
 	class Model
 	{
+		GLfloat* vertices;
+		GLfloat* colors;
+		GLuint* indices;
 		//IDENTIFICADORES
 		GLuint idVAO = 0;
 		GLuint idVBO = 0;
@@ -15,6 +18,9 @@ namespace PAG
 		ShaderProgram sp;
 	public:
 		Model();
+		Model(GLfloat* v, GLfloat* c, GLuint* i, std::string filevs, std::string filefs);
+		void initModel();
+		void draw();
 		~Model();
 	};
 }
