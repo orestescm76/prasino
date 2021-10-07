@@ -62,7 +62,10 @@ void PAG::Renderer::refreshWindow()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	triangle->draw();
+	if (drawing)
+		draw();
+	else
+		erase();
 }
 
 void PAG::Renderer::changeColor(double yoffset)
@@ -133,6 +136,18 @@ void PAG::Renderer::printInfo()
 	Log::getInstance()->printMessage(PAG::msgType::INFO, "VENDOR: " + vendor);
 	Log::getInstance()->printMessage(PAG::msgType::INFO, "VERSION: " + version);
 	Log::getInstance()->printMessage(PAG::msgType::INFO, "SHADING LANGUAGE VERSION: " + shadingVersion);
+}
+
+void PAG::Renderer::draw()
+{
+	drawing = true;
+	triangle->draw();
+}
+
+void PAG::Renderer::erase()
+{
+	drawing = false;
+	triangle->unDraw();
 }
 
 

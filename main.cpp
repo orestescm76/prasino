@@ -29,6 +29,12 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 {
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, GLFW_TRUE);
+	bool drawing = PAG::Renderer::getInstance()->isDrawing();
+	if (key == GLFW_KEY_A && !drawing)
+		PAG::Renderer::getInstance()->draw();
+	else if(key == GLFW_KEY_D && drawing)
+		PAG::Renderer::getInstance()->erase();
+	window_refresh_callback(window);
 	//std::cout << "Key callback called" << std::endl;
 }
 //callback de botones del ratón

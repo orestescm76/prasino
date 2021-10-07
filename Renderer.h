@@ -14,8 +14,7 @@ namespace PAG
 		Model* triangle;
 		Renderer();
 		void configBackColor(GLfloat r, GLfloat g, GLfloat b, GLfloat a);
-		//void createShaders();
-
+		bool drawing = false;
 	public:
 		static const std::string version;
 		// Lo único que necesito estático de la clase Renderer es la instancia y el método de la instancia
@@ -29,6 +28,9 @@ namespace PAG
 		void minusColor();
 		void configViewport(int width, int height);
 		void printInfo();
+		void draw();
+		void erase();
+		bool isDrawing() { return drawing; }
 		virtual ~Renderer();
 	};
 }

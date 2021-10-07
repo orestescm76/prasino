@@ -80,3 +80,8 @@ void PAG::ShaderProgram::useProgram()
 	glUseProgram(idSP);
 }
 
+void PAG::ShaderProgram::deactivate()
+{
+	glUseProgram(0); //??
+}
+

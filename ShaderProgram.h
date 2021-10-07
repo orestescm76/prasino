@@ -21,5 +21,6 @@ namespace PAG
 		void checkErrors(GLint status, GLint id, std::string msg, bool isShader);
 		GLint getIdSP() { return idSP; }
 		void useProgram();
+		void deactivate();
 	};
 }
