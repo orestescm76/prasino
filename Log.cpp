@@ -1,4 +1,4 @@
-#include <iostream>
+#include "pch.h"
 #include "Log.h"
 
 PAG::Log* PAG::Log::instance = nullptr;

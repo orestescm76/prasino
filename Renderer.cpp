@@ -3,9 +3,8 @@
 * @brief renderer cpp
 */
 
-#include <iostream>
+#include "pch.h"
 #include "Renderer.h"
-#include "Log.h"
 
 PAG::Renderer* PAG::Renderer::instance = nullptr;
 const std::string PAG::Renderer::version = "0.5.0";
@@ -19,9 +18,9 @@ PAG::Renderer::Renderer()
 	//indices para pintarlo
 	GLuint indices[] = { 0, 1, 2 };
 	//colores de los vertices
-	GLfloat colores[] = { 0.0, 0.733, 0.176,
-						0.835, 0.188, 0.196,
-						0.114, 0.118, 0.2 };
+	GLfloat colores[] = {0.0f, 0.733f, 0.176f,
+						0.835f, 0.188f, 0.196f,
+						0.114f, 0.118f, 0.2f };
 	try
 	{
 		triangle = new Model(vertices, colores, indices, "pag03-vs.glsl", "pag03-fs.glsl");
@@ -121,20 +120,20 @@ void PAG::Renderer::minusColor()
 		b = 0.0f;
 }
 
-void PAG::Renderer::configBackColor(GLfloat r, GLfloat g, GLfloat b, GLfloat a)
+void PAG::Renderer::configBackColor(GLfloat _r, GLfloat _g, GLfloat _b, GLfloat _a)
 {
-	glClearColor(r, g, b, a);
+	glClearColor(_r, _g, _b, _a);
 }
 
 void PAG::Renderer::printInfo()
 {
 	std::string renderer((const char*)glGetString(GL_RENDERER));
 	std::string vendor = (const char*)glGetString(GL_VENDOR);
-	std::string version = (const char*)glGetString(GL_VERSION);
+	std::string openglversion = (const char*)glGetString(GL_VERSION);
 	std::string shadingVersion = (const char*)glGetString(GL_SHADING_LANGUAGE_VERSION);
 	Log::getInstance()->printMessage(PAG::msgType::INFO, "RENDERER: " + renderer);
 	Log::getInstance()->printMessage(PAG::msgType::INFO, "VENDOR: " + vendor);
-	Log::getInstance()->printMessage(PAG::msgType::INFO, "VERSION: " + version);
+	Log::getInstance()->printMessage(PAG::msgType::INFO, "VERSION: " + openglversion);
 	Log::getInstance()->printMessage(PAG::msgType::INFO, "SHADING LANGUAGE VERSION: " + shadingVersion);
 }
 

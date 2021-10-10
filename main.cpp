@@ -3,13 +3,10 @@
 * @brief main
 * VERSION 0.5.0
 */
-
-#include <iostream>
+#include "pch.h"
 #include "Renderer.h"
 #include "Log.h"
-//en este orden que si no la jodemos
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
+#include "Model.h"
 
 //callback de redibujar
 void window_refresh_callback(GLFWwindow* window)
@@ -18,15 +15,18 @@ void window_refresh_callback(GLFWwindow* window)
 	glfwSwapBuffers(window);
 	//std::cout << "Ventana redibujada" << std::endl;
 }
-//callback al redimensionar ventana
+//callback al redimensionar ventana - C400, parámetro formal sin referencia
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
 	PAG::Renderer::getInstance()->configViewport(width, height);
+	window;
 	//std::cout << "Ventana redimensionada: " << width << "x" << height << std::endl;
 }
 //callback al pulsar una tecla
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
+	mods;
+	scancode;
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, GLFW_TRUE);
 	bool drawing = PAG::Renderer::getInstance()->isDrawing();
@@ -40,6 +40,9 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 //callback de botones del ratón
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
+	mods;
+	button;
+	window;
 	if (action == GLFW_PRESS)
 	{
 		//std::cout << "Se ha pulsado " << button << std::endl;
@@ -52,6 +55,7 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 //callback rueda ratón
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
+	xoffset;
 	//std::cout << "Movida la rueda del raton " << xoffset
 	//	<< " Unidades en horizontal y " << yoffset << " unidades en vertical"
 	//	<< std::endl;
@@ -62,6 +66,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 int main()
 {
 	PAG::Log* log = PAG::Log::getInstance();
+	
 	// - Inicializa GLFW. Es un proceso que sólo debe realizarse una vez en la aplicación
 	if (glfwInit() != GLFW_TRUE)
 	{
@@ -79,7 +84,7 @@ int main()
 	// - Definimos el puntero para guardar la dirección de la ventana de la aplicación y la creamos
 	GLFWwindow* window;
 	// - Tamaño, título de la ventana, en ventana y no en pantalla completa, sin compartir recursos con otras ventanas.
-	window = glfwCreateWindow(1024, 576, "PAG2122-[ColominaMonsalve-Orestes]", nullptr, nullptr);
+	window = glfwCreateWindow(1024, 720, "PAG2122-[ColominaMonsalve-Orestes]", nullptr, nullptr);
 	//¿salió bien?
 	if (!window)
 	{
@@ -134,4 +139,5 @@ int main()
 	log->printMessage(PAG::msgType::INFO, "PAR2122 is finished!");
 	std::cout << "Press enter to continue..." << std::endl;
 	std::cin.get();
+	return 0;
 }

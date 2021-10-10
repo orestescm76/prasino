@@ -1,6 +1,6 @@
+#include "pch.h"
 #include "Model.h"
 #include "Log.h"
-#include <iostream>
 PAG::Model::Model(): vertices(nullptr), indices(nullptr), colors(nullptr)
 {
 
@@ -57,8 +57,12 @@ void PAG::Model::unDraw()
 
 PAG::Model::~Model()
 {
-	glDeleteVertexArrays(1, &idVBO);
-	glDeleteVertexArrays(1, &idColor);
-	glDeleteVertexArrays(1, &idIBO);
-	glDeleteVertexArrays(1, &idVAO);
+	if(idVBO != 0)
+		glDeleteVertexArrays(1, &idVBO);
+	if(idColor != 0)
+		glDeleteVertexArrays(1, &idColor);
+	if(idIBO != 0)
+		glDeleteVertexArrays(1, &idIBO);
+	if(idVAO != 0)
+		glDeleteVertexArrays(1, &idVAO);
 }

@@ -1,5 +1,7 @@
+#include "pch.h"
 #include "Log.h"
 #include "ShaderProgram.h"
+
 
 PAG::ShaderProgram::ShaderProgram(std::string filevs, std::string filefs) : idSP(0)
 {
@@ -20,13 +22,12 @@ PAG::ShaderProgram::ShaderProgram(std::string filevs, std::string filefs) : idSP
 }
 PAG::ShaderProgram::~ShaderProgram()
 {
-	glDeleteProgram(idSP);
+	if(idSP != 0)
+		glDeleteProgram(idSP);
 }
 
 void PAG::ShaderProgram::createShader(Shader& shader)
 {
-	GLint statusfs = 0;
-	GLint statusvs = 0;
 	GLint status = 0;
 
 	//Crear shader
@@ -41,8 +42,8 @@ void PAG::ShaderProgram::createShader(Shader& shader)
 		//Compilar shaders
 		Log::getInstance()->printMessage(msgType::INFO, "Compiling shader");
 		glCompileShader(idShader);
-		glGetShaderiv(idShader, GL_COMPILE_STATUS, &statusvs);
-		checkErrors(statusvs, idShader, shader.getName() + " wasn't compiled", true);
+		glGetShaderiv(idShader, GL_COMPILE_STATUS, &status);
+		checkErrors(status, idShader, shader.getName() + " wasn't compiled", true);
 		//Attach shaders
 		Log::getInstance()->printMessage(msgType::INFO, "Attaching shader");
 		glAttachShader(idSP, idShader);

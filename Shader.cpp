@@ -1,8 +1,8 @@
+#include "pch.h"
 #include "Shader.h"
 #include "Log.h"
 #include "Renderer.h"
-#include <fstream>
-#include <sstream>
+
 
 PAG::Shader::Shader(std::string path, std::string name, GLenum type) : filename(path), shaderName(name), id(0), shaderType(type)
 {
@@ -19,7 +19,8 @@ PAG::Shader::Shader(std::string path, std::string name, GLenum type) : filename(
 
 PAG::Shader::~Shader()
 {
-	glDeleteShader(id);
+	if(id != 0)
+		glDeleteShader(id);
 }
 
 std::string PAG::Shader::loadShader()

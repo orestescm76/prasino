@@ -1,9 +1,6 @@
 #pragma once
 #include "Model.h"
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
-#include <string>
-
+#include "Log.h"
 namespace PAG
 {
 	class Renderer
@@ -13,7 +10,7 @@ namespace PAG
 		GLfloat r, g, b, a;
 		Model* triangle;
 		Renderer();
-		void configBackColor(GLfloat r, GLfloat g, GLfloat b, GLfloat a);
+		void configBackColor(GLfloat _r, GLfloat _g, GLfloat _b, GLfloat _a);
 		bool drawing = false;
 	public:
 		static const std::string version;
