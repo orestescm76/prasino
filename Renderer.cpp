@@ -7,7 +7,7 @@
 #include "Renderer.h"
 
 PAG::Renderer* PAG::Renderer::instance = nullptr;
-const std::string PAG::Renderer::version = "0.5.0";
+const std::string PAG::Renderer::version = "0.5.1";
 
 PAG::Renderer::Renderer()
 {
