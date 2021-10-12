@@ -10,6 +10,11 @@ PAG::Model::Model(GLfloat* v, GLfloat* c, GLuint* i, std::string filevs, std::st
 {
 	initModel();
 }
+//creo que no es lo mejor
+PAG::Model::Model(const Model& model): vertices(model.vertices), colors(model.colors), indices(model.indices), sp(model.sp)
+{
+	initModel();
+}
 
 void PAG::Model::initModel()
 {
@@ -48,7 +53,7 @@ void PAG::Model::draw()
 	glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, nullptr);
 }
 
-void PAG::Model::unDraw()
+void PAG::Model::erase()
 {
 	sp.deactivate();
 	glBindVertexArray(0);

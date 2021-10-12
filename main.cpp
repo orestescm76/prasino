@@ -1,7 +1,7 @@
 /*
 * @author orestescm76
 * @brief main
-* VERSION 0.5.1
+* VERSION 0.5.2
 */
 #include "pch.h"
 #include "Renderer.h"
@@ -65,12 +65,10 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 
 int main()
 {
-	PAG::Log* log = PAG::Log::getInstance();
-	
 	// - Inicializa GLFW. Es un proceso que sólo debe realizarse una vez en la aplicación
 	if (glfwInit() != GLFW_TRUE)
 	{
-		log->printMessage(PAG::msgType::ERROR, "Failed to initialize GLFW");
+		PAG::Log::getInstance()->printMessage(PAG::msgType::ERROR, "Failed to initialize GLFW");
 		return -1;
 	}
 
@@ -88,7 +86,7 @@ int main()
 	//¿salió bien?
 	if (!window)
 	{
-		log->printMessage(PAG::msgType::ERROR, "Failed to open GLFW window");
+		PAG::Log::getInstance()->printMessage(PAG::msgType::ERROR, "Failed to open GLFW window");
 		glfwTerminate();
 		return -2;
 	}
@@ -101,18 +99,19 @@ int main()
 	glewExperimental = true;
 	if (glewInit() != GLEW_OK)
 	{
-		log->printMessage(PAG::msgType::ERROR, "Failed to initialize GLEW");
+		PAG::Log::getInstance()->printMessage(PAG::msgType::ERROR, "Failed to initialize GLEW");
 		glfwDestroyWindow(window);
 		glfwTerminate();
 		return -3;
 	}
+	//Start the renderer.
 	try
 	{
-		log->printMessage(PAG::msgType::INFO, "Starting PAG 2122 " + PAG::Renderer::getInstance()->version);
+		PAG::Log::getInstance()->printMessage(PAG::msgType::INFO, "Starting PAG 2122 " + PAG::Renderer::getInstance()->version);
 	}
 	catch (const std::exception& e)
 	{
-		log->printMessage(PAG::msgType::ERROR, e.what());
+		PAG::Log::getInstance()->printMessage(PAG::msgType::ERROR, e.what());
 		return -1;
 	}
 	
@@ -136,7 +135,7 @@ int main()
 	window = nullptr;
 	glfwTerminate();
 	delete PAG::Renderer::getInstance();
-	log->printMessage(PAG::msgType::INFO, "PAR2122 is finished!");
+	PAG::Log::getInstance()->printMessage(PAG::msgType::INFO, "PAR2122 is finished!");
 	std::cout << "Press enter to continue..." << std::endl;
 	std::cin.get();
 	return 0;

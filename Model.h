@@ -16,9 +16,10 @@ namespace PAG
 	public:
 		Model();
 		Model(GLfloat* v, GLfloat* c, GLuint* i, std::string filevs, std::string filefs);
+		Model(const Model& model);
 		void initModel();
 		void draw();
-		void unDraw();
+		void erase();
 		~Model();
 	};
 }

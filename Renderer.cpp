@@ -7,7 +7,7 @@
 #include "Renderer.h"
 
 PAG::Renderer* PAG::Renderer::instance = nullptr;
-const std::string PAG::Renderer::version = "0.5.1";
+const std::string PAG::Renderer::version = "0.5.2";
 
 PAG::Renderer::Renderer()
 {
@@ -146,11 +146,15 @@ void PAG::Renderer::draw()
 void PAG::Renderer::erase()
 {
 	drawing = false;
-	triangle->unDraw();
+	triangle->erase();
 }
-
 
 void PAG::Renderer::configViewport(int width, int height)
 {
 	glViewport(0, 0, width, height);
+}
+
+bool PAG::Renderer::isDrawing()
+{
+	return drawing;
 }

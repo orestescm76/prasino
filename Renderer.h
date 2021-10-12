@@ -27,7 +27,7 @@ namespace PAG
 		void printInfo();
 		void draw();
 		void erase();
-		bool isDrawing() { return drawing; }
+		bool isDrawing();
 		virtual ~Renderer();
 	};
 }

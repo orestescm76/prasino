@@ -3,7 +3,6 @@
 #include <iostream>
 #include <string>
 #include <fstream>
-#include <fstream>
 #include <sstream>
 //en este orden que si no la jodemos
 #include <GL/glew.h>
