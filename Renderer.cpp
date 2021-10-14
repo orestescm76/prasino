@@ -7,7 +7,7 @@
 #include "Renderer.h"
 
 PAG::Renderer* PAG::Renderer::instance = nullptr;
-const std::string PAG::Renderer::version = "0.5.2";
+const std::string PAG::Renderer::version = "0.6.0a1";
 
 PAG::Renderer::Renderer()
 {
@@ -18,17 +18,20 @@ PAG::Renderer::Renderer()
 	//indices para pintarlo
 	GLuint indices[] = { 0, 1, 2 };
 	//colores de los vertices
-	GLfloat colores[] = {0.0f, 0.733f, 0.176f,
+	GLfloat colores[] = { 0.0f, 0.733f, 0.176f,
 						0.835f, 0.188f, 0.196f,
-						0.114f, 0.118f, 0.2f };
+						0.678f, 0.847f, 0.902f };
+						//0.114f, 0.118f, 0.2f };
 	try
 	{
-		triangle = new Model(vertices, colores, indices, "pag03-vs.glsl", "pag03-fs.glsl");
+		sp = std::make_shared<ShaderProgram>("pag06-vs.glsl", "pag06-fs.glsl");
+
 	}
 	catch (const std::exception& e)
 	{
 		throw std::runtime_error("PAG::Renderer::Renderer -> " + (std::string)e.what());
 	}
+	triangle = std::make_unique <Model>(vertices, colores, indices, sp);
 	r = .6f;
 	g = .6f;
 	b = .6f;
@@ -38,7 +41,7 @@ PAG::Renderer::Renderer()
 
 PAG::Renderer::~Renderer()
 {
-	delete triangle;
+
 }
 
 PAG::Renderer* PAG::Renderer::getInstance()

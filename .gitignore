@@ -369,3 +369,4 @@ FodyWeavers.xsd
 *.filters
 PAR2122.vcxproj
 log.txt
+/VDinamico.h

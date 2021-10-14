@@ -8,10 +8,11 @@ namespace PAG
 	private:
 		static Renderer* instance;
 		GLfloat r, g, b, a;
-		Model* triangle;
+		std::unique_ptr<Model> triangle;
+		std::shared_ptr<ShaderProgram> sp;
 		Renderer();
 		void configBackColor(GLfloat _r, GLfloat _g, GLfloat _b, GLfloat _a);
-		bool drawing = false;
+		bool drawing = true;
 	public:
 		static const std::string version;
 		// Lo único que necesito estático de la clase Renderer es la instancia y el método de la instancia

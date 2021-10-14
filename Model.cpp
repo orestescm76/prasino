@@ -6,8 +6,9 @@ PAG::Model::Model(): vertices(nullptr), indices(nullptr), colors(nullptr)
 
 }
 
-PAG::Model::Model(GLfloat* v, GLfloat* c, GLuint* i, std::string filevs, std::string filefs): vertices(v), colors(c), indices(i), sp(filevs, filefs)
+PAG::Model::Model(GLfloat* v, GLfloat* c, GLuint* i, std::shared_ptr<ShaderProgram> shaderProgram): vertices(v), colors(c), indices(i)
 {
+	sp = shaderProgram;
 	initModel();
 }
 //creo que no es lo mejor
@@ -48,14 +49,14 @@ void PAG::Model::initModel()
 
 void PAG::Model::draw()
 {
-	sp.useProgram();
+	sp->useProgram();
 	glBindVertexArray(idVAO);
 	glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, nullptr);
 }
 
 void PAG::Model::erase()
 {
-	sp.deactivate();
+	sp->deactivate();
 	glBindVertexArray(0);
 	
 }

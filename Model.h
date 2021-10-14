@@ -12,10 +12,10 @@ namespace PAG
 		GLuint idVBO = 0;
 		GLuint idColor = 0;
 		GLuint idIBO = 0;
-		ShaderProgram sp;
+		std::shared_ptr<ShaderProgram> sp;
 	public:
 		Model();
-		Model(GLfloat* v, GLfloat* c, GLuint* i, std::string filevs, std::string filefs);
+		Model(GLfloat* v, GLfloat* c, GLuint* i, std::shared_ptr<ShaderProgram> shaderProgram);
 		Model(const Model& model);
 		void initModel();
 		void draw();

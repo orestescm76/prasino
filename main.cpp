@@ -1,7 +1,8 @@
 /*
 * @author orestescm76
 * @brief main
-* VERSION 0.5.2
+* VERSION 0.6.0a1
+* 
 */
 #include "pch.h"
 #include "Renderer.h"
