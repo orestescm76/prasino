@@ -91,3 +91,14 @@ void PAG::ShaderProgram::deactivate()
 	glUseProgram(0); //??
 }
 
+const PAG::Shader& PAG::ShaderProgram::getVertexShader()
+{
+	return vertexShader;
+}
+
+const PAG::Shader& PAG::ShaderProgram::getFragmentShader()
+{
+	return fragmentShader;
+}
+
+

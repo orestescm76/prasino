@@ -7,10 +7,11 @@
 #include "Renderer.h"
 
 PAG::Renderer* PAG::Renderer::instance = nullptr;
-const std::string PAG::Renderer::version = "0.6.0a1";
+const std::string PAG::Renderer::version = "0.6.0a2";
 
 PAG::Renderer::Renderer()
 {
+	camera = Camera();
 	//vertices del triangulo
 	GLfloat vertices[] = {-.5, -.5, 0,
 						.5, -.5, 0,
@@ -25,7 +26,6 @@ PAG::Renderer::Renderer()
 	try
 	{
 		sp = std::make_shared<ShaderProgram>("pag06-vs.glsl", "pag06-fs.glsl");
-
 	}
 	catch (const std::exception& e)
 	{
@@ -143,6 +143,10 @@ void PAG::Renderer::printInfo()
 void PAG::Renderer::draw()
 {
 	drawing = true;
+	glm::mat4 view = camera.getViewMatrix();
+	glm::mat4 proj = camera.getProjMatrix();
+	sp->getVertexShader().setUniformMat4("matView", view);
+	sp->getVertexShader().setUniformMat4("matProj", proj);
 	triangle->draw();
 }
 
@@ -154,6 +158,9 @@ void PAG::Renderer::erase()
 
 void PAG::Renderer::configViewport(int width, int height)
 {
+	wViewport = width;
+	hViewport = height;
+	camera.setViewport(width, height);
 	glViewport(0, 0, width, height);
 }
 

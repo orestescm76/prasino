@@ -1,4 +1,5 @@
 #pragma once
+#include <glm/fwd.hpp>
 namespace PAG
 {
 	class Shader
@@ -13,14 +14,20 @@ namespace PAG
 		std::string loadShader();
 		//Checks and returns the error log messages if there's anything wrong.
 		void checkErrors(GLint status, GLint id, std::string msg);
+		GLint getUniformLocation(std::string uniform) const;
+		void createShader();
+		//Returns the Shader's source code
+		std::string& getSrc();
 	public:
 		Shader();
 		Shader(std::string path, std::string name, GLenum type, GLint sp);
 		Shader(const Shader& shader);
 		~Shader();
-		void createShader();
+		//Returns the Shader's ID
 		GLint getId();
-		std::string& getSrc();
+		//Uniform set up
+		void setUniformVec3(std::string uniform, glm::vec3 vec) const;
+		void setUniformMat4(std::string uniform, glm::mat4 mat) const;
 	};
 }
 

@@ -20,5 +20,8 @@ namespace PAG
 		GLint getIdSP();
 		void useProgram();
 		void deactivate();
+		//Setting up the uniforms is a Shader thing.
+		const Shader& getVertexShader();
+		const Shader& getFragmentShader();
 	};
 }

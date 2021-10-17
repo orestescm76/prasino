@@ -15,9 +15,14 @@ PAG::Camera::Camera(glm::vec3 p, float a, float zn, float zf, float w, float h):
 {
 }
 
+glm::vec3 PAG::Camera::getUp()
+{
+	return up;
+}
+
 glm::vec3 PAG::Camera::cameraDirection()
 {
-	return glm::normalize(pos - target);
+	return glm::normalize(target - pos);
 }
 
 glm::mat4 PAG::Camera::getViewMatrix()
@@ -27,10 +32,18 @@ glm::mat4 PAG::Camera::getViewMatrix()
 
 glm::mat4 PAG::Camera::getProjMatrix()
 {
-	return glm::perspective(glm::radians(fov), wViewport / hViewport, zNear, zFar);
+	proj = glm::perspective(glm::radians(fov), wViewport / hViewport, zNear, zFar);
+	return proj;
 }
+
 
 PAG::Camera::~Camera()
 {
 
+}
+
+void PAG::Camera::setViewport(float w, float h)
+{
+	wViewport = w;
+	hViewport = h;
 }

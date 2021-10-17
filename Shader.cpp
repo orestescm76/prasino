@@ -87,9 +87,35 @@ GLint PAG::Shader::getId()
 	return id;
 }
 
-std::string& PAG::Shader::getSrc()
+std::string& PAG::Shader::getSrc() 
 {
 	return src;
+}
+
+void PAG::Shader::setUniformVec3(std::string uniform, glm::vec3 vec) const
+{
+	try
+	{
+		glUniform3fv(getUniformLocation(uniform), 1, &vec[0]);
+	}
+	catch (const std::exception& e)
+	{
+		throw std::invalid_argument("Shader::setUniformVec3 -> " + (std::string)e.what());
+	}
+	
+}
+
+void PAG::Shader::setUniformMat4(std::string uniform, glm::mat4 mat) const
+{
+	try
+	{
+		glUniformMatrix4fv(getUniformLocation(uniform), 1, GL_FALSE, &mat[0][0]);
+	}
+	catch (const std::exception& e)
+	{
+		throw std::invalid_argument("Shader::setUniformMat4 -> " + (std::string)e.what());
+	}
+	
 }
 
 void PAG::Shader::checkErrors(GLint status, GLint shaderId, std::string msg)
@@ -103,4 +129,12 @@ void PAG::Shader::checkErrors(GLint status, GLint shaderId, std::string msg)
 		std::string logs(log);
 		throw std::runtime_error("ShaderProgram::checkErrors -> " + logs);
 	}
+}
+
+GLint PAG::Shader::getUniformLocation(std::string uniform) const
+{
+	GLint loc = glGetUniformLocation(idSP, uniform.c_str());
+	if (loc != -1)
+		return loc;
+	else throw std::invalid_argument("Shader::getUniformLocation -> Couldn't find the uniform location");
 }

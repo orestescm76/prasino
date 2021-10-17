@@ -1,7 +1,7 @@
 /*
 * @author orestescm76
 * @brief main
-* VERSION 0.6.0a1
+* VERSION 0.6.0a2
 * 
 */
 #include "pch.h"
@@ -83,7 +83,7 @@ int main()
 	// - Definimos el puntero para guardar la dirección de la ventana de la aplicación y la creamos
 	GLFWwindow* window;
 	// - Tamaño, título de la ventana, en ventana y no en pantalla completa, sin compartir recursos con otras ventanas.
-	window = glfwCreateWindow(1024, 720, "PAG2122-[ColominaMonsalve-Orestes]", nullptr, nullptr);
+	window = glfwCreateWindow(1280, 720, "PAG2122-[ColominaMonsalve-Orestes]", nullptr, nullptr);
 	//¿salió bien?
 	if (!window)
 	{
@@ -115,7 +115,7 @@ int main()
 		PAG::Log::getInstance()->printMessage(PAG::msgType::ERROR, e.what());
 		return -1;
 	}
-	
+	PAG::Renderer::getInstance()->configViewport(1280, 720);
 	PAG::Renderer::getInstance()->printInfo();
 	//registrar callbacks
 	glfwSetWindowRefreshCallback(window, window_refresh_callback);	
