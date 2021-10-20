@@ -33,8 +33,21 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	bool drawing = PAG::Renderer::getInstance()->isDrawing();
 	if (key == GLFW_KEY_A && !drawing)
 		PAG::Renderer::getInstance()->draw();
-	else if(key == GLFW_KEY_D && drawing)
+	else if (key == GLFW_KEY_D && drawing)
 		PAG::Renderer::getInstance()->erase();
+	else if (key == GLFW_KEY_H)
+	{
+		std::cout << "'p' for panning right" << std::endl
+			<< "'P' for panning left" << std::endl;
+	}
+	else if (key == GLFW_KEY_P)
+	{
+		//float angle = PAG::Renderer::getInstance()->getCamera().getPanAngle();
+		PAG::Renderer::getInstance()->getCamera().pan(.1, PAG::Direction::RIGHT);
+
+	}
+	else
+		std::cout << "Press 'h' for the keybinds" << std::endl;
 	window_refresh_callback(window);
 	//std::cout << "Key callback called" << std::endl;
 }

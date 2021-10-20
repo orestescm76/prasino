@@ -7,6 +7,7 @@ namespace PAG
 	class Renderer
 	{
 	private:
+
 		static Renderer* instance;
 		GLfloat r, g, b, a;
 		std::unique_ptr<Model> triangle;
@@ -32,6 +33,7 @@ namespace PAG
 		void draw();
 		void erase();
 		bool isDrawing();
+		Camera& getCamera();
 		virtual ~Renderer();
 	};
 }

@@ -12,17 +12,6 @@ const std::string PAG::Renderer::version = "0.6.0a2";
 PAG::Renderer::Renderer()
 {
 	camera = Camera();
-	//vertices del triangulo
-	GLfloat vertices[] = {-.5, -.5, 0,
-						.5, -.5, 0,
-						.0,  .5, 0 };
-	//indices para pintarlo
-	GLuint indices[] = { 0, 1, 2 };
-	//colores de los vertices
-	GLfloat colores[] = { 0.0f, 0.733f, 0.176f,
-						0.835f, 0.188f, 0.196f,
-						0.678f, 0.847f, 0.902f };
-						//0.114f, 0.118f, 0.2f };
 	try
 	{
 		sp = std::make_shared<ShaderProgram>("pag06-vs.glsl", "pag06-fs.glsl");
@@ -31,7 +20,7 @@ PAG::Renderer::Renderer()
 	{
 		throw std::runtime_error("PAG::Renderer::Renderer -> " + (std::string)e.what());
 	}
-	triangle = std::make_unique <Model>(vertices, colores, indices, sp);
+	triangle = std::make_unique <Model>(sp);
 	r = .6f;
 	g = .6f;
 	b = .6f;
@@ -143,6 +132,8 @@ void PAG::Renderer::printInfo()
 void PAG::Renderer::draw()
 {
 	drawing = true;
+	if (!triangle.get()) //If it's destroyed
+		triangle = std::make_unique<Model>(sp);
 	glm::mat4 view = camera.getViewMatrix();
 	glm::mat4 proj = camera.getProjMatrix();
 	sp->getVertexShader().setUniformMat4("matView", view);
@@ -153,7 +144,12 @@ void PAG::Renderer::draw()
 void PAG::Renderer::erase()
 {
 	drawing = false;
-	triangle->erase();
+	
+	if (triangle.get()) //if there is a triangle
+	{
+		triangle->erase();
+		triangle.reset(); //Destroy the triangle, but do it once!
+	}
 }
 
 void PAG::Renderer::configViewport(int width, int height)
@@ -167,4 +163,9 @@ void PAG::Renderer::configViewport(int width, int height)
 bool PAG::Renderer::isDrawing()
 {
 	return drawing;
+}
+
+PAG::Camera& PAG::Renderer::getCamera()
+{
+	return camera;
 }

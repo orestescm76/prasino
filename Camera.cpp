@@ -20,9 +20,29 @@ glm::vec3 PAG::Camera::getUp()
 	return up;
 }
 
-glm::vec3 PAG::Camera::cameraDirection()
+void PAG::Camera::pan(float degrees, Direction dir)
 {
-	return glm::normalize(target - pos);
+	glm::vec3 n = -cameraDirection(true); //direccion camara
+	glm::vec3 u = glm::normalize(glm::cross(up, n));
+	glm::vec3 v = glm::cross(u,n);
+	glm::mat4 rot = glm::rotate(glm::mat4(1.0f), glm::radians(10.0f), n);
+
+	target = glm::vec3(glm::vec4(target, 1.0f)*rot);
+	std::cout << target.x << "," << target.y << "," << target.z << std::endl;
+	std::cout << "Grados: " << glm::radians(degrees) << std::endl;
+}
+
+float PAG::Camera::getPanAngle()
+{
+	return panAngle;
+}
+
+glm::vec3 PAG::Camera::cameraDirection(bool norm)
+{
+	if (norm)
+		return glm::normalize(pos - target);
+	else
+		return pos - target;
 }
 
 glm::mat4 PAG::Camera::getViewMatrix()
@@ -32,14 +52,7 @@ glm::mat4 PAG::Camera::getViewMatrix()
 
 glm::mat4 PAG::Camera::getProjMatrix()
 {
-	proj = glm::perspective(glm::radians(fov), wViewport / hViewport, zNear, zFar);
-	return proj;
-}
-
-
-PAG::Camera::~Camera()
-{
-
+	return glm::perspective(glm::radians(fov), wViewport / hViewport, zNear, zFar);
 }
 
 void PAG::Camera::setViewport(float w, float h)
@@ -47,3 +60,9 @@ void PAG::Camera::setViewport(float w, float h)
 	wViewport = w;
 	hViewport = h;
 }
+
+PAG::Camera::~Camera()
+{
+
+}
+

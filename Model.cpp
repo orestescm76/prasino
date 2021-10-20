@@ -1,9 +1,23 @@
 #include "pch.h"
 #include "Model.h"
 #include "Log.h"
-PAG::Model::Model(): vertices(nullptr), indices(nullptr), colors(nullptr)
-{
 
+
+PAG::Model::Model(std::shared_ptr<ShaderProgram> shaderProgram): sp(shaderProgram)
+{
+	//Copy the model data
+	vertices = verticesArr;
+	indices = indicesArr;
+	colors = colorsArr;
+	initModel();
+}
+
+PAG::Model::Model()
+{
+	//Copy the model data
+	vertices = verticesArr;
+	indices = indicesArr;
+	colors = colorsArr;
 }
 
 PAG::Model::Model(GLfloat* v, GLfloat* c, GLuint* i, std::shared_ptr<ShaderProgram> shaderProgram): vertices(v), colors(c), indices(i)
