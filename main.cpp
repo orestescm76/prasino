@@ -1,7 +1,7 @@
 /*
 * @author orestescm76
 * @brief main
-* VERSION 0.6.0a2
+* VERSION 0.6.0a3
 * 
 */
 #include "pch.h"
