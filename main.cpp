@@ -1,13 +1,15 @@
 /*
 * @author orestescm76
 * @brief main
-* VERSION 0.6.0a3
+* VERSION 0.6.0
 * 
 */
 #include "pch.h"
 #include "Renderer.h"
 #include "Log.h"
 #include "Model.h"
+
+double xold, yold = 0.0;
 
 //callback de redibujar
 void window_refresh_callback(GLFWwindow* window)
@@ -27,29 +29,68 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
 	mods;
-	scancode;
-	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-		glfwSetWindowShouldClose(window, GLFW_TRUE);
-	bool drawing = PAG::Renderer::getInstance()->isDrawing();
-	if (key == GLFW_KEY_A && !drawing)
-		PAG::Renderer::getInstance()->draw();
-	else if (key == GLFW_KEY_D && drawing)
-		PAG::Renderer::getInstance()->erase();
-	else if (key == GLFW_KEY_H)
+	scancode;		
+	if (action == GLFW_PRESS)
 	{
-		std::cout << "'p' for panning right" << std::endl
-			<< "'P' for panning left" << std::endl;
+		switch (key)
+		{
+		case GLFW_KEY_ESCAPE:
+			glfwSetWindowShouldClose(window, GLFW_TRUE);
+			break;
+		case GLFW_KEY_P:
+			PAG::Log::getInstance()->printMessage(PAG::msgType::INFO, "Pan set");
+			PAG::Renderer::getInstance()->getCamera().setMov(PAG::MovType::PAN);
+				break;
+		case GLFW_KEY_T:
+			PAG::Log::getInstance()->printMessage(PAG::msgType::INFO, "Tilt set");
+			PAG::Renderer::getInstance()->getCamera().setMov(PAG::MovType::TILT);
+			break;
+		case GLFW_KEY_O:
+			PAG::Log::getInstance()->printMessage(PAG::msgType::INFO, "Orbit set");
+			PAG::Renderer::getInstance()->getCamera().setMov(PAG::MovType::ORBIT);
+			break;
+		case GLFW_KEY_C:
+			PAG::Log::getInstance()->printMessage(PAG::msgType::INFO, "Crane set");
+			PAG::Renderer::getInstance()->getCamera().setMov(PAG::MovType::CRANE);
+			break;
+		case GLFW_KEY_L:
+			PAG::Log::getInstance()->printMessage(PAG::msgType::INFO, "Dolly set");
+			PAG::Renderer::getInstance()->getCamera().setMov(PAG::MovType::DOLLY);
+			break;
+		case GLFW_KEY_UP:
+		case GLFW_KEY_DOWN:
+		case GLFW_KEY_LEFT:
+		case GLFW_KEY_RIGHT:
+		case GLFW_KEY_W:
+		case GLFW_KEY_S:
+			PAG::Renderer::getInstance()->getCamera().move(key);
+			break;
+		case GLFW_KEY_A:
+			std::cout << "Drawing" << std::endl;
+			PAG::Renderer::getInstance()->draw();
+			break;
+		case GLFW_KEY_D:
+			std::cout << "Deleting" << std::endl;
+			PAG::Renderer::getInstance()->erase();
+			break;
+		case GLFW_KEY_H:
+			std::cout << "'p' for panning" << std::endl
+				<< "'t' for tilting" << std::endl
+				<< "'o' for orbit" << std::endl
+				<< "'c' for crane" << std::endl
+				<< "'l' for dolly" << std::endl
+				<< "'a' for creating the triangle" << std::endl
+				<< "'d' for destroying the triangle" << std::endl;
+			break;
+		case GLFW_KEY_R:
+			PAG::Renderer::getInstance()->getCamera().reset();
+			break;
+		default:
+			std::cout << "Press 'h' for the keybinds" << std::endl;
+			break;
+		}
 	}
-	else if (key == GLFW_KEY_P)
-	{
-		//float angle = PAG::Renderer::getInstance()->getCamera().getPanAngle();
-		PAG::Renderer::getInstance()->getCamera().pan(.1, PAG::Direction::RIGHT);
-
-	}
-	else
-		std::cout << "Press 'h' for the keybinds" << std::endl;
 	window_refresh_callback(window);
-	//std::cout << "Key callback called" << std::endl;
 }
 //callback de botones del ratón
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
@@ -57,8 +98,10 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 	mods;
 	button;
 	window;
+
 	if (action == GLFW_PRESS)
 	{
+
 		//std::cout << "Se ha pulsado " << button << std::endl;
 	}
 	else if (action == GLFW_RELEASE)
@@ -73,7 +116,18 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 	//std::cout << "Movida la rueda del raton " << xoffset
 	//	<< " Unidades en horizontal y " << yoffset << " unidades en vertical"
 	//	<< std::endl;
+	PAG::Renderer::getInstance()->getCamera().zoom(yoffset);
 	PAG::Renderer::getInstance()->changeColor(yoffset);
+	window_refresh_callback(window);
+}
+
+void mouse_moved_callback(GLFWwindow* window, double xpos, double ypos)
+{
+	double xoffset = xpos - xold;
+	double yoffset = ypos - yold;
+	PAG::Renderer::getInstance()->getCamera().move(xoffset, yoffset);
+	xold = xpos;
+	yold = ypos;
 	window_refresh_callback(window);
 }
 
@@ -136,13 +190,14 @@ int main()
 	glfwSetKeyCallback(window, key_callback);
 	glfwSetMouseButtonCallback(window, mouse_button_callback);
 	glfwSetScrollCallback(window, scroll_callback);
-	
+	glfwSetCursorPosCallback(window, mouse_moved_callback);
 	//configurar OpenGL
 	PAG::Renderer::getInstance()->start();
-
+	glfwGetCursorPos(window, &xold, &yold);
 	//Ciclo de eventos
 	while (!glfwWindowShouldClose(window))
 	{
+
 		glfwPollEvents();
 	}
 	glfwDestroyWindow(window);

@@ -7,7 +7,7 @@
 #include "Renderer.h"
 
 PAG::Renderer* PAG::Renderer::instance = nullptr;
-const std::string PAG::Renderer::version = "0.6.0a3";
+const std::string PAG::Renderer::version = "0.6.0";
 
 PAG::Renderer::Renderer()
 {
@@ -21,9 +21,9 @@ PAG::Renderer::Renderer()
 		throw std::runtime_error("PAG::Renderer::Renderer -> " + (std::string)e.what());
 	}
 	triangle = std::make_unique <Model>(sp);
-	r = .6f;
-	g = .6f;
-	b = .6f;
+	r = 0.0f;
+	g = 0.0f;
+	b = 0.0f;
 	a = 1.0f;
 }
 
@@ -144,7 +144,6 @@ void PAG::Renderer::draw()
 void PAG::Renderer::erase()
 {
 	drawing = false;
-	
 	if (triangle.get()) //if there is a triangle
 	{
 		triangle->erase();
