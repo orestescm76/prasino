@@ -10,7 +10,7 @@ PAG::Camera::Camera(float w, float h): wViewport(w), hViewport(h)
 
 }
 
-PAG::Camera::Camera(glm::vec3 p, float a, float zn, float zf, float w, float h): pos(p), fov(a), zNear(zn), zFar(zf), wViewport(w), hViewport(h)
+PAG::Camera::Camera(glm::vec3 p, float a, float zn, float zf, float w, float h): pos(p), fovX(a), zNear(zn), zFar(zf), wViewport(w), hViewport(h)
 {
 }
 
@@ -70,6 +70,12 @@ void PAG::Camera::updateCameraAxis()
 		return;							   //I think you popped another microdot.
 	u = glm::normalize(glm::cross(up, n));
 	v = glm::cross(u, n);
+}
+
+float PAG::Camera::getFovY()
+{
+	float aspect = wViewport / hViewport;
+	return 2 * glm::atan(glm::tan(glm::radians(fovX) / 2) / aspect);
 }
 
 void PAG::Camera::pan(float offset)
@@ -161,13 +167,13 @@ void PAG::Camera::orbit(float xoffset, float yoffset)
 	glm::mat4 trans2 = glm::translate(glm::mat4(1.0f), pos);
 	//Composición de la matriz
 	target = glm::vec3(trans2 * rotv * rotu * trans1 * glm::vec4(target, 1.0f));
-	pos = glm::vec3(trans2 * rotv* rotu * trans1 * glm::vec4(pos, 1.0f));
+	//pos = glm::vec3(trans2 * rotv* rotu * trans1 * glm::vec4(pos, 1.0f));
 	//std::cout << "(" << target.x << "," << target.y << "," << target.z << ")" << std::endl;
 }
 
 void PAG::Camera::zoom(float yoffset)
 {
-	fov -= yoffset;
+	fovX -= yoffset;
 }
 
 float PAG::Camera::getPanAngle()
@@ -195,7 +201,7 @@ glm::mat4 PAG::Camera::getViewMatrix()
 
 glm::mat4 PAG::Camera::getProjMatrix()
 {
-	return glm::perspective(glm::radians(fov), wViewport / hViewport, zNear, zFar);
+	return glm::perspective(getFovY(), wViewport / hViewport, zNear, zFar);
 }
 
 void PAG::Camera::setViewport(float w, float h)

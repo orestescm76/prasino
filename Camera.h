@@ -21,7 +21,7 @@ namespace PAG
 		glm::mat4 proj = glm::mat4();
 		//ejes de la camara
 		glm::vec3 n, v, u;
-		float fov = 45.0f;
+		float fovX = 45.0f;
 		float zNear =0.1f;
 		float zFar = 100.0f;
 		float wViewport = 0.0f;
@@ -30,6 +30,7 @@ namespace PAG
 		float sensitivity = 0.1f;
 		MovType movType = MovType::PAN;
 		void updateCameraAxis();
+		float getFovY();
 	public:
 		Camera();
 		Camera(float w, float h);

@@ -10,7 +10,21 @@
 #include "Model.h"
 
 double xold, yold = 0.0;
+bool hideMouse = false;
 
+void hideShowMouse(GLFWwindow* window)
+{
+	if (hideMouse)
+	{
+		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+		hideMouse = false;
+	}
+	else
+	{
+		glfwSetInputMode(window, GLFW_CURSOR,  GLFW_CURSOR_NORMAL);
+		hideMouse = true;
+	}
+}
 //callback de redibujar
 void window_refresh_callback(GLFWwindow* window)
 {
@@ -73,6 +87,9 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 			std::cout << "Deleting" << std::endl;
 			PAG::Renderer::getInstance()->erase();
 			break;
+		case GLFW_KEY_Z:
+			hideShowMouse(window);
+			break;
 		case GLFW_KEY_H:
 			std::cout << "'p' for panning" << std::endl
 				<< "'t' for tilting" << std::endl
@@ -80,7 +97,8 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 				<< "'c' for crane" << std::endl
 				<< "'l' for dolly" << std::endl
 				<< "'a' for creating the triangle" << std::endl
-				<< "'d' for destroying the triangle" << std::endl;
+				<< "'d' for destroying the triangle" << std::endl
+				<< "'z' to hide/show cursor" << std::endl;
 			break;
 		case GLFW_KEY_R:
 			PAG::Renderer::getInstance()->getCamera().reset();
