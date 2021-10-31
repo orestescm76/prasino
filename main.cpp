@@ -1,7 +1,7 @@
 /*
 * @author orestescm76
 * @brief main
-* VERSION 0.6.0
+* VERSION 0.7.0a1
 * 
 */
 #include "pch.h"
@@ -81,10 +81,12 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 			break;
 		case GLFW_KEY_A:
 			std::cout << "Drawing" << std::endl;
+			PAG::Renderer::getInstance()->setDrawingTriangle(true);
 			PAG::Renderer::getInstance()->draw();
 			break;
 		case GLFW_KEY_D:
 			std::cout << "Deleting" << std::endl;
+			PAG::Renderer::getInstance()->setDrawingTriangle(false);
 			PAG::Renderer::getInstance()->erase();
 			break;
 		case GLFW_KEY_Z:
@@ -107,8 +109,9 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 			std::cout << "Press 'h' for the keybinds" << std::endl;
 			break;
 		}
+		window_refresh_callback(window);
 	}
-	window_refresh_callback(window);
+	
 }
 //callback de botones del ratón
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
@@ -213,6 +216,7 @@ int main()
 	PAG::Renderer::getInstance()->start();
 	glfwGetCursorPos(window, &xold, &yold);
 	//Ciclo de eventos
+
 	while (!glfwWindowShouldClose(window))
 	{
 

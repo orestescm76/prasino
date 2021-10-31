@@ -7,7 +7,7 @@
 #include "Renderer.h"
 
 PAG::Renderer* PAG::Renderer::instance = nullptr;
-const std::string PAG::Renderer::version = "0.6.0";
+const std::string PAG::Renderer::version = "0.7.0a1";
 
 PAG::Renderer::Renderer()
 {
@@ -20,7 +20,8 @@ PAG::Renderer::Renderer()
 	{
 		throw std::runtime_error("PAG::Renderer::Renderer -> " + (std::string)e.what());
 	}
-	triangle = std::make_unique <Model>(sp);
+	triangle = std::make_unique <Triangle>(sp);
+	tetrahedron = std::make_unique<Tetrahedron>(sp);
 	r = 0.0f;
 	g = 0.0f;
 	b = 0.0f;
@@ -53,10 +54,7 @@ void PAG::Renderer::refreshWindow()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	if (drawing)
-		draw();
-	else
-		erase();
+	draw();
 }
 
 void PAG::Renderer::changeColor(double yoffset)
@@ -77,6 +75,7 @@ void PAG::Renderer::start()
 	
 	glEnable(GL_PROGRAM_POINT_SIZE);
 	glEnable(GL_MULTISAMPLE);
+	draw();
 }
 
 void PAG::Renderer::activeZBuffer()
@@ -131,22 +130,22 @@ void PAG::Renderer::printInfo()
 
 void PAG::Renderer::draw()
 {
-	drawing = true;
-	if (!triangle.get()) //If it's destroyed
-		triangle = std::make_unique<Model>(sp);
+	
+	if (!triangle.get() && drawingTriangle) //If it's destroyed and we need to draw
+		triangle = std::make_unique<Triangle>(sp);
 	glm::mat4 view = camera.getViewMatrix();
 	glm::mat4 proj = camera.getProjMatrix();
 	sp->getVertexShader().setUniformMat4("matView", view);
 	sp->getVertexShader().setUniformMat4("matProj", proj);
-	triangle->draw();
+	if(drawingTriangle)
+		triangle->draw();
+	tetrahedron->draw();
 }
 
 void PAG::Renderer::erase()
 {
-	drawing = false;
 	if (triangle.get()) //if there is a triangle
 	{
-		triangle->erase();
 		triangle.reset(); //Destroy the triangle, but do it once!
 	}
 }
@@ -159,9 +158,14 @@ void PAG::Renderer::configViewport(int width, int height)
 	glViewport(0, 0, width, height);
 }
 
-bool PAG::Renderer::isDrawing()
+bool PAG::Renderer::isDrawingTriangle()
 {
-	return drawing;
+	return drawingTriangle;
+}
+
+void PAG::Renderer::setDrawingTriangle(bool draw)
+{
+	drawingTriangle = draw;
 }
 
 PAG::Camera& PAG::Renderer::getCamera()

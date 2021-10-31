@@ -22,6 +22,7 @@ namespace PAG
 		static Log* getInstance();
 		//Prints a meesage to the console, for constants
 		void printMessage(msgType _msgType, std::string msg);
+		void printMessage(msgType _msgType, long num);
 	};
 }
 

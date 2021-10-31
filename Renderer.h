@@ -1,5 +1,6 @@
 #pragma once
-#include "Model.h"
+#include "Triangle.h"
+#include "Tetrahedron.h"
 #include "Log.h"
 #include "Camera.h"
 namespace PAG
@@ -10,12 +11,13 @@ namespace PAG
 
 		static Renderer* instance;
 		GLfloat r, g, b, a;
-		std::unique_ptr<Model> triangle;
+		std::unique_ptr<Triangle> triangle;
+		std::unique_ptr<Tetrahedron> tetrahedron;
 		std::shared_ptr<ShaderProgram> sp;
 		Camera camera;
 		Renderer();
 		void configBackColor(GLfloat _r, GLfloat _g, GLfloat _b, GLfloat _a);
-		bool drawing = true;
+		bool drawingTriangle = true;
 		float wViewport, hViewport;
 	public:
 		static const std::string version;
@@ -32,7 +34,8 @@ namespace PAG
 		void printInfo();
 		void draw();
 		void erase();
-		bool isDrawing();
+		bool isDrawingTriangle();
+		void setDrawingTriangle(bool draw);
 		Camera& getCamera();
 		virtual ~Renderer();
 	};

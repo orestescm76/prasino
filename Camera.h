@@ -14,8 +14,8 @@ namespace PAG
 
 	class Camera
 	{
-		glm::vec3 pos = { 3.0f, 0.0f, 3.0f };
-		glm::vec3 target = { 1.0f, 0.0f, 1.0f };
+		glm::vec3 pos = { 4.0f, 1.0f, 4.0f };
+		glm::vec3 target = { 0.0f, 0.0f, 0.0f };
 		glm::vec3 up = { 0.0f, 1.0f, 0.0f };
 		glm::mat4 view = glm::mat4();
 		glm::mat4 proj = glm::mat4();
