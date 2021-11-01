@@ -1,6 +1,6 @@
 #pragma once
-#include "Triangle.h"
-#include "Tetrahedron.h"
+//Includes model and Shader Program
+#include "Model.h"
 #include "Log.h"
 #include "Camera.h"
 namespace PAG
@@ -11,8 +11,8 @@ namespace PAG
 
 		static Renderer* instance;
 		GLfloat r, g, b, a;
-		std::unique_ptr<Triangle> triangle;
-		std::unique_ptr<Tetrahedron> tetrahedron;
+		std::unique_ptr<Model> triangle;
+		std::unique_ptr<Model> tetrahedron;
 		std::shared_ptr<ShaderProgram> sp;
 		Camera camera;
 		Renderer();

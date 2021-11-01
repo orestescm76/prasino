@@ -4,6 +4,7 @@ namespace PAG
 {
 	enum class MovType
 	{
+		LOCK,
 		PAN,
 		TILT,
 		DOLLY,
@@ -28,7 +29,7 @@ namespace PAG
 		float hViewport = 0.0f;
 		float panAngle = 0.0f;
 		float sensitivity = 0.1f;
-		MovType movType = MovType::PAN;
+		MovType movType = MovType::LOCK;
 		void updateCameraAxis();
 		float getFovY();
 	public:

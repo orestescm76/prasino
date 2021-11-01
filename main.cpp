@@ -1,7 +1,7 @@
 /*
 * @author orestescm76
 * @brief main
-* VERSION 0.7.0a1
+* VERSION 0.7.0a2
 * 
 */
 #include "pch.h"
@@ -67,9 +67,13 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 			PAG::Log::getInstance()->printMessage(PAG::msgType::INFO, "Crane set");
 			PAG::Renderer::getInstance()->getCamera().setMov(PAG::MovType::CRANE);
 			break;
-		case GLFW_KEY_L:
+		case GLFW_KEY_F:
 			PAG::Log::getInstance()->printMessage(PAG::msgType::INFO, "Dolly set");
 			PAG::Renderer::getInstance()->getCamera().setMov(PAG::MovType::DOLLY);
+			break;
+		case GLFW_KEY_L:
+			PAG::Log::getInstance()->printMessage(PAG::msgType::INFO, "Camera locked");
+			PAG::Renderer::getInstance()->getCamera().setMov(PAG::MovType::LOCK);
 			break;
 		case GLFW_KEY_UP:
 		case GLFW_KEY_DOWN:
@@ -79,12 +83,11 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 		case GLFW_KEY_S:
 			PAG::Renderer::getInstance()->getCamera().move(key);
 			break;
-		case GLFW_KEY_A:
+		case GLFW_KEY_1:
 			std::cout << "Drawing" << std::endl;
 			PAG::Renderer::getInstance()->setDrawingTriangle(true);
-			PAG::Renderer::getInstance()->draw();
 			break;
-		case GLFW_KEY_D:
+		case GLFW_KEY_2:
 			std::cout << "Deleting" << std::endl;
 			PAG::Renderer::getInstance()->setDrawingTriangle(false);
 			PAG::Renderer::getInstance()->erase();
@@ -93,14 +96,16 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 			hideShowMouse(window);
 			break;
 		case GLFW_KEY_H:
-			std::cout << "'p' for panning" << std::endl
+			std::cout 
+				<< "'1' shows the triangle" << std::endl
+				<< "'2' shows the tetrahedron" << std::endl 
+				<< "'p' for panning" << std::endl
 				<< "'t' for tilting" << std::endl
 				<< "'o' for orbit" << std::endl
 				<< "'c' for crane" << std::endl
-				<< "'l' for dolly" << std::endl
-				<< "'a' for creating the triangle" << std::endl
-				<< "'d' for destroying the triangle" << std::endl
-				<< "'z' to hide/show cursor" << std::endl;
+				<< "'f' for dolly" << std::endl
+				<< "'z' to hide/show cursor" << std::endl
+				<< "'l' to lock the camera" << std::endl;
 			break;
 		case GLFW_KEY_R:
 			PAG::Renderer::getInstance()->getCamera().reset();

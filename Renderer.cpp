@@ -7,7 +7,7 @@
 #include "Renderer.h"
 
 PAG::Renderer* PAG::Renderer::instance = nullptr;
-const std::string PAG::Renderer::version = "0.7.0a1";
+const std::string PAG::Renderer::version = "0.7.0a2";
 
 PAG::Renderer::Renderer()
 {
@@ -20,8 +20,9 @@ PAG::Renderer::Renderer()
 	{
 		throw std::runtime_error("PAG::Renderer::Renderer -> " + (std::string)e.what());
 	}
-	triangle = std::make_unique <Triangle>(sp);
-	tetrahedron = std::make_unique<Tetrahedron>(sp);
+	triangle = std::make_unique <Model>(sp, PAG::Models::TRIANGLE);
+	tetrahedron = std::make_unique<Model>(sp, PAG::Models::TETRAHEDRON);
+	tetrahedron->setDrawingMode(GL_LINE);
 	r = 0.0f;
 	g = 0.0f;
 	b = 0.0f;
@@ -31,7 +32,7 @@ PAG::Renderer::Renderer()
 
 PAG::Renderer::~Renderer()
 {
-
+	//std::unique_ptr and std::shared_ptr destroys on its own and we do not need to delete it manually
 }
 
 PAG::Renderer* PAG::Renderer::getInstance()
@@ -53,7 +54,7 @@ PAG::Renderer* PAG::Renderer::getInstance()
 void PAG::Renderer::refreshWindow()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	
 	draw();
 }
 
@@ -130,24 +131,33 @@ void PAG::Renderer::printInfo()
 
 void PAG::Renderer::draw()
 {
-	
 	if (!triangle.get() && drawingTriangle) //If it's destroyed and we need to draw
-		triangle = std::make_unique<Triangle>(sp);
+		triangle = std::make_unique<Model>(sp, PAG::Models::TRIANGLE);
+
+	if (!tetrahedron.get() && !drawingTriangle) //If it's destroyed and we need to draw
+	{
+		tetrahedron = std::make_unique<Model>(sp, PAG::Models::TETRAHEDRON);
+		tetrahedron->setDrawingMode(GL_LINE);
+	}
+		
+
 	glm::mat4 view = camera.getViewMatrix();
 	glm::mat4 proj = camera.getProjMatrix();
 	sp->getVertexShader().setUniformMat4("matView", view);
 	sp->getVertexShader().setUniformMat4("matProj", proj);
 	if(drawingTriangle)
 		triangle->draw();
-	tetrahedron->draw();
+	else
+		tetrahedron->draw();
 }
 
 void PAG::Renderer::erase()
 {
 	if (triangle.get()) //if there is a triangle
-	{
 		triangle.reset(); //Destroy the triangle, but do it once!
-	}
+	
+	if (tetrahedron.get())
+		tetrahedron.reset();
 }
 
 void PAG::Renderer::configViewport(int width, int height)
