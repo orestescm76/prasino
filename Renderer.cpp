@@ -7,22 +7,22 @@
 #include "Renderer.h"
 
 PAG::Renderer* PAG::Renderer::instance = nullptr;
-const std::string PAG::Renderer::version = "0.7.0a2";
+const std::string PAG::Renderer::version = "0.7.0";
 
 PAG::Renderer::Renderer()
 {
 	camera = Camera();
 	try
 	{
-		sp = std::make_shared<ShaderProgram>("pag06-vs.glsl", "pag06-fs.glsl");
+		sp = std::make_shared<ShaderProgram>("pag07-vs.glsl", "pag07-fs.glsl");
 	}
 	catch (const std::exception& e)
 	{
 		throw std::runtime_error("PAG::Renderer::Renderer -> " + (std::string)e.what());
 	}
-	triangle = std::make_unique <Model>(sp, PAG::Models::TRIANGLE);
-	tetrahedron = std::make_unique<Model>(sp, PAG::Models::TETRAHEDRON);
-	tetrahedron->setDrawingMode(GL_LINE);
+	mat = Material({ 0,0,0 }, glm::vec3(0.263, 0.149, 0.596), { 0,0,0 }, 0.0f);
+	triangle = std::make_unique <Model>(sp, PAG::ModelType::TRIANGLE, mat);
+	tetrahedron = std::make_unique<Model>(sp, PAG::ModelType::TETRAHEDRON, mat);
 	r = 0.0f;
 	g = 0.0f;
 	b = 0.0f;
@@ -76,7 +76,6 @@ void PAG::Renderer::start()
 	
 	glEnable(GL_PROGRAM_POINT_SIZE);
 	glEnable(GL_MULTISAMPLE);
-	draw();
 }
 
 void PAG::Renderer::activeZBuffer()
@@ -132,23 +131,44 @@ void PAG::Renderer::printInfo()
 void PAG::Renderer::draw()
 {
 	if (!triangle.get() && drawingTriangle) //If it's destroyed and we need to draw
-		triangle = std::make_unique<Model>(sp, PAG::Models::TRIANGLE);
+		triangle = std::make_unique<Model>(sp, PAG::ModelType::TRIANGLE, mat);
 
 	if (!tetrahedron.get() && !drawingTriangle) //If it's destroyed and we need to draw
 	{
-		tetrahedron = std::make_unique<Model>(sp, PAG::Models::TETRAHEDRON);
-		tetrahedron->setDrawingMode(GL_LINE);
+		tetrahedron = std::make_unique<Model>(sp, PAG::ModelType::TETRAHEDRON, mat);
 	}
 		
 
 	glm::mat4 view = camera.getViewMatrix();
 	glm::mat4 proj = camera.getProjMatrix();
-	sp->getVertexShader().setUniformMat4("matView", view);
-	sp->getVertexShader().setUniformMat4("matProj", proj);
-	if(drawingTriangle)
-		triangle->draw();
-	else
-		tetrahedron->draw();
+	//Multiply the matrices
+	glm::mat4 projview = proj * view;
+	try
+	{
+		sp->getVertexShader().setUniformMat4("matProjView", projview);
+		if (drawingTriangle)
+		{
+			sp->getFragmentShader().setUniformVec3("diffuse", triangle->getMaterial().diffuse);
+			//We need to use the shaderprogram beforehand
+			triangle->useProgram();
+			triangle->setDrawingMode(renderType);
+			triangle->draw();
+		}
+		else
+		{
+			sp->getFragmentShader().setUniformVec3("diffuse", tetrahedron->getMaterial().diffuse);
+			tetrahedron->useProgram();
+			tetrahedron->setDrawingMode(renderType);
+			tetrahedron->draw();
+
+		}
+	}
+	catch (const std::exception& e)
+	{
+		throw std::runtime_error("PAG::Renderer::draw() -> " + (std::string)e.what());
+	}
+
+
 }
 
 void PAG::Renderer::erase()
@@ -176,6 +196,11 @@ bool PAG::Renderer::isDrawingTriangle()
 void PAG::Renderer::setDrawingTriangle(bool draw)
 {
 	drawingTriangle = draw;
+}
+
+void PAG::Renderer::setRenderType(RenderType rt)
+{
+	renderType = rt;
 }
 
 PAG::Camera& PAG::Renderer::getCamera()

@@ -118,6 +118,12 @@ void PAG::Shader::setUniformMat4(std::string uniform, glm::mat4 mat) const
 	
 }
 
+void PAG::Shader::setUniformSubroutine(std::string uniform, std::string func) const
+{
+	GLuint id = glGetSubroutineIndex(idSP, shaderType, func.c_str());
+	glUniformSubroutinesuiv(shaderType, 1, &id);
+}
+
 void PAG::Shader::checkErrors(GLint status, GLint shaderId, std::string msg)
 {
 	if (status == GL_FALSE)

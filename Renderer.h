@@ -5,6 +5,8 @@
 #include "Camera.h"
 namespace PAG
 {
+
+
 	class Renderer
 	{
 	private:
@@ -19,6 +21,8 @@ namespace PAG
 		void configBackColor(GLfloat _r, GLfloat _g, GLfloat _b, GLfloat _a);
 		bool drawingTriangle = true;
 		float wViewport, hViewport;
+		RenderType renderType = RenderType::SOLID;
+		Material mat;
 	public:
 		static const std::string version;
 		// Lo único que necesito estático de la clase Renderer es la instancia y el método de la instancia
@@ -36,6 +40,7 @@ namespace PAG
 		void erase();
 		bool isDrawingTriangle();
 		void setDrawingTriangle(bool draw);
+		void setRenderType(RenderType rt);
 		Camera& getCamera();
 		virtual ~Renderer();
 	};

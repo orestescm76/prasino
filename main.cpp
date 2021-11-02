@@ -1,7 +1,7 @@
 /*
 * @author orestescm76
 * @brief main
-* VERSION 0.7.0a2
+* VERSION 0.7.0
 * 
 */
 #include "pch.h"
@@ -28,7 +28,17 @@ void hideShowMouse(GLFWwindow* window)
 //callback de redibujar
 void window_refresh_callback(GLFWwindow* window)
 {
-	PAG::Renderer::getInstance()->refreshWindow();
+	try
+	{
+		PAG::Renderer::getInstance()->refreshWindow();
+	}
+	catch (const std::exception& e)
+	{
+		PAG::Log::getInstance()->printMessage(PAG::msgType::ERROR, (std::string)e.what());
+
+		glfwSetWindowShouldClose(window, GLFW_TRUE);
+	}
+
 	glfwSwapBuffers(window);
 	//std::cout << "Ventana redibujada" << std::endl;
 }
@@ -75,6 +85,14 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 			PAG::Log::getInstance()->printMessage(PAG::msgType::INFO, "Camera locked");
 			PAG::Renderer::getInstance()->getCamera().setMov(PAG::MovType::LOCK);
 			break;
+		case GLFW_KEY_V:
+			PAG::Log::getInstance()->printMessage(PAG::msgType::INFO, "Set fill");
+			PAG::Renderer::getInstance()->setRenderType(PAG::RenderType::SOLID);
+			break;
+		case GLFW_KEY_B:
+			PAG::Log::getInstance()->printMessage(PAG::msgType::INFO, "Set wire");
+			PAG::Renderer::getInstance()->setRenderType(PAG::RenderType::WIRE);
+			break;
 		case GLFW_KEY_UP:
 		case GLFW_KEY_DOWN:
 		case GLFW_KEY_LEFT:
@@ -84,11 +102,9 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 			PAG::Renderer::getInstance()->getCamera().move(key);
 			break;
 		case GLFW_KEY_1:
-			std::cout << "Drawing" << std::endl;
 			PAG::Renderer::getInstance()->setDrawingTriangle(true);
 			break;
 		case GLFW_KEY_2:
-			std::cout << "Deleting" << std::endl;
 			PAG::Renderer::getInstance()->setDrawingTriangle(false);
 			PAG::Renderer::getInstance()->erase();
 			break;
@@ -96,16 +112,18 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 			hideShowMouse(window);
 			break;
 		case GLFW_KEY_H:
-			std::cout 
+			std::cout
 				<< "'1' shows the triangle" << std::endl
-				<< "'2' shows the tetrahedron" << std::endl 
+				<< "'2' shows the tetrahedron" << std::endl
 				<< "'p' for panning" << std::endl
 				<< "'t' for tilting" << std::endl
 				<< "'o' for orbit" << std::endl
 				<< "'c' for crane" << std::endl
 				<< "'f' for dolly" << std::endl
 				<< "'z' to hide/show cursor" << std::endl
-				<< "'l' to lock the camera" << std::endl;
+				<< "'l' to lock the camera" << std::endl
+				<< "'v' to set the render to Fill" << std::endl
+				<< "'b' to set the render to Wire" << std::endl;
 			break;
 		case GLFW_KEY_R:
 			PAG::Renderer::getInstance()->getCamera().reset();

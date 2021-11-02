@@ -1,18 +1,24 @@
 #pragma once
 #include "ShaderProgram.h"
+#include "Material.h"
 namespace PAG
 {
-	enum class Models
+	enum class ModelType
 	{
 		TRIANGLE,
 		TETRAHEDRON
 	};
+
+	enum class RenderType
+	{
+		SOLID,
+		WIRE
+	};
+
 	class Model
 	{
 	protected:
-		//GLfloat* vertices;
-		//GLfloat* colors;
-		//GLuint* indices;
+		//EEDD
 		std::vector<GLfloat> vertices;
 		std::vector<GLuint> indices;
 		//IDENTIFICADORES
@@ -25,17 +31,22 @@ namespace PAG
 		//Create models
 		void createTriangle();
 		void createTetrahedron();
+		//Other data
 		GLenum drawingMode = GL_FILL;
-		Models modelType;
+		ModelType modelType;
+		Material material;
 	public:
 		Model();
 		Model(GLfloat* v, GLfloat* c, GLuint* i, std::shared_ptr<ShaderProgram>& shaderProgram);
-		Model(std::shared_ptr<ShaderProgram> shaderProgram, Models model);
+		Model(std::shared_ptr<ShaderProgram> shaderProgram, ModelType model, Material& m);
 		Model(const Model& model);
 
 		void initModel();
 		void draw();
-		void setDrawingMode(GLenum mode);
+		void setDrawingMode(RenderType mode);
+		void useProgram();
+
+		Material getMaterial();
 		virtual ~Model();
 	};
 }

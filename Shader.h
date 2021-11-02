@@ -28,6 +28,7 @@ namespace PAG
 		//Uniform set up
 		void setUniformVec3(std::string uniform, glm::vec3 vec) const;
 		void setUniformMat4(std::string uniform, glm::mat4 mat) const;
+		void setUniformSubroutine(std::string uniform, std::string func) const;
 	};
 }
 

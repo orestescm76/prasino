@@ -7,14 +7,14 @@ PAG::Model::Model()
 
 }
 
-PAG::Model::Model(std::shared_ptr<ShaderProgram> shaderProgram, Models model): sp(shaderProgram), modelType(model)
+PAG::Model::Model(std::shared_ptr<ShaderProgram> shaderProgram, ModelType model, Material& m): sp(shaderProgram), modelType(model), material(m)
 {
 	switch (modelType)
 	{
-	case PAG::Models::TRIANGLE:
+	case PAG::ModelType::TRIANGLE:
 		createTriangle();
 		break;
-	case PAG::Models::TETRAHEDRON:
+	case PAG::ModelType::TETRAHEDRON:
 		createTetrahedron();
 		break;
 	default:
@@ -95,16 +95,37 @@ void PAG::Model::initModel()
 
 void PAG::Model::draw()
 {
-	sp->useProgram();
 	glBindVertexArray(idVAO);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, idIBO);
 	glPolygonMode(GL_FRONT_AND_BACK, drawingMode);
 	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, nullptr);
 }
 
-void PAG::Model::setDrawingMode(GLenum mode)
+void PAG::Model::setDrawingMode(PAG::RenderType mode)
 {
-	drawingMode = mode;
+	switch (mode)
+	{
+	case PAG::RenderType::SOLID:
+		drawingMode = GL_FILL;
+		sp->getFragmentShader().setUniformSubroutine("", "diffuseColor");
+		break;
+	case PAG::RenderType::WIRE:
+		sp->getFragmentShader().setUniformSubroutine("", "blue");
+		drawingMode = GL_LINE;
+		break;
+	default:
+		break;
+	}
+}
+
+PAG::Material PAG::Model::getMaterial()
+{
+	return material;
+}
+
+void PAG::Model::useProgram()
+{
+	sp->useProgram();
 }
 
 PAG::Model::~Model()

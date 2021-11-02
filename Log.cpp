@@ -44,26 +44,3 @@ void PAG::Log::printMessage(PAG::msgType _tipoMensaje, std::string msg)
 		break;
 	}
 }
-
-void PAG::Log::printMessage(msgType _msgType, long num)
-{
-	switch (_msgType)
-	{
-	case msgType::INFO:
-		std::cout << "<INFO>: " << num << std::endl;
-		file << "<INFO>: " << num << std::endl;
-		break;
-	case msgType::WARNING:
-		std::cout << "<WARNING>: " << num << std::endl;
-		file << "<WARNING>: " << num << std::endl;
-		break;
-	case msgType::ERROR:
-		std::cout << "<ERROR>: " << num << std::endl;
-		file << "<ERROR>: " << num << std::endl;
-		break;
-	case msgType::OK:
-		std::cout << "<OK>: " << num << std::endl;
-		file << "<OK>: " << num << std::endl;
-		break;
-	}
-}
