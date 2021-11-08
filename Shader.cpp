@@ -40,6 +40,22 @@ PAG::Shader::~Shader()
 		glDeleteShader(id);
 }
 
+PAG::Shader& PAG::Shader::operator=(const Shader& orig)
+{
+	if (this != &orig)
+	{
+		this->id = orig.id;
+		this->idSP = orig.idSP;
+		this->filename = orig.filename;
+		this->src = orig.src;
+		this->shaderType = orig.shaderType;
+		this->shaderName = orig.shaderName;
+	}
+	return *this;
+}
+
+
+
 std::string PAG::Shader::loadShader()
 {
 	Log::getInstance()->printMessage(msgType::INFO, "Opening " + filename);

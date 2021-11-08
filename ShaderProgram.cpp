@@ -14,7 +14,7 @@ PAG::ShaderProgram::ShaderProgram(std::string filevs, std::string filefs)
 	{
 		idSP = glCreateProgram();
 		vertexShader = Shader(filevs, "Vertex shader", GL_VERTEX_SHADER, idSP);
-		fragmentShader = Shader(filefs, "Fragment shader", GL_FRAGMENT_SHADER, idSP);
+ 		fragmentShader = Shader(filefs, "Fragment shader", GL_FRAGMENT_SHADER, idSP);
 		//Todo bien, los creamos
 		linkShaders();
 	}
@@ -88,7 +88,7 @@ void PAG::ShaderProgram::useProgram()
 
 void PAG::ShaderProgram::deactivate()
 {
-	glUseProgram(0); //??
+	glUseProgram(0);
 }
 
 const PAG::Shader& PAG::ShaderProgram::getVertexShader()

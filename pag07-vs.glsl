@@ -10,6 +10,5 @@ void main ()
 {
 	//gl_Position = vec4 ( posicion, 1 );
 	gl_Position = matProjView * vec4(posicion,1);
-	//gl_Position = MVP * vec4 ( posicion, 1 );
 	color = colorVertice;
 }

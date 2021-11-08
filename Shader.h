@@ -23,6 +23,7 @@ namespace PAG
 		Shader(std::string path, std::string name, GLenum type, GLint sp);
 		Shader(const Shader& shader);
 		~Shader();
+		Shader& operator=(const Shader& orig);
 		//Returns the Shader's ID
 		GLint getId();
 		//Uniform set up

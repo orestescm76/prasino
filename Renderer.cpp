@@ -23,10 +23,13 @@ PAG::Renderer::Renderer()
 	mat = Material({ 0,0,0 }, glm::vec3(0.263, 0.149, 0.596), { 0,0,0 }, 0.0f);
 	triangle = std::make_unique <Model>(sp, PAG::ModelType::TRIANGLE, mat);
 	tetrahedron = std::make_unique<Model>(sp, PAG::ModelType::TETRAHEDRON, mat);
-	r = 0.0f;
-	g = 0.0f;
-	b = 0.0f;
-	a = 1.0f;
+	backColor = { 0,0,0,1 };
+}
+
+void PAG::Renderer::configBackColor(glm::vec4 color)
+{
+	backColor = color;
+	glClearColor(backColor.r, backColor.g, backColor.b, backColor.a);
 }
 
 
@@ -63,12 +66,12 @@ void PAG::Renderer::changeColor(double yoffset)
 	if (yoffset > 0)
 		addColor();
 	else minusColor();
-	configBackColor(r, g, b, a);
+	configBackColor(backColor);
 }
 
 void PAG::Renderer::start()
 {
-	configBackColor(r,g,b,a);
+	configBackColor({0,0,0,1});
 	activeZBuffer();
 	//Polilínea, sólidos de revolución
 	//glPrimitiveRestartIndex(0xFFFF);
@@ -87,33 +90,20 @@ void PAG::Renderer::activeZBuffer()
 
 void PAG::Renderer::addColor()
 {
-	r += .05f;
-	g += .05f;
-	b += .05f;
-	if (r >= 1.0f)
-		r = 1.0f;
-	if (g >= 1.0f)
-		g = 1.0f;
-	if (b >= 1.0f)
-		b = 1.0f;
+	backColor.r += .05f;
+	backColor.g += .05f;
+	backColor.b += .05f;
+	if (backColor.r >= 1.0f)
+		backColor = glm::vec4(1);
 }
 
 void PAG::Renderer::minusColor()
 {
-	r -= .05f;
-	g -= .05f;
-	b -= .05f;
-	if (r <= 0.0f)
-		r = 0.0f;
-	if (g <= 0.0f)
-		g = 0.0f;
-	if (b <= 0.0f)
-		b = 0.0f;
-}
-
-void PAG::Renderer::configBackColor(GLfloat _r, GLfloat _g, GLfloat _b, GLfloat _a)
-{
-	glClearColor(_r, _g, _b, _a);
+	backColor.r -= .05f;
+	backColor.g -= .05f;
+	backColor.b -= .05f;
+	if (backColor.r <= 0.0f)
+		backColor = glm::vec4(0);
 }
 
 void PAG::Renderer::printInfo()
@@ -203,7 +193,27 @@ void PAG::Renderer::setRenderType(RenderType rt)
 	renderType = rt;
 }
 
-PAG::Camera& PAG::Renderer::getCamera()
+void PAG::Renderer::moveCamera(int key)
 {
-	return camera;
+	camera.move(key);
+}
+
+void PAG::Renderer::moveCamera(float xoffset, float yoffset)
+{
+	camera.move(xoffset, yoffset);
+}
+
+void PAG::Renderer::setCamera(MovType mov)
+{
+	camera.setMov(mov);
+}
+
+void PAG::Renderer::resetCamera()
+{
+	camera.reset();
+}
+
+void PAG::Renderer::zoomCamera(float yoffset)
+{
+	camera.zoom(yoffset);
 }

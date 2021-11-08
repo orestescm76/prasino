@@ -18,8 +18,6 @@ namespace PAG
 		glm::vec3 pos = { 4.0f, 1.0f, 4.0f };
 		glm::vec3 target = { 0.0f, 0.0f, 0.0f };
 		glm::vec3 up = { 0.0f, 1.0f, 0.0f };
-		glm::mat4 view = glm::mat4();
-		glm::mat4 proj = glm::mat4();
 		//ejes de la camara
 		glm::vec3 n, v, u;
 		float fovX = 45.0f;
@@ -36,6 +34,7 @@ namespace PAG
 		Camera();
 		Camera(float w, float h);
 		Camera(glm::vec3 p, float a, float zn, float zf, float w, float h);
+		Camera& operator=(const Camera& orig);
 		~Camera();
 		void setViewport(float w, float h);
 		//Returns the camera direction. NORMALIZED.

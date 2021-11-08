@@ -5,20 +5,18 @@
 #include "Camera.h"
 namespace PAG
 {
-
-
 	class Renderer
 	{
 	private:
 
 		static Renderer* instance;
-		GLfloat r, g, b, a;
+		glm::vec4 backColor;
 		std::unique_ptr<Model> triangle;
 		std::unique_ptr<Model> tetrahedron;
 		std::shared_ptr<ShaderProgram> sp;
 		Camera camera;
 		Renderer();
-		void configBackColor(GLfloat _r, GLfloat _g, GLfloat _b, GLfloat _a);
+		void configBackColor(glm::vec4 color);
 		bool drawingTriangle = true;
 		float wViewport, hViewport;
 		RenderType renderType = RenderType::SOLID;
@@ -41,7 +39,12 @@ namespace PAG
 		bool isDrawingTriangle();
 		void setDrawingTriangle(bool draw);
 		void setRenderType(RenderType rt);
-		Camera& getCamera();
+		//Camera& getCamera();
+		void moveCamera(int key);
+		void moveCamera(float xoffset, float yoffset);
+		void setCamera(MovType mov);
+		void resetCamera();
+		void zoomCamera(float yoffset);
 		virtual ~Renderer();
 	};
 }

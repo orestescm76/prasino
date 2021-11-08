@@ -13,6 +13,18 @@ PAG::Material::Material(const Material& orig): ambient(orig.ambient), diffuse(or
 {
 }
 
+PAG::Material& PAG::Material::operator=(const Material& orig)
+{
+    if (this != &orig)
+    {
+        this->ambient = orig.ambient;
+        this->diffuse = orig.diffuse;
+        this->specular = orig.specular;
+        this->shininess = orig.shininess;
+    }
+    return *this;
+}
+
 PAG::Material::~Material()
 {
 }

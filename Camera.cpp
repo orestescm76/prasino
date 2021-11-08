@@ -14,6 +14,25 @@ PAG::Camera::Camera(glm::vec3 p, float a, float zn, float zf, float w, float h):
 {
 }
 
+PAG::Camera& PAG::Camera::operator=(const Camera& orig)
+{
+	if (this != &orig)
+	{
+		this->pos = orig.pos;
+		this->target = orig.target;
+		this->up = orig.up;
+		this->fovX = orig.fovX;
+		this->zNear = orig.zNear;
+		this->zFar = orig.zFar;
+		this->wViewport = orig.wViewport;
+		this->hViewport = orig.hViewport;
+		this->panAngle = orig.panAngle;
+		this->sensitivity = orig.sensitivity;
+		this->movType = orig.movType;
+	}
+	return *this;
+}
+
 glm::vec3 PAG::Camera::getUp()
 {
 	return up;
@@ -35,9 +54,7 @@ void PAG::Camera::move(float xoffset, float yoffset)
 		tilt(yoffset*sensitivity);
 		break;
 	case MovType::ORBIT:
-		/*orbit(xoffset, yoffset);*/
-		pan(xoffset * sensitivity);
-		tilt(yoffset * sensitivity);
+		orbit(xoffset, yoffset);
 		break;
 	default:
 		break;
@@ -62,12 +79,14 @@ void PAG::Camera::move(int action)
 void PAG::Camera::updateCameraAxis()
 {
 	n = -cameraDirection(true); //direccion camara
-	glm::bvec3 check = glm::equal(n, up, 0.01f); //What's going on, Truth? Who was them dudes? 
+	glm::bvec3 check = glm::equal(n, up, 0.01f);	//What's going on, Truth? Who was them dudes? 
 	glm::bvec3 check2 = glm::equal(n, -up, 0.01f);	
-	if (check.x && check.y && check.z)	   //Don't go there man
-		return;							   //Now what if I told you we never went to the moon, JFK lives in Scotland with Janis Joplin, 
-	if (check2.x && check2.y && check2.z)  //and the only reason we have been in the cold war for the last 45 years was because snake-headed aliens ran the oil business.
-		return;							   //I think you popped another microdot.
+	if (check.x && check.y && check.z)				//Don't go there man
+		up = { 0.0f, 0.0f, 1.0f };					//Now what if I told you we never went to the moon, JFK lives in Scotland with Janis Joplin, 
+	else if (check2.x && check2.y && check2.z)		//and the only reason we have been in the cold war for the last 45 years was because snake-headed aliens ran the oil business.
+		up = { 0.0f, 0.0f, -1.0f };					//I think you popped another microdot.
+	else
+		up = { 0.0f, 1.0f, 0.0f };
 	u = glm::normalize(glm::cross(up, n));
 	v = glm::cross(u, n);
 }
@@ -155,18 +174,18 @@ void PAG::Camera::orbit(float xoffset, float yoffset)
 	//1 transladar el punto donde miro a donde esta la camara. o transladar la camara en el origen
 	//2 rotacion
 	//3 transladar todo a donde estaba
-	float xdegrees = xoffset * 0.01f;
-	float ydegrees = yoffset * 0.01f;
+	float xdegrees = xoffset * 0.1f;
+	float ydegrees = yoffset * 0.1f;
 	updateCameraAxis();
 	//paso 1
-	glm::mat4 trans1 = glm::translate(glm::mat4(1.0f), -pos);
+	glm::mat4 trans1 = glm::translate(glm::mat4(1.0f), -target);
 	//paso 2
-	glm::mat4 rotu = glm::rotate(glm::mat4(1.0f), glm::radians(xoffset), u);
-	glm::mat4 rotv = glm::rotate(glm::mat4(1.0f), glm::radians(yoffset), v);
+	glm::mat4 rotu = glm::rotate(glm::mat4(1.0f), glm::radians(ydegrees), u);
+	glm::mat4 rotv = glm::rotate(glm::mat4(1.0f), glm::radians(xdegrees), v);
 	//paso 3
-	glm::mat4 trans2 = glm::translate(glm::mat4(1.0f), pos);
+	glm::mat4 trans2 = glm::translate(glm::mat4(1.0f), target);
 	//Composición de la matriz
-	target = glm::vec3(trans2 * rotv * rotu * trans1 * glm::vec4(target, 1.0f));
+	pos = glm::vec3(trans2 * rotv * rotu * trans1 * glm::vec4(pos, 1.0f));
 	//pos = glm::vec3(trans2 * rotv* rotu * trans1 * glm::vec4(pos, 1.0f));
 	//std::cout << "(" << target.x << "," << target.y << "," << target.z << ")" << std::endl;
 }

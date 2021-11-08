@@ -12,6 +12,24 @@
 double xold, yold = 0.0;
 bool hideMouse = false;
 
+void printHelp()
+{
+	std::cout
+		<< "'1' shows the triangle" << std::endl
+		<< "'2' shows the tetrahedron" << std::endl
+		<< "'p' for panning" << std::endl
+		<< "'t' for tilting" << std::endl
+		<< "'o' for orbit" << std::endl
+		<< "'c' for crane" << std::endl
+		<< "'f' for dolly" << std::endl
+		<< "'z' to hide/show cursor" << std::endl
+		<< "'l' to lock the camera" << std::endl
+		<< "'v' to set the render to Fill" << std::endl
+		<< "'b' to set the render to Wire" << std::endl
+		<< "'r' to reset the camera" << std::endl
+		<< "Mouse wheel to change the color and zoom!" << std::endl;
+}
+
 void hideShowMouse(GLFWwindow* window)
 {
 	if (hideMouse)
@@ -63,27 +81,33 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 			break;
 		case GLFW_KEY_P:
 			PAG::Log::getInstance()->printMessage(PAG::msgType::INFO, "Pan set");
-			PAG::Renderer::getInstance()->getCamera().setMov(PAG::MovType::PAN);
+			std::cout << "Move the mouse!" << std::endl;
+			PAG::Renderer::getInstance()->setCamera(PAG::MovType::PAN);
 				break;
 		case GLFW_KEY_T:
 			PAG::Log::getInstance()->printMessage(PAG::msgType::INFO, "Tilt set");
-			PAG::Renderer::getInstance()->getCamera().setMov(PAG::MovType::TILT);
+			std::cout << "Move the mouse!" << std::endl;
+			PAG::Renderer::getInstance()->setCamera(PAG::MovType::TILT);
 			break;
 		case GLFW_KEY_O:
 			PAG::Log::getInstance()->printMessage(PAG::msgType::INFO, "Orbit set");
-			PAG::Renderer::getInstance()->getCamera().setMov(PAG::MovType::ORBIT);
+			std::cout << "Move the mouse!" << std::endl;
+			PAG::Renderer::getInstance()->setCamera(PAG::MovType::ORBIT);
 			break;
 		case GLFW_KEY_C:
 			PAG::Log::getInstance()->printMessage(PAG::msgType::INFO, "Crane set");
-			PAG::Renderer::getInstance()->getCamera().setMov(PAG::MovType::CRANE);
+			PAG::Renderer::getInstance()->setCamera(PAG::MovType::CRANE);
+			std::cout << "Press up to move up\nPress down to move down" << std::endl;
 			break;
 		case GLFW_KEY_F:
 			PAG::Log::getInstance()->printMessage(PAG::msgType::INFO, "Dolly set");
-			PAG::Renderer::getInstance()->getCamera().setMov(PAG::MovType::DOLLY);
+			PAG::Renderer::getInstance()->setCamera(PAG::MovType::DOLLY);
+			std::cout << "Press left to move in the -X axis\nPress right to move in the +X axis" << std::endl;
+			std::cout << "Press S to move in the -Z axis\nPress W to move in the +Z axis" << std::endl;
 			break;
 		case GLFW_KEY_L:
 			PAG::Log::getInstance()->printMessage(PAG::msgType::INFO, "Camera locked");
-			PAG::Renderer::getInstance()->getCamera().setMov(PAG::MovType::LOCK);
+			PAG::Renderer::getInstance()->setCamera(PAG::MovType::LOCK);
 			break;
 		case GLFW_KEY_V:
 			PAG::Log::getInstance()->printMessage(PAG::msgType::INFO, "Set fill");
@@ -99,7 +123,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 		case GLFW_KEY_RIGHT:
 		case GLFW_KEY_W:
 		case GLFW_KEY_S:
-			PAG::Renderer::getInstance()->getCamera().move(key);
+			PAG::Renderer::getInstance()->moveCamera(key);
 			break;
 		case GLFW_KEY_1:
 			PAG::Renderer::getInstance()->setDrawingTriangle(true);
@@ -112,21 +136,10 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 			hideShowMouse(window);
 			break;
 		case GLFW_KEY_H:
-			std::cout
-				<< "'1' shows the triangle" << std::endl
-				<< "'2' shows the tetrahedron" << std::endl
-				<< "'p' for panning" << std::endl
-				<< "'t' for tilting" << std::endl
-				<< "'o' for orbit" << std::endl
-				<< "'c' for crane" << std::endl
-				<< "'f' for dolly" << std::endl
-				<< "'z' to hide/show cursor" << std::endl
-				<< "'l' to lock the camera" << std::endl
-				<< "'v' to set the render to Fill" << std::endl
-				<< "'b' to set the render to Wire" << std::endl;
+			printHelp();
 			break;
 		case GLFW_KEY_R:
-			PAG::Renderer::getInstance()->getCamera().reset();
+			PAG::Renderer::getInstance()->resetCamera();
 			break;
 		default:
 			std::cout << "Press 'h' for the keybinds" << std::endl;
@@ -160,7 +173,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 	//std::cout << "Movida la rueda del raton " << xoffset
 	//	<< " Unidades en horizontal y " << yoffset << " unidades en vertical"
 	//	<< std::endl;
-	PAG::Renderer::getInstance()->getCamera().zoom(yoffset);
+	PAG::Renderer::getInstance()->zoomCamera(yoffset);
 	PAG::Renderer::getInstance()->changeColor(yoffset);
 	window_refresh_callback(window);
 }
@@ -169,7 +182,7 @@ void mouse_moved_callback(GLFWwindow* window, double xpos, double ypos)
 {
 	double xoffset = xpos - xold;
 	double yoffset = ypos - yold;
-	PAG::Renderer::getInstance()->getCamera().move(xoffset, yoffset);
+	PAG::Renderer::getInstance()->moveCamera(xoffset, yoffset);
 	xold = xpos;
 	yold = ypos;
 	window_refresh_callback(window);
@@ -237,13 +250,14 @@ int main()
 	glfwSetCursorPosCallback(window, mouse_moved_callback);
 	//configurar OpenGL
 	PAG::Renderer::getInstance()->start();
+	//First I draw before any event
+	PAG::Renderer::getInstance()->draw();
+	std::cout << "Press 'h' to print keybinds" << std::endl;
 	glfwGetCursorPos(window, &xold, &yold);
 	//Ciclo de eventos
-
 	while (!glfwWindowShouldClose(window))
 	{
-
-		glfwPollEvents();
+		glfwWaitEvents();
 	}
 	glfwDestroyWindow(window);
 	window = nullptr;

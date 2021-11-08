@@ -17,7 +17,6 @@ namespace PAG
 
 	class Model
 	{
-	protected:
 		//EEDD
 		std::vector<GLfloat> vertices;
 		std::vector<GLuint> indices;
