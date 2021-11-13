@@ -90,7 +90,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>B:\Programacion\librerias\glwrappers\glew-2.1.0\include;B:\Programacion\librerias\glwrappers\glm-0.9.9.8\glm;B:\Programacion\librerias\glwrappers\glfw-3.3.4.bin.WIN32\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)Librerias\glwrappers\glew-2.1.0\include;$(ProjectDir)Librerias\glwrappers\glm-0.9.9.8\glm;$(ProjectDir)Librerias\glwrappers\glfw-3.3.4.bin.WIN32\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <DiagnosticsFormat>Classic</DiagnosticsFormat>
       <TreatWarningAsError>false</TreatWarningAsError>
@@ -186,6 +186,15 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="ShaderProgram.cpp" />
+    <ClCompile Include="src\Camera.cpp" />
+    <ClCompile Include="src\Log.cpp" />
+    <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\Material.cpp" />
+    <ClCompile Include="src\Model.cpp" />
+    <ClCompile Include="src\pch.cpp" />
+    <ClCompile Include="src\Renderer.cpp" />
+    <ClCompile Include="src\Shader.cpp" />
+    <ClCompile Include="src\ShaderProgram.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
@@ -196,6 +205,14 @@
     <ClInclude Include="Shader.h" />
     <ClInclude Include="ShaderProgram.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="src\Camera.h" />
+    <ClInclude Include="src\Log.h" />
+    <ClInclude Include="src\Material.h" />
+    <ClInclude Include="src\Model.h" />
+    <ClInclude Include="src\pch.h" />
+    <ClInclude Include="src\Renderer.h" />
+    <ClInclude Include="src\Shader.h" />
+    <ClInclude Include="src\ShaderProgram.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="pag07-fs.glsl" />
