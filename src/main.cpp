@@ -1,7 +1,7 @@
 /*
 * @author orestescm76
 * @brief main
-* VERSION 0.7.0
+* VERSION 0.8.0a1
 * 
 */
 #include "pch.h"
@@ -251,7 +251,16 @@ int main()
 	//configurar OpenGL
 	PAG::Renderer::getInstance()->start();
 	//First I draw before any event
-	PAG::Renderer::getInstance()->draw();
+	try
+	{
+		PAG::Renderer::getInstance()->draw();
+
+	}
+	catch (const std::exception& e)
+	{
+		std::cout << e.what();
+		return -5;
+	}
 	std::cout << "Press 'h' to print keybinds" << std::endl;
 	glfwGetCursorPos(window, &xold, &yold);
 	//Ciclo de eventos

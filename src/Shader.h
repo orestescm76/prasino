@@ -1,5 +1,4 @@
 #pragma once
-#include <glm/fwd.hpp>
 namespace PAG
 {
 	class Shader
@@ -29,6 +28,7 @@ namespace PAG
 		//Uniform set up
 		void setUniformVec3(std::string uniform, glm::vec3 vec) const;
 		void setUniformMat4(std::string uniform, glm::mat4 mat) const;
+		void setUniformFloat(std::string uniform, float num) const;
 		void setUniformSubroutine(std::string uniform, std::string func) const;
 	};
 }

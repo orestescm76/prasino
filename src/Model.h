@@ -6,7 +6,8 @@ namespace PAG
 	enum class ModelType
 	{
 		TRIANGLE,
-		TETRAHEDRON
+		TETRAHEDRON,
+		LIGHT_CUBE
 	};
 
 	enum class RenderType
@@ -18,26 +19,30 @@ namespace PAG
 	class Model
 	{
 		//EEDD
-		std::vector<GLfloat> vertices;
-		std::vector<GLuint> indices;
+		std::vector<float> vertices;
+		std::vector<float> normals;
+		std::vector<unsigned int> indices;
 		//IDENTIFICADORES
-		GLuint idVAO = 0;
-		GLuint idVBO = 0;
-		GLuint idColor = 0;
-		GLuint idIBO = 0;
+		unsigned int idVAO = 0;
+		unsigned int idVBO = 0;
+		unsigned int idColor = 0;
+		unsigned int idIBO = 0;
+		unsigned int idNormalVBO = 0;
 		//Pointer to the shader program
 		std::shared_ptr<ShaderProgram> sp;
 		//Create models
 		void createTriangle();
 		void createTetrahedron();
+		void createLightCube();
 		//Other data
-		GLenum drawingMode = GL_FILL;
+		unsigned int drawingMode = GL_FILL;
 		ModelType modelType;
 		Material material;
 	public:
 		Model();
 		Model(GLfloat* v, GLfloat* c, GLuint* i, std::shared_ptr<ShaderProgram>& shaderProgram);
 		Model(std::shared_ptr<ShaderProgram> shaderProgram, ModelType model, Material& m);
+		Model(std::shared_ptr<ShaderProgram> shaderProgram, ModelType model);
 		Model(const Model& model);
 
 		void initModel();

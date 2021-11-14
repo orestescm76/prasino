@@ -134,8 +134,21 @@ void PAG::Shader::setUniformMat4(std::string uniform, glm::mat4 mat) const
 	
 }
 
+void PAG::Shader::setUniformFloat(std::string uniform, float num) const
+{
+	try
+	{
+		glUniform3f(getUniformLocation(uniform), 1, GL_FALSE, num);
+	}
+	catch (const std::exception& e)
+	{
+		throw std::invalid_argument("Shader::setUniformMat4 -> " + (std::string)e.what());
+	}
+}
+
 void PAG::Shader::setUniformSubroutine(std::string uniform, std::string func) const
 {
+	glUseProgram(idSP);
 	GLuint id = glGetSubroutineIndex(idSP, shaderType, func.c_str());
 	glUniformSubroutinesuiv(shaderType, 1, &id);
 }
@@ -155,8 +168,9 @@ void PAG::Shader::checkErrors(GLint status, GLint shaderId, std::string msg)
 
 GLint PAG::Shader::getUniformLocation(std::string uniform) const
 {
+	
 	GLint loc = glGetUniformLocation(idSP, uniform.c_str());
-	if (loc != -1)
+	if (loc != GL_INVALID_INDEX)
 		return loc;
-	else throw std::invalid_argument("Shader::getUniformLocation -> Couldn't find the uniform location");
+	throw std::invalid_argument("Shader::getUniformLocation -> Couldn't find the uniform location "+uniform);
 }

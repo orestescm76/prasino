@@ -3,6 +3,7 @@
 #include "Model.h"
 #include "Log.h"
 #include "Camera.h"
+#include "Light.h"
 namespace PAG
 {
 	class Renderer
@@ -13,14 +14,19 @@ namespace PAG
 		glm::vec4 backColor;
 		std::unique_ptr<Model> triangle;
 		std::unique_ptr<Model> tetrahedron;
+		std::unique_ptr<Model> lightCube;
 		std::shared_ptr<ShaderProgram> sp;
+		std::shared_ptr<ShaderProgram> spLightCube;
 		Camera camera;
 		Renderer();
 		void configBackColor(glm::vec4 color);
 		bool drawingTriangle = true;
 		float wViewport, hViewport;
 		RenderType renderType = RenderType::SOLID;
-		Material mat;
+		Material copper;
+		Light ambL, point;
+		void loadUniforms();
+		void activateLight(Light& l);
 	public:
 		static const std::string version;
 		// Lo único que necesito estático de la clase Renderer es la instancia y el método de la instancia
