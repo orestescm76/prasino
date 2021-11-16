@@ -7,7 +7,7 @@
 #include "Renderer.h"
 
 PAG::Renderer* PAG::Renderer::instance = nullptr;
-const std::string PAG::Renderer::version = "0.8.0a1";
+const std::string PAG::Renderer::version = "0.8.0a2";
 
 PAG::Renderer::Renderer() : 
 	copper(glm::vec3(0.19125, 0.0735, 0.0225), glm::vec3(.7038,.27048,.0828), { .256777, .137622, 0.086014 }, 64.0f), 
