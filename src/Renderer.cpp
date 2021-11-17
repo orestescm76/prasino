@@ -10,10 +10,11 @@ PAG::Renderer* PAG::Renderer::instance = nullptr;
 const std::string PAG::Renderer::version = "0.8.0a2";
 
 PAG::Renderer::Renderer() : 
-	copper(glm::vec3(0.19125, 0.0735, 0.0225), glm::vec3(.7038,.27048,.0828), { .256777, .137622, 0.086014 }, 64.0f), 
+	copper(glm::vec3(0.19125, 0.0735, 0.0225), glm::vec3(.7038, .27048, .0828), {.256777, .137622, 0.086014}, 1.0f),
 	camera(),
 	ambL(glm::vec3(.25f,.25f,.25f)),
-	point(glm::vec3(.8f, .8f, .8f), glm::vec3(1,1,1), glm::vec3(1,0,1))
+	point(glm::vec3(.8f, .8f, .8f), glm::vec3(1,1,1), glm::vec3(0,0,-2)),
+	dir(glm::vec3(.8f, .8f, .8f), glm::vec3(1, 1, 1), glm::vec3(1,0, 1), glm::vec3(-1,-1,-1))
 {
 	try
 	{
@@ -46,16 +47,16 @@ void PAG::Renderer::loadUniforms()
 {
 	if (drawingTriangle)
 	{
-		triangle->useProgram();
-		sp->getFragmentShader().setUniformVec3("Ka", triangle->getMaterial().ambient);
+		//triangle->useProgram();
+		//sp->getFragmentShader().setUniformVec3("Ka", triangle->getMaterial().ambient);
 		sp->getFragmentShader().setUniformVec3("Kd", triangle->getMaterial().diffuse);
 		sp->getFragmentShader().setUniformVec3("Ks", triangle->getMaterial().specular);
 		sp->getFragmentShader().setUniformFloat("shininess", triangle->getMaterial().shininess);
 	}
 	else
 	{
-		tetrahedron->useProgram();
-		sp->getFragmentShader().setUniformVec3("Ka", tetrahedron->getMaterial().ambient);
+		//tetrahedron->useProgram();
+		//sp->getFragmentShader().setUniformVec3("Ka", tetrahedron->getMaterial().ambient);
 		sp->getFragmentShader().setUniformVec3("Kd", tetrahedron->getMaterial().diffuse);
 		sp->getFragmentShader().setUniformVec3("Ks", tetrahedron->getMaterial().specular);
 		sp->getFragmentShader().setUniformFloat("shininess", tetrahedron->getMaterial().shininess);
@@ -64,19 +65,31 @@ void PAG::Renderer::loadUniforms()
 
 void PAG::Renderer::activateLight(Light& l)
 {
+	
 	switch (l.type)
 	{
 	case LightType::AMBIENT:
-		
 		sp->getFragmentShader().setUniformSubroutine("", "ambientColor");
 		sp->getFragmentShader().setUniformVec3("Ia", ambL.ambient);
 		break;
-	default:
-		sp->getFragmentShader().setUniformSubroutine("", "diffuseAndSpecular");
+	case LightType::POINT:
+		sp->getFragmentShader().setUniformSubroutine("", "point");
 		sp->getFragmentShader().setUniformVec3("Id", point.diffuse);
 		sp->getFragmentShader().setUniformVec3("Is", point.specular);
 		sp->getFragmentShader().setUniformVec3("lPos", point.position);
-
+	case LightType::DIRECTIONAL:
+		sp->getFragmentShader().setUniformSubroutine("", "directional");
+		sp->getFragmentShader().setUniformVec3("Id", dir.diffuse);
+		sp->getFragmentShader().setUniformVec3("Is", dir.specular);
+		sp->getFragmentShader().setUniformVec3("lDir", dir.direction);
+		break;
+	case LightType::SPOTLIGHT:
+		sp->getFragmentShader().setUniformSubroutine("", "spot");
+		sp->getFragmentShader().setUniformVec3("Id", dir.diffuse);
+		sp->getFragmentShader().setUniformVec3("Is", point.specular);
+		sp->getFragmentShader().setUniformVec3("lPos", point.position);
+		sp->getFragmentShader().setUniformVec3("lDir", point.direction);
+		sp->getFragmentShader().setUniformFloat("sAngle", point.angle);
 		break;
 	}
 	
@@ -107,13 +120,14 @@ void PAG::Renderer::refreshWindow()
 	if (!tetrahedron.get() && !drawingTriangle) //If it's destroyed and we need to draw
 		tetrahedron = std::make_unique<Model>(sp, PAG::ModelType::TETRAHEDRON, copper);
 
+	sp->useProgram();
+	//activateLight(ambL);
+	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	
-	activateLight(ambL);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	loadUniforms();
-	draw();
+	//draw();
 	activateLight(point);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+	loadUniforms();
+	//glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 	draw();
 
 }
@@ -136,7 +150,7 @@ void PAG::Renderer::start()
 	
 	glEnable(GL_PROGRAM_POINT_SIZE);
 	glEnable(GL_MULTISAMPLE);
-	glEnable(GL_BLEND);
+	//glEnable(GL_BLEND);
 }
 
 void PAG::Renderer::activeZBuffer()
@@ -178,31 +192,28 @@ void PAG::Renderer::printInfo()
 
 void PAG::Renderer::draw()
 {
-
-		
-
 	glm::mat4 view = camera.getViewMatrix();
 	glm::mat4 proj = camera.getProjMatrix();
 	//Multiply the matrices
 	glm::mat4 projview = proj * view;
-	glm::mat4 projviewmod = proj * view * glm::translate(glm::mat4(1), point.position);
-	sp->useProgram();
+
 	try
 	{
 		sp->getVertexShader().setUniformMat4("matProjViewModel", projview);
-		sp->getVertexShader().setUniformMat4("matModel", glm::mat4(1.0));
+		sp->getVertexShader().setUniformMat4("matModel", glm::mat4(1));
 
 		if (drawingTriangle)
 		{
-			triangle->setDrawingMode(renderType);
+			//triangle->setDrawingMode(renderType);
 			triangle->draw();
 		}
 		else
 		{
-			tetrahedron->setDrawingMode(renderType);
+			//tetrahedron->setDrawingMode(renderType);
 			tetrahedron->draw();
 		}
 		spLightCube->useProgram();
+		glm::mat4 projviewmod = proj * view * glm::translate(glm::mat4(1), dir.position);
 		spLightCube->getVertexShader().setUniformMat4("matProjViewModel", projviewmod);
 		lightCube->draw();
 	}
@@ -210,8 +221,6 @@ void PAG::Renderer::draw()
 	{
 		throw std::runtime_error("PAG::Renderer::draw() -> " + (std::string)e.what());
 	}
-
-
 }
 
 void PAG::Renderer::erase()

@@ -24,7 +24,7 @@ namespace PAG
 		float wViewport, hViewport;
 		RenderType renderType = RenderType::SOLID;
 		Material copper;
-		Light ambL, point;
+		Light ambL, point, dir;// spot;
 		void loadUniforms();
 		void activateLight(Light& l);
 	public:

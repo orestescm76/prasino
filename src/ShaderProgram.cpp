@@ -7,12 +7,12 @@ PAG::ShaderProgram::ShaderProgram()
 
 }
 
-PAG::ShaderProgram::ShaderProgram(std::string filevs, std::string filefs) try:
+PAG::ShaderProgram::ShaderProgram(std::string filevs, std::string filefs) try :
+	idSP(glCreateProgram()),
 	//Intentamos cargar los shaders
 	vertexShader(filevs, "Vertex shader", GL_VERTEX_SHADER, idSP),
 	fragmentShader(filefs, "Fragment shader", GL_FRAGMENT_SHADER, idSP)
 {
-	idSP = glCreateProgram();
 	//Todo bien, los creamos
 	linkShaders();
 

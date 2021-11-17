@@ -132,7 +132,6 @@ void PAG::Shader::setUniformFloat(std::string uniform, float num) const
 
 void PAG::Shader::setUniformSubroutine(std::string uniform, std::string func) const
 {
-	glUseProgram(idSP);
 	GLuint id = glGetSubroutineIndex(idSP, shaderType, func.c_str());
 	glUniformSubroutinesuiv(shaderType, 1, &id);
 }

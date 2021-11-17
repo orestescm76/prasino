@@ -23,6 +23,8 @@ namespace PAG
 		Light(glm::vec3 amb);
 		//Point constructor
 		Light(glm::vec3 dif, glm::vec3 spec, glm::vec3 pos);
+		//Directional constructor
+		Light(glm::vec3 dif, glm::vec3 spec, glm::vec3 pos, glm::vec3 dir);
 		~Light();
 	};
 }

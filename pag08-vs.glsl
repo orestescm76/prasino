@@ -13,5 +13,5 @@ void main ()
 	//gl_Position = vec4 ( posicion, 1 );
 	gl_Position = matProjViewModel * vec4(vPos, 1);
 	pos = vec3(matModel * vec4(vPos, 1));
-	normal = vec3(matModel * vec4(vNormal, 0));
+	normal = vec3(matModel * vec4(vNormal,0));
 }

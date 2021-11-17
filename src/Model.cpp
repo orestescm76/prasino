@@ -66,13 +66,20 @@ void PAG::Model::createTriangle()
 	//vertices
 	vertices = { -.5, -.5, 0,
 		.5, -.5, 0,
+		.0,  .5, 0,
+		-.5, -.5, 0,
+		.5, -.5, 0,
 		.0,  .5, 0 };
 	//indices para pintarlo
-	indices = { 0, 1, 2 };
+	indices = { 0, 1, 2,
+				3, 4, 5};
 
 	normals = {0,0,1,
 				0,0,1,
-				0,0,1 };
+				0,0,1,
+				0,0,-1,
+				0,0,-1,
+				0,0,-1 };
 	////colores de los vertices
 	//GLfloat colorsArr[9] = { 0.0f, 0.733f, 0.176f,
 	//					0.835f, 0.188f, 0.196f,
@@ -89,16 +96,40 @@ void PAG::Model::createTetrahedron()
 	*/
 	vertices = { 0, 1, 0,
 				1, 0, 0,
+				0, 0, 0,
+
+				0, 1, 0,
+				0, 0, 0,
 				0, 0, 1,
-				0, 0, 0 };
-	indices = { 0, 3, 1,
-				0, 1, 2,
-				0, 2, 3,
-				1, 3, 2 };
-	normals = { 0, 1, 0,
+				
+				0, 0, 1,
+				0, 0, 0,
 				1, 0, 0,
+					
+				0, 1, 0,
 				0, 0, 1,
-				0,-1,0
+				1, 0, 0 };
+	
+	indices = {0,1,2,
+				3,4,5,
+				6,7,8,
+				9,10,11};
+
+	normals = { 0, 0, -1,
+				0, 0, -1,
+				0, 0, -1,
+
+				-1, 0, 0,
+				-1, 0, 0,
+				-1, 0, 0,
+				
+				0, -1, 0,
+				0, -1, 0,
+				0, -1, 0,
+
+				1,1,1,
+				1,1,1,
+				1,1,1
 	};
 }
 
@@ -166,7 +197,6 @@ void PAG::Model::initModel()
 
 void PAG::Model::draw()
 {
-	sp->useProgram();
 	glBindVertexArray(idVAO);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, idIBO);
 	glPolygonMode(GL_FRONT_AND_BACK, drawingMode);
@@ -181,7 +211,7 @@ void PAG::Model::setDrawingMode(PAG::RenderType mode)
 		drawingMode = GL_FILL;
 		break;
 	case PAG::RenderType::WIRE:
-		sp->getFragmentShader().setUniformSubroutine("", "blue");
+		sp->getFragmentShader().setUniformSubroutine("", "wire");
 		drawingMode = GL_LINE;
 		break;
 	default:
