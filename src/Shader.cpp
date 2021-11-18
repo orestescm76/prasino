@@ -94,44 +94,22 @@ std::string& PAG::Shader::getSrc()
 
 void PAG::Shader::setUniformVec3(std::string uniform, glm::vec3 vec) const
 {
-	try
-	{
-		glUniform3fv(getUniformLocation(uniform), 1, &vec[0]);
-	}
-	catch (const std::exception& e)
-	{
-		throw std::invalid_argument("Shader::setUniformVec3 -> " + (std::string)e.what());
-	}
-	
+	glUniform3fv(getUniformLocation(uniform), 1, &vec[0]);
 }
 
 void PAG::Shader::setUniformMat4(std::string uniform, glm::mat4 mat) const
 {
-	try
-	{
-		glUniformMatrix4fv(getUniformLocation(uniform), 1, GL_FALSE, &mat[0][0]);
-	}
-	catch (const std::exception& e)
-	{
-		throw std::invalid_argument("Shader::setUniformMat4 -> " + (std::string)e.what());
-	}
-	
+	glUniformMatrix4fv(getUniformLocation(uniform), 1, GL_FALSE, &mat[0][0]);
 }
 
 void PAG::Shader::setUniformFloat(std::string uniform, float num) const
 {
-	try
-	{
-		glUniform3f(getUniformLocation(uniform), 1, GL_FALSE, num);
-	}
-	catch (const std::exception& e)
-	{
-		throw std::invalid_argument("Shader::setUniformMat4 -> " + (std::string)e.what());
-	}
+	glUniform3f(getUniformLocation(uniform), 1, GL_FALSE, num);
 }
 
 void PAG::Shader::setUniformSubroutine(std::string uniform, std::string func) const
 {
+	//unsigned int subId = glGetSubroutineUniformLocation(idSP, shaderType, func.c_str());
 	GLuint id = glGetSubroutineIndex(idSP, shaderType, func.c_str());
 	glUniformSubroutinesuiv(shaderType, 1, &id);
 }
@@ -155,5 +133,5 @@ GLint PAG::Shader::getUniformLocation(std::string uniform) const
 	GLint loc = glGetUniformLocation(idSP, uniform.c_str());
 	if (loc != GL_INVALID_INDEX)
 		return loc;
-	throw std::invalid_argument("Shader::getUniformLocation -> Couldn't find the uniform location "+uniform);
+	Log::getInstance()->printMessage(msgType::WARNING, "Shader::getUniformLocation()->Couldn't find the uniform location "+uniform);
 }

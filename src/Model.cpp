@@ -95,25 +95,29 @@ void PAG::Model::createTetrahedron()
 	* Είναι το πολύεδρο που έχει τέσσερις έδρες, δηλαδή η τριγωνική πυραμίδα.
 	*/
 	vertices = { 0, 1, 0,
-				1, 0, 0,
 				0, 0, 0,
+				1, 0, 0,
 
 				0, 1, 0,
-				0, 0, 0,
 				0, 0, 1,
+				0, 0, 0,
 				
 				0, 0, 1,
-				0, 0, 0,
 				1, 0, 0,
+				0, 0, 0,
+				
 					
 				0, 1, 0,
-				0, 0, 1,
-				1, 0, 0 };
+				1, 0, 0,
+				0, 0, 1 };
 	
 	indices = {0,1,2,
 				3,4,5,
 				6,7,8,
 				9,10,11};
+
+	glm::vec3 aux(1, 1, 1);
+	aux = glm::normalize(aux);
 
 	normals = { 0, 0, -1,
 				0, 0, -1,
@@ -127,10 +131,22 @@ void PAG::Model::createTetrahedron()
 				0, -1, 0,
 				0, -1, 0,
 
-				1,1,1,
-				1,1,1,
-				1,1,1
+				aux.x,aux.y,aux.z,
+				aux.x,aux.y,aux.z,
+				aux.x,aux.y,aux.z
 	};
+	//vertices = { 0, 1, 0,
+	//		1, 0, 0,
+	//		0, 0, 1,
+	//		0, 0, 0 };
+	//indices = { 0, 1, 3,
+	//            0, 3, 2,
+	//            3, 1, 2,
+	//            0, 2, 1 };
+	//normals = {0,1,0,
+	//		   1,0,0,
+	//			0,0,1,
+	//			-1,-1,-1};
 }
 
 void PAG::Model::createLightCube()
@@ -197,31 +213,36 @@ void PAG::Model::initModel()
 
 void PAG::Model::draw()
 {
+	//Bind the vertices and indices
 	glBindVertexArray(idVAO);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, idIBO);
-	glPolygonMode(GL_FRONT_AND_BACK, drawingMode);
+	//Check how do we render.
+	switch (renderType)
+	{
+	case RenderType::WIRE:
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		sp->getFragmentShader().setUniformSubroutine("", "wire");
+		break;
+	case RenderType::SOLID:
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		break;
+	}
 	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, nullptr);
 }
 
 void PAG::Model::setDrawingMode(PAG::RenderType mode)
 {
-	switch (mode)
-	{
-	case PAG::RenderType::SOLID:
-		drawingMode = GL_FILL;
-		break;
-	case PAG::RenderType::WIRE:
-		sp->getFragmentShader().setUniformSubroutine("", "wire");
-		drawingMode = GL_LINE;
-		break;
-	default:
-		break;
-	}
+	renderType = mode;
 }
 
 PAG::Material PAG::Model::getMaterial()
 {
 	return material;
+}
+
+PAG::ShaderProgram* PAG::Model::getShaderProgram()
+{
+	return sp.get();
 }
 
 void PAG::Model::useProgram()

@@ -1,7 +1,7 @@
 /*
 * @author orestescm76
 * @brief main
-* VERSION 0.8.0a2
+* VERSION 0.8.0a3
 * 
 */
 #include "pch.h"
@@ -253,7 +253,7 @@ int main()
 	//First I draw before any event
 	try
 	{
-		PAG::Renderer::getInstance()->draw();
+		PAG::Renderer::getInstance()->refreshWindow();
 
 	}
 	catch (const std::exception& e)

@@ -21,10 +21,13 @@ namespace PAG
 		LightType type = LightType::AMBIENT;
 		//Ambient constructor
 		Light(glm::vec3 amb);
-		//Point constructor
-		Light(glm::vec3 dif, glm::vec3 spec, glm::vec3 pos);
-		//Directional constructor
-		Light(glm::vec3 dif, glm::vec3 spec, glm::vec3 pos, glm::vec3 dir);
+		//Point or directional constructor
+		Light(glm::vec3 dif, glm::vec3 spec, glm::vec3 vec, LightType type);
+		//Spot constructor
+		Light(glm::vec3 dif, glm::vec3 spec, glm::vec3 pos, glm::vec3 dir, float gamma);
+		//Copy constructor
+		Light(const Light& orig);
+		Light& operator=(const Light& orig) = default;
 		~Light();
 	};
 }

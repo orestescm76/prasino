@@ -1,7 +1,10 @@
 #version 410
 
-in vec3 pos;
-in vec3 normal;
+in outputVS
+{
+	vec3 pos;
+	vec3 normal;
+} inputVS;
 
 uniform vec3 Ka;
 uniform vec3 Kd;
@@ -39,22 +42,21 @@ vec3 ambientColor()
 subroutine (lightMode)
 vec3 point()
 {
-	vec3 n = normalize(normal);
-	vec3 l = normalize(lPos-pos);
-	vec3 v = normalize(-pos);
+	vec3 n = normalize(inputVS.normal);
+	vec3 l = normalize(lPos - inputVS.pos);
+	vec3 v = normalize(-inputVS.pos);
 	vec3 r = reflect(-l, n);
 	vec3 diff = (Id*Kd * max(dot(l,n),0.0));
-	vec3 spec;
-	spec = (Is*Ks * pow( max( dot(r,v), 0.0 ) , shininess));
+	vec3 spec = (Is*Ks * pow( max( dot(r,v), 0.0 ) , shininess));
 	return diff + spec;
 }
 
 subroutine (lightMode)
 vec3 directional()
 {
-	vec3 n = normalize(normal);
+	vec3 n = normalize(inputVS.normal);
 	vec3 l = -lDir;
-	vec3 v = normalize(-pos);
+	vec3 v = normalize(-inputVS.pos);
 	vec3 r = reflect(-l, n);
 
 	vec3 diff = (Id*Kd * max(dot(l,n),0.0));
@@ -66,16 +68,16 @@ vec3 directional()
 subroutine (lightMode)
 vec3 spot()
 {
-	vec3 l = normalize(lPos-pos);
+	vec3 l = normalize(lPos-inputVS.pos);
 	vec3 d = lDir;
-	float cosG = cos(sAngle*180/3.141592);
+	float cosG = cos(sAngle);
 	float sFactor = 1.0;
 	if(dot(-l, d) < cosG)
 	{
 		sFactor=0.0;
 	}
-	vec3 n = normalize(normal);
-	vec3 v = normalize(-pos);
+	vec3 n = normalize(inputVS.normal);
+	vec3 v = normalize(-inputVS.pos);
 	vec3 r = reflect(-l,n);
 		vec3 diff = (Id*Kd * max(dot(l,n),0.0));
 	vec3 spec;

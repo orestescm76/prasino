@@ -3,15 +3,18 @@ layout (location = 0) in vec3 vPos;
 layout (location = 1) in vec3 vNormal;
 
 uniform mat4 matProjViewModel;
-uniform mat4 matModel;
+uniform mat4 matModelView;
 
-out vec3 pos;
-out vec3 normal;
+out outputVS
+{
+	vec3 pos;
+	vec3 normal;
+} outVS;
 
 void main ()
 {
 	//gl_Position = vec4 ( posicion, 1 );
-	gl_Position = matProjViewModel * vec4(vPos, 1);
-	pos = vec3(matModel * vec4(vPos, 1));
-	normal = vec3(matModel * vec4(vNormal, 0));
+	gl_Position = matProjViewModel * vec4(vPos, 1.0);
+	outVS.pos = vec3(matModelView * vec4(vPos, 1.0));
+	outVS.normal = vec3(transpose(inverse(matModelView)) * vec4(vNormal, 0.0));
 }

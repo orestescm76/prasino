@@ -35,7 +35,7 @@ namespace PAG
 		void createTetrahedron();
 		void createLightCube();
 		//Other data
-		unsigned int drawingMode = GL_FILL;
+		RenderType renderType = RenderType::SOLID;
 		ModelType modelType;
 		Material material;
 	public:
@@ -51,6 +51,7 @@ namespace PAG
 		void useProgram();
 
 		Material getMaterial();
+		ShaderProgram* getShaderProgram();
 		virtual ~Model();
 	};
 }

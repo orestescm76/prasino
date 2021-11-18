@@ -23,10 +23,13 @@ namespace PAG
 		bool drawingTriangle = true;
 		float wViewport, hViewport;
 		RenderType renderType = RenderType::SOLID;
-		Material copper;
-		Light ambL, point, dir;// spot;
-		void loadUniforms();
-		void activateLight(Light& l);
+		Material mat;
+		std::vector<Light> lights;
+		//Light ambL, point, dir, spot;
+		//Activate the light and set the uniforms with the model shader program
+		void activateLight(Light& l, ShaderProgram& shaderProgram, Model* model);
+		void loadCameraUniforms(ShaderProgram& shaderProgram);
+		void drawLightCube(Light& l);
 	public:
 		static const std::string version;
 		// Lo único que necesito estático de la clase Renderer es la instancia y el método de la instancia
@@ -40,7 +43,7 @@ namespace PAG
 		void minusColor();
 		void configViewport(int width, int height);
 		void printInfo();
-		void draw();
+		void draw(Light& l);
 		void erase();
 		bool isDrawingTriangle();
 		void setDrawingTriangle(bool draw);
