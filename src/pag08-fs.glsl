@@ -46,8 +46,8 @@ vec3 point()
 	vec3 l = normalize(lPos - inputVS.pos);
 	vec3 v = normalize(-inputVS.pos);
 	vec3 r = reflect(-l, n);
-	vec3 diff = (Id*Kd * max(dot(l,n),0.0));
-	vec3 spec = (Is*Ks * pow( max( dot(r,v), 0.0 ) , shininess));
+	vec3 diff = (Id*Kd * max(dot(l,n),0));
+	vec3 spec = (Is*Ks * pow( max( dot(r,v), 0 ) , shininess));
 	return diff + spec;
 }
 

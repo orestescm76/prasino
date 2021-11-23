@@ -13,8 +13,8 @@ out outputVS
 
 void main ()
 {
+	outVS.normal = vec3(matModelView * vec4(vNormal, 0.0));
+	outVS.pos = vec3(matModelView * vec4(vPos, 1.0));
 	//gl_Position = vec4 ( posicion, 1 );
 	gl_Position = matProjViewModel * vec4(vPos, 1.0);
-	outVS.pos = vec3(matModelView * vec4(vPos, 1.0));
-	outVS.normal = vec3(transpose(inverse(matModelView)) * vec4(vNormal, 0.0));
 }

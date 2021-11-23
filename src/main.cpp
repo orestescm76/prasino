@@ -266,7 +266,7 @@ int main()
 	//Ciclo de eventos
 	while (!glfwWindowShouldClose(window))
 	{
-		glfwWaitEvents();
+		glfwPollEvents();
 	}
 	glfwDestroyWindow(window);
 	window = nullptr;
