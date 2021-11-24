@@ -9,9 +9,8 @@ namespace PAG
 		SPOTLIGHT
 	};
 
-	class Light
+	struct Light
 	{
-	public:
 		glm::vec3 position = { 0,0,0 };
 		glm::vec3 ambient = { 0,0,0 };
 		glm::vec3 diffuse = { 0,0,0 };

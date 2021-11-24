@@ -7,10 +7,11 @@
 #include "Renderer.h"
 
 PAG::Renderer* PAG::Renderer::instance = nullptr;
-const std::string PAG::Renderer::version = "0.8.0a3";
+const std::string PAG::Renderer::version = "0.8.0";
 
-PAG::Renderer::Renderer() : 
-	mat(glm::vec3(0,.30f,0), glm::vec3(.1,.35,.1), glm::vec3(.45,.55,.45), 0.9f*128.0f),
+PAG::Renderer::Renderer() :
+	//mat(glm::vec3(.1745f, .01175f,.01175f), glm::vec3(.61424f, .04136f, .04136f), glm::vec3(.727811f,.626959,.626959f), 0.6f*128.0f),
+	mat(glm::vec3(0.0215,0.1745,0.0215),glm::vec3(0.07568,	0.61424 ,	0.07568),glm::vec3(0.633, 	0.727811 ,	0.633),.6*128.0f),
 	camera(),
 	lights()
 {
@@ -27,13 +28,13 @@ PAG::Renderer::Renderer() :
 	tetrahedron = std::make_unique<Model>(shaderProgram, PAG::ModelType::TETRAHEDRON, mat);
 	lightCube = std::make_unique<Model>(spLightCube, ModelType::LIGHT_CUBE);
 	Light ambL(glm::vec3(.12,.12,.12));
-	Light point(glm::vec3(1.0f,1.0f,1.0f), glm::vec3(.7f,.7f,.7f), glm::vec3(.3f,-.1f,.3f), LightType::POINT);
-	Light dir(glm::vec3(.3,.3,.3), glm::vec3(.5,.5,.5),glm::vec3(0,0,1), LightType::DIRECTIONAL);
-	Light spot(glm::vec3(.9f, .9f, .9f), glm::vec3(.7f,.7f,.7f), glm::vec3(1,1,1), glm::vec3(-1,-1,-1), 30.0f);
+	Light point(glm::vec3(1), glm::vec3(1), glm::vec3(-.2,.3,.2), LightType::POINT);
+	Light dir(glm::vec3(.8f,.8f,.2f), glm::vec3(.9),glm::vec3(0,0,1), LightType::DIRECTIONAL);
+	Light spot(glm::vec3(1.0f), glm::vec3(1.0f), glm::vec3(1,1,1), glm::vec3(-1,-1,-1), 64.0f);
 	lights.push_back(ambL);
 	lights.push_back(point);
-	//lights.push_back(dir);
-	//lights.push_back(spot);
+	lights.push_back(dir);
+	lights.push_back(spot);
 	backColor = { 0,0,0,1 };
 }
 
@@ -59,11 +60,12 @@ void PAG::Renderer::activateLight(Light& l, ShaderProgram* sp, Model* model)
 		sp->getFragmentShader().setUniformVec3("Ia", l.ambient);
 		sp->getFragmentShader().setUniformVec3("Ka", model->getMaterial().ambient);
 		break;
+	//WORKS
 	case LightType::POINT:
 		sp->getFragmentShader().setUniformSubroutine("", "point");
 		sp->getFragmentShader().setUniformVec3("Id", l.diffuse);
 		sp->getFragmentShader().setUniformVec3("Is", l.specular);
-		////Apply transform
+		//Apply transform
 		lPos = glm::vec3(camera.getViewMatrix() * glm::vec4(l.position, 1.0f));
 		sp->getFragmentShader().setUniformVec3("lPos", lPos);
 		sp->getFragmentShader().setUniformVec3("Kd", model->getMaterial().diffuse);
@@ -76,7 +78,8 @@ void PAG::Renderer::activateLight(Light& l, ShaderProgram* sp, Model* model)
 		sp->getFragmentShader().setUniformVec3("Id", l.diffuse);
 		sp->getFragmentShader().setUniformVec3("Is", l.specular);
 		//Apply transform
-		glm::vec3 lDir = glm::vec3(camera.getViewMatrix() * glm::vec4(l.direction, 0));
+		glm::mat4 matrix = glm::inverse(glm::transpose(camera.getViewMatrix()));
+		glm::vec3 lDir = glm::vec3(matrix * glm::vec4(l.direction, 0));
 		lDir = glm::normalize(lDir);
 		sp->getFragmentShader().setUniformVec3("lDir", lDir);
 		sp->getFragmentShader().setUniformVec3("Kd", model->getMaterial().diffuse);
@@ -85,6 +88,7 @@ void PAG::Renderer::activateLight(Light& l, ShaderProgram* sp, Model* model)
 		break;
 	case LightType::SPOTLIGHT:
 		sp->getFragmentShader().setUniformSubroutine("", "spot");
+		sp->getFragmentShader().setUniformFloat("sAngle", glm::radians(l.angle));
 		sp->getFragmentShader().setUniformVec3("Id", l.diffuse);
 		sp->getFragmentShader().setUniformVec3("Is", l.specular);
 		//Apply transform
@@ -96,7 +100,7 @@ void PAG::Renderer::activateLight(Light& l, ShaderProgram* sp, Model* model)
 		lDir = glm::normalize(lDir);
 		sp->getFragmentShader().setUniformVec3("lDir", lDir);
 
-		sp->getFragmentShader().setUniformFloat("sAngle", glm::radians(l.angle));
+		
 
 		sp->getFragmentShader().setUniformVec3("Kd", model->getMaterial().diffuse);
 		sp->getFragmentShader().setUniformVec3("Ks", model->getMaterial().specular);

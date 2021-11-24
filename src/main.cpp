@@ -1,7 +1,7 @@
 /*
 * @author orestescm76
 * @brief main
-* VERSION 0.8.0a3
+* VERSION 0.8.0
 * 
 */
 #include "pch.h"
@@ -127,6 +127,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 			break;
 		case GLFW_KEY_1:
 			PAG::Renderer::getInstance()->setDrawingTriangle(true);
+			PAG::Renderer::getInstance()->erase();
 			break;
 		case GLFW_KEY_2:
 			PAG::Renderer::getInstance()->setDrawingTriangle(false);

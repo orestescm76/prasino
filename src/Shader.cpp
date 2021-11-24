@@ -104,7 +104,7 @@ void PAG::Shader::setUniformMat4(std::string uniform, glm::mat4 mat) const
 
 void PAG::Shader::setUniformFloat(std::string uniform, float num) const
 {
-	glUniform3f(getUniformLocation(uniform), 1, GL_FALSE, num);
+	glUniform1f(getUniformLocation(uniform), num);
 }
 
 void PAG::Shader::setUniformSubroutine(std::string uniform, std::string func) const
