@@ -16,15 +16,15 @@ PAG::Renderer::Renderer() :
 {
 	try
 	{
-		sp = std::make_shared<ShaderProgram>("pag08-vs.glsl", "pag08-fs.glsl");
+		shaderProgram = std::make_shared<ShaderProgram>("pag08-vs.glsl", "pag08-fs.glsl");
 		spLightCube = std::make_shared<ShaderProgram>("pag08-vs.glsl", "pag08-light-fs.glsl");
 	}
 	catch (const std::exception& e)
 	{
 		throw std::runtime_error("PAG::Renderer::Renderer -> " + (std::string)e.what());
 	}
-	triangle = std::make_unique <Model>(sp, PAG::ModelType::TRIANGLE, mat);
-	tetrahedron = std::make_unique<Model>(sp, PAG::ModelType::TETRAHEDRON, mat);
+	triangle = std::make_unique <Model>(shaderProgram, PAG::ModelType::TRIANGLE, mat);
+	tetrahedron = std::make_unique<Model>(shaderProgram, PAG::ModelType::TETRAHEDRON, mat);
 	lightCube = std::make_unique<Model>(spLightCube, ModelType::LIGHT_CUBE);
 	Light ambL(glm::vec3(.12,.12,.12));
 	Light point(glm::vec3(1.0f,1.0f,1.0f), glm::vec3(.7f,.7f,.7f), glm::vec3(.3f,-.1f,.3f), LightType::POINT);
@@ -49,64 +49,64 @@ PAG::Renderer::~Renderer()
 	//std::unique_ptr and std::shared_ptr destroys on its own and we do not need to delete it manually
 }
 
-void PAG::Renderer::activateLight(Light& l, ShaderProgram& shaderProgram, Model* model)
+void PAG::Renderer::activateLight(Light& l, ShaderProgram* sp, Model* model)
 {
 	glm::vec3 lPos, lDir;
 	switch (l.type)
 	{
 	case LightType::AMBIENT:
-		shaderProgram.getFragmentShader().setUniformSubroutine("", "ambientColor");
-		shaderProgram.getFragmentShader().setUniformVec3("Ia", l.ambient);
-		shaderProgram.getFragmentShader().setUniformVec3("Ka", model->getMaterial().ambient);
+		sp->getFragmentShader().setUniformSubroutine("", "ambientColor");
+		sp->getFragmentShader().setUniformVec3("Ia", l.ambient);
+		sp->getFragmentShader().setUniformVec3("Ka", model->getMaterial().ambient);
 		break;
 	case LightType::POINT:
-		shaderProgram.getFragmentShader().setUniformSubroutine("", "point");
-		shaderProgram.getFragmentShader().setUniformVec3("Id", l.diffuse);
-		shaderProgram.getFragmentShader().setUniformVec3("Is", l.specular);
+		sp->getFragmentShader().setUniformSubroutine("", "point");
+		sp->getFragmentShader().setUniformVec3("Id", l.diffuse);
+		sp->getFragmentShader().setUniformVec3("Is", l.specular);
 		////Apply transform
 		lPos = glm::vec3(camera.getViewMatrix() * glm::vec4(l.position, 1.0f));
-		shaderProgram.getFragmentShader().setUniformVec3("lPos", lPos);
-		shaderProgram.getFragmentShader().setUniformVec3("Kd", model->getMaterial().diffuse);
-		shaderProgram.getFragmentShader().setUniformVec3("Ks", model->getMaterial().specular);
-		shaderProgram.getFragmentShader().setUniformFloat("shininess", model->getMaterial().shininess);
+		sp->getFragmentShader().setUniformVec3("lPos", lPos);
+		sp->getFragmentShader().setUniformVec3("Kd", model->getMaterial().diffuse);
+		sp->getFragmentShader().setUniformVec3("Ks", model->getMaterial().specular);
+		sp->getFragmentShader().setUniformFloat("shininess", model->getMaterial().shininess);
 
 		break;
 	case LightType::DIRECTIONAL:
-		shaderProgram.getFragmentShader().setUniformSubroutine("", "directional");
-		shaderProgram.getFragmentShader().setUniformVec3("Id", l.diffuse);
-		shaderProgram.getFragmentShader().setUniformVec3("Is", l.specular);
+		sp->getFragmentShader().setUniformSubroutine("", "directional");
+		sp->getFragmentShader().setUniformVec3("Id", l.diffuse);
+		sp->getFragmentShader().setUniformVec3("Is", l.specular);
 		//Apply transform
 		glm::vec3 lDir = glm::vec3(camera.getViewMatrix() * glm::vec4(l.direction, 0));
 		lDir = glm::normalize(lDir);
-		shaderProgram.getFragmentShader().setUniformVec3("lDir", lDir);
-		shaderProgram.getFragmentShader().setUniformVec3("Kd", model->getMaterial().diffuse);
-		shaderProgram.getFragmentShader().setUniformVec3("Ks", model->getMaterial().specular);
-		shaderProgram.getFragmentShader().setUniformFloat("shininess", model->getMaterial().shininess);
+		sp->getFragmentShader().setUniformVec3("lDir", lDir);
+		sp->getFragmentShader().setUniformVec3("Kd", model->getMaterial().diffuse);
+		sp->getFragmentShader().setUniformVec3("Ks", model->getMaterial().specular);
+		sp->getFragmentShader().setUniformFloat("shininess", model->getMaterial().shininess);
 		break;
 	case LightType::SPOTLIGHT:
-		shaderProgram.getFragmentShader().setUniformSubroutine("", "spot");
-		shaderProgram.getFragmentShader().setUniformVec3("Id", l.diffuse);
-		shaderProgram.getFragmentShader().setUniformVec3("Is", l.specular);
+		sp->getFragmentShader().setUniformSubroutine("", "spot");
+		sp->getFragmentShader().setUniformVec3("Id", l.diffuse);
+		sp->getFragmentShader().setUniformVec3("Is", l.specular);
 		//Apply transform
 		lPos = glm::vec3(camera.getViewMatrix() * glm::vec4(l.position, 1));
-		shaderProgram.getFragmentShader().setUniformVec3("lPos", lPos);
+		sp->getFragmentShader().setUniformVec3("lPos", lPos);
 
 		//Apply transform
 		lDir = glm::vec3(camera.getViewMatrix() * glm::vec4(l.direction, 0));
 		lDir = glm::normalize(lDir);
-		shaderProgram.getFragmentShader().setUniformVec3("lDir", lDir);
+		sp->getFragmentShader().setUniformVec3("lDir", lDir);
 
-		shaderProgram.getFragmentShader().setUniformFloat("sAngle", glm::radians(l.angle));
+		sp->getFragmentShader().setUniformFloat("sAngle", glm::radians(l.angle));
 
-		shaderProgram.getFragmentShader().setUniformVec3("Kd", model->getMaterial().diffuse);
-		shaderProgram.getFragmentShader().setUniformVec3("Ks", model->getMaterial().specular);
-		shaderProgram.getFragmentShader().setUniformFloat("shininess", model->getMaterial().shininess);
+		sp->getFragmentShader().setUniformVec3("Kd", model->getMaterial().diffuse);
+		sp->getFragmentShader().setUniformVec3("Ks", model->getMaterial().specular);
+		sp->getFragmentShader().setUniformFloat("shininess", model->getMaterial().shininess);
 		break;
 	}
 
 }
 
-void PAG::Renderer::loadCameraUniforms(ShaderProgram& shaderProgram)
+void PAG::Renderer::loadCameraUniforms(ShaderProgram* sp)
 {
 	glm::mat4 view = camera.getViewMatrix();
 	glm::mat4 proj = camera.getProjMatrix();
@@ -114,8 +114,8 @@ void PAG::Renderer::loadCameraUniforms(ShaderProgram& shaderProgram)
 	glm::mat4 projview = proj * view;
 	
 
-	shaderProgram.getVertexShader().setUniformMat4("matProjViewModel", projview);
-	shaderProgram.getVertexShader().setUniformMat4("matModelView", view);
+	sp->getVertexShader().setUniformMat4("matProjViewModel", projview);
+	sp->getVertexShader().setUniformMat4("matModelView", view);
 	
 }
 
@@ -150,10 +150,10 @@ void PAG::Renderer::refreshWindow()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	if (!triangle.get() && drawingTriangle) //If it's destroyed and we need to draw
-		triangle = std::make_unique<Model>(sp, PAG::ModelType::TRIANGLE, mat);
+		triangle = std::make_unique<Model>(shaderProgram, PAG::ModelType::TRIANGLE, mat);
 
 	if (!tetrahedron.get() && !drawingTriangle) //If it's destroyed and we need to draw
-		tetrahedron = std::make_unique<Model>(sp, PAG::ModelType::TETRAHEDRON, mat);
+		tetrahedron = std::make_unique<Model>(shaderProgram, PAG::ModelType::TETRAHEDRON, mat);
 
 	//sp->useProgram();
 	//activateLight(ambL);
@@ -242,9 +242,9 @@ void PAG::Renderer::draw(Light& l)
 			triangle->useProgram();
 			
 			//Set the light
-			activateLight(l, *triangle->getShaderProgram(), triangle.get());
+			activateLight(l, triangle->getShaderProgram(), triangle.get());
 
-			loadCameraUniforms(*triangle->getShaderProgram());
+			loadCameraUniforms(triangle->getShaderProgram());
 			//Set the drawing mode.
 			triangle->setDrawingMode(renderType);
 			//Ready
@@ -253,11 +253,11 @@ void PAG::Renderer::draw(Light& l)
 		else
 		{
 			tetrahedron->useProgram();
-			loadCameraUniforms(*tetrahedron->getShaderProgram());
+			loadCameraUniforms(tetrahedron->getShaderProgram());
 			//Set the drawing mode.
 			tetrahedron->setDrawingMode(renderType);
 			//Set the light
-			activateLight(l, *tetrahedron->getShaderProgram(), tetrahedron.get());
+			activateLight(l, tetrahedron->getShaderProgram(), tetrahedron.get());
 			//Ready
 			tetrahedron->draw();
 		}

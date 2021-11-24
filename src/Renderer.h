@@ -15,7 +15,7 @@ namespace PAG
 		std::unique_ptr<Model> triangle;
 		std::unique_ptr<Model> tetrahedron;
 		std::unique_ptr<Model> lightCube;
-		std::shared_ptr<ShaderProgram> sp;
+		std::shared_ptr<ShaderProgram> shaderProgram;
 		std::shared_ptr<ShaderProgram> spLightCube;
 		Camera camera;
 		Renderer();
@@ -27,8 +27,8 @@ namespace PAG
 		std::vector<Light> lights;
 		//Light ambL, point, dir, spot;
 		//Activate the light and set the uniforms with the model shader program
-		void activateLight(Light& l, ShaderProgram& shaderProgram, Model* model);
-		void loadCameraUniforms(ShaderProgram& shaderProgram);
+		void activateLight(Light& l, ShaderProgram* sp, Model* model);
+		void loadCameraUniforms(ShaderProgram* sp);
 		void drawLightCube(Light& l);
 	public:
 		static const std::string version;
