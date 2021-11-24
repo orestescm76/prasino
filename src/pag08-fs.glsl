@@ -79,7 +79,7 @@ vec3 spot()
 	vec3 n = normalize(inputVS.normal);
 	vec3 v = normalize(-inputVS.pos);
 	vec3 r = reflect(-l,n);
-		vec3 diff = (Id*Kd * max(dot(l,n),0.0));
+	vec3 diff = (Id*Kd * max(dot(l,n),0.0));
 	vec3 spec;
 	spec = (Is*Ks * pow( max( dot(r,v), 0.0 ) , shininess));
 	return sFactor*(diff+spec);

@@ -10,7 +10,7 @@ PAG::Renderer* PAG::Renderer::instance = nullptr;
 const std::string PAG::Renderer::version = "0.8.0a3";
 
 PAG::Renderer::Renderer() : 
-	mat(glm::vec3(0,0,0), glm::vec3(.1,.35,.1), glm::vec3(.45,.55,.45), 0.9f*128.0f),
+	mat(glm::vec3(0,.30f,0), glm::vec3(.1,.35,.1), glm::vec3(.45,.55,.45), 0.9f*128.0f),
 	camera(),
 	lights()
 {
@@ -27,10 +27,10 @@ PAG::Renderer::Renderer() :
 	tetrahedron = std::make_unique<Model>(sp, PAG::ModelType::TETRAHEDRON, mat);
 	lightCube = std::make_unique<Model>(spLightCube, ModelType::LIGHT_CUBE);
 	Light ambL(glm::vec3(.12,.12,.12));
-	Light point(glm::vec3(1.0f,1.0f,1.0f), glm::vec3(.7f,.7f,.7f), glm::vec3(.5f,0.0f,.5f), LightType::POINT);
+	Light point(glm::vec3(1.0f,1.0f,1.0f), glm::vec3(.7f,.7f,.7f), glm::vec3(.3f,-.1f,.3f), LightType::POINT);
 	Light dir(glm::vec3(.3,.3,.3), glm::vec3(.5,.5,.5),glm::vec3(0,0,1), LightType::DIRECTIONAL);
-	Light spot(glm::vec3(.9f, .9f, .9f), glm::vec3(.7,.7,.7), glm::vec3(.6,.5,.6), glm::vec3(-1,-1,-1), 30);
-	//lights.push_back(ambL);
+	Light spot(glm::vec3(.9f, .9f, .9f), glm::vec3(.7f,.7f,.7f), glm::vec3(1,1,1), glm::vec3(-1,-1,-1), 30.0f);
+	lights.push_back(ambL);
 	lights.push_back(point);
 	//lights.push_back(dir);
 	//lights.push_back(spot);
@@ -63,10 +63,9 @@ void PAG::Renderer::activateLight(Light& l, ShaderProgram& shaderProgram, Model*
 		shaderProgram.getFragmentShader().setUniformSubroutine("", "point");
 		shaderProgram.getFragmentShader().setUniformVec3("Id", l.diffuse);
 		shaderProgram.getFragmentShader().setUniformVec3("Is", l.specular);
-		//Apply transform
+		////Apply transform
 		lPos = glm::vec3(camera.getViewMatrix() * glm::vec4(l.position, 1.0f));
 		shaderProgram.getFragmentShader().setUniformVec3("lPos", lPos);
-
 		shaderProgram.getFragmentShader().setUniformVec3("Kd", model->getMaterial().diffuse);
 		shaderProgram.getFragmentShader().setUniformVec3("Ks", model->getMaterial().specular);
 		shaderProgram.getFragmentShader().setUniformFloat("shininess", model->getMaterial().shininess);
@@ -89,8 +88,8 @@ void PAG::Renderer::activateLight(Light& l, ShaderProgram& shaderProgram, Model*
 		shaderProgram.getFragmentShader().setUniformVec3("Id", l.diffuse);
 		shaderProgram.getFragmentShader().setUniformVec3("Is", l.specular);
 		//Apply transform
-		//lPos = glm::vec3(camera.getViewMatrix() * glm::vec4(l.position, 1));
-		//shaderProgram.getFragmentShader().setUniformVec3("lPos", lPos);
+		lPos = glm::vec3(camera.getViewMatrix() * glm::vec4(l.position, 1));
+		shaderProgram.getFragmentShader().setUniformVec3("lPos", lPos);
 
 		//Apply transform
 		lDir = glm::vec3(camera.getViewMatrix() * glm::vec4(l.direction, 0));
@@ -116,12 +115,14 @@ void PAG::Renderer::loadCameraUniforms(ShaderProgram& shaderProgram)
 	
 
 	shaderProgram.getVertexShader().setUniformMat4("matProjViewModel", projview);
-	shaderProgram.getVertexShader().setUniformMat4("matModelView", view*glm::mat4(1));
+	shaderProgram.getVertexShader().setUniformMat4("matModelView", view);
 	
 }
 
 void PAG::Renderer::drawLightCube(Light& l)
 {
+	if (l.type == LightType::AMBIENT)
+		return;
 	spLightCube->useProgram();
 	glm::mat4 projviewmod = camera.getProjMatrix() * camera.getViewMatrix() * glm::translate(glm::mat4(1), l.position);
 	spLightCube->getVertexShader().setUniformMat4("matProjViewModel", projviewmod);
