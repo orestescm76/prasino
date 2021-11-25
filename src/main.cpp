@@ -1,7 +1,7 @@
 /*
 * @author orestescm76
 * @brief main
-* VERSION 0.8.0
+* VERSION 0.9.0a1
 * 
 */
 #include "pch.h"
@@ -183,7 +183,9 @@ void mouse_moved_callback(GLFWwindow* window, double xpos, double ypos)
 {
 	double xoffset = xpos - xold;
 	double yoffset = ypos - yold;
-	PAG::Renderer::getInstance()->moveCamera(xoffset, yoffset);
+	int mouse_state = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT);
+	if(mouse_state == GLFW_PRESS)
+		PAG::Renderer::getInstance()->moveCamera(xoffset, yoffset);
 	xold = xpos;
 	yold = ypos;
 	window_refresh_callback(window);

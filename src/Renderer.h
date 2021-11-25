@@ -12,8 +12,8 @@ namespace PAG
 
 		static Renderer* instance;
 		glm::vec4 backColor;
-		std::unique_ptr<Model> triangle;
-		std::unique_ptr<Model> tetrahedron;
+		std::vector<std::unique_ptr<Model>> models;
+		unsigned int activeModel;
 		std::unique_ptr<Model> lightCube;
 		std::shared_ptr<ShaderProgram> shaderProgram;
 		std::shared_ptr<ShaderProgram> spLightCube;
@@ -28,8 +28,10 @@ namespace PAG
 		//Light ambL, point, dir, spot;
 		//Activate the light and set the uniforms with the model shader program
 		void activateLight(Light& l, ShaderProgram* sp, Model* model);
-		void loadCameraUniforms(ShaderProgram* sp);
+		void loadUniforms(ShaderProgram* sp, Model* model);
 		void drawLightCube(Light& l);
+		void draw(Light& l, Model* model);
+		std::unique_ptr<Model> createModel(ModelType type, std::shared_ptr<ShaderProgram>& sp, Material& mat);
 	public:
 		static const std::string version;
 		// Lo único que necesito estático de la clase Renderer es la instancia y el método de la instancia
@@ -43,7 +45,6 @@ namespace PAG
 		void minusColor();
 		void configViewport(int width, int height);
 		void printInfo();
-		void draw(Light& l);
 		void erase();
 		bool isDrawingTriangle();
 		void setDrawingTriangle(bool draw);

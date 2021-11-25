@@ -2,13 +2,52 @@
 #include "Model.h"
 #include "Log.h"
 
+void PAG::Model::processNode(aiNode* node, const aiScene* scene)
+{
+	// process all the node's meshes (if any)
+	for (unsigned int i = 0; i < node->mNumMeshes; i++)
+	{
+		aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
+		processMesh(mesh, scene);
+	}
+	// then do the same for each of its children
+	for (unsigned int i = 0; i < node->mNumChildren; i++)
+	{
+		processNode(node->mChildren[i], scene);
+	}
+}
+
+void PAG::Model::processMesh(aiMesh* mesh, const aiScene* scene)
+{
+	for (size_t i = 0; i < mesh->mNumVertices; i++)
+	{
+		vertices.push_back(mesh->mVertices[i].x);
+		vertices.push_back(mesh->mVertices[i].y);
+		vertices.push_back(mesh->mVertices[i].z);
+		if (mesh->HasNormals())
+		{
+			normals.push_back(mesh->mNormals[i].x);
+			normals.push_back(mesh->mNormals[i].y);
+			normals.push_back(mesh->mNormals[i].z);
+		}
+	}
+	for (size_t i = 0; i < mesh->mNumFaces; i++)
+	{
+		aiFace face = mesh->mFaces[i];
+		for (size_t j = 0; j < face.mNumIndices; j++)
+		{
+			indices.push_back(face.mIndices[j]);
+		}
+	}
+}
+
 PAG::Model::Model()
 {
 
 }
 
 PAG::Model::Model(std::shared_ptr<ShaderProgram> shaderProgram, ModelType model, Material& m): sp(shaderProgram), modelType(model), material(m),
-vertices(), normals(), indices()
+vertices(), normals(), indices(), modelMatrix(1)
 {
 	switch (modelType)
 	{
@@ -28,7 +67,7 @@ vertices(), normals(), indices()
 }
 
 PAG::Model::Model(std::shared_ptr<ShaderProgram> shaderProgram, ModelType model) : sp(shaderProgram), modelType(model),
-vertices(), normals(), indices()
+vertices(), normals(), indices(), modelMatrix(1)
 {
 	switch (modelType)
 	{
@@ -47,13 +86,50 @@ vertices(), normals(), indices()
 	initModel();
 }
 
+PAG::Model::Model(std::shared_ptr<ShaderProgram> shaderProgram, std::string filename, Material mat): sp(shaderProgram), modelType(ModelType::EXTERN), modelMatrix(1),
+normals(), vertices(), indices(), material(mat)
+{
+	Assimp::Importer importer;
+	const aiScene* scene = importer.ReadFile(filename, aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_GenSmoothNormals);
+	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
+		throw;
+	processNode(scene->mRootNode, scene);
+	initModel();
+	modelMatrix = glm::scale(modelMatrix, glm::vec3(.3));
+	//Log::getInstance()->printMessage(msgType::INFO, "Loading model");
+	//objl::Loader loader;
+	//bool loaded = loader.LoadFile(filename);
+	//if (loaded)
+	//{
+	//	//vertices
+	//	int numvertices = loader.LoadedVertices.size();
+	//	//mount the data
+	//	for (size_t i = 0; i < numvertices*3; i+=3)
+	//	{
+	//		vertices.push_back(loader.LoadedVertices[i / 3].Position.X);
+	//		vertices.push_back(loader.LoadedVertices[i / 3].Position.Y);
+	//		vertices.push_back(loader.LoadedVertices[i / 3].Position.Z);
+
+	//		normals.push_back(loader.LoadedVertices[i / 3].Normal.X);
+	//		normals.push_back(loader.LoadedVertices[i / 3].Normal.Y);
+	//		normals.push_back(loader.LoadedVertices[i / 3].Normal.Z);
+	//	}
+	//	for (size_t i = 0; i < loader.LoadedIndices.size(); i++)
+	//	{
+	//		indices.push_back(loader.LoadedIndices[i]);
+	//	}
+	//}
+	//modelMatrix = glm::scale(modelMatrix, glm::vec3(.05));
+	//initModel();
+}
+
 PAG::Model::Model(GLfloat* v, GLfloat* c, GLuint* i, std::shared_ptr<ShaderProgram>& shaderProgram): sp(shaderProgram),
-vertices(), normals(), indices()
+vertices(), normals(), indices(), modelMatrix(1)
 {
 	initModel();
 }
 //creo que no es lo mejor
-PAG::Model::Model(const Model& model): sp(model.sp)
+PAG::Model::Model(const Model& model): sp(model.sp), modelMatrix(model.modelMatrix)
 {
 	initModel();
 }
@@ -243,6 +319,11 @@ PAG::Material PAG::Model::getMaterial()
 PAG::ShaderProgram* PAG::Model::getShaderProgram()
 {
 	return sp.get();
+}
+
+glm::mat4 PAG::Model::getModelMatrix()
+{
+	return modelMatrix;
 }
 
 void PAG::Model::useProgram()

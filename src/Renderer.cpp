@@ -7,13 +7,14 @@
 #include "Renderer.h"
 
 PAG::Renderer* PAG::Renderer::instance = nullptr;
-const std::string PAG::Renderer::version = "0.8.0";
+const std::string PAG::Renderer::version = "0.9.0a1";
 
 PAG::Renderer::Renderer() :
 	//mat(glm::vec3(.1745f, .01175f,.01175f), glm::vec3(.61424f, .04136f, .04136f), glm::vec3(.727811f,.626959,.626959f), 0.6f*128.0f),
-	mat(glm::vec3(0.0215,0.1745,0.0215),glm::vec3(0.07568,	0.61424 ,	0.07568),glm::vec3(0.633, 	0.727811 ,	0.633),.6*128.0f),
+	mat(glm::vec3(0.0215,0.1745,0.0215),glm::vec3(0.07568,	0.61424 ,	0.07568),glm::vec3(0.633, 	0.727811 ,	0.633), .6f*128.0f),
 	camera(),
-	lights()
+	lights(),
+	models()
 {
 	try
 	{
@@ -24,17 +25,20 @@ PAG::Renderer::Renderer() :
 	{
 		throw std::runtime_error("PAG::Renderer::Renderer -> " + (std::string)e.what());
 	}
-	triangle = std::make_unique <Model>(shaderProgram, PAG::ModelType::TRIANGLE, mat);
-	tetrahedron = std::make_unique<Model>(shaderProgram, PAG::ModelType::TETRAHEDRON, mat);
+	//models.push_back(createModel(ModelType::TRIANGLE, shaderProgram, mat));
+	//models.push_back(createModel(ModelType::TETRAHEDRON, shaderProgram, mat));
 	lightCube = std::make_unique<Model>(spLightCube, ModelType::LIGHT_CUBE);
+	models.push_back(std::make_unique<Model>(shaderProgram,"ChessKnight.obj",mat));
 	Light ambL(glm::vec3(.12,.12,.12));
 	Light point(glm::vec3(1), glm::vec3(1), glm::vec3(-.2,.3,.2), LightType::POINT);
-	Light dir(glm::vec3(.8f,.8f,.2f), glm::vec3(.9),glm::vec3(0,0,1), LightType::DIRECTIONAL);
+	Light dir(glm::vec3(.1f,.1f,.9f), glm::vec3(.9),glm::vec3(0,0,1), LightType::DIRECTIONAL);
 	Light spot(glm::vec3(1.0f), glm::vec3(1.0f), glm::vec3(1,1,1), glm::vec3(-1,-1,-1), 64.0f);
+
 	lights.push_back(ambL);
 	lights.push_back(point);
 	lights.push_back(dir);
 	lights.push_back(spot);
+
 	backColor = { 0,0,0,1 };
 }
 
@@ -110,17 +114,20 @@ void PAG::Renderer::activateLight(Light& l, ShaderProgram* sp, Model* model)
 
 }
 
-void PAG::Renderer::loadCameraUniforms(ShaderProgram* sp)
+void PAG::Renderer::loadUniforms(ShaderProgram* sp, Model* model)
 {
+	glm::mat4 mod = model->getModelMatrix();
 	glm::mat4 view = camera.getViewMatrix();
 	glm::mat4 proj = camera.getProjMatrix();
 	//Multiply the matrices
-	glm::mat4 projview = proj * view;
-	
 
-	sp->getVertexShader().setUniformMat4("matProjViewModel", projview);
-	sp->getVertexShader().setUniformMat4("matModelView", view);
-	
+	glm::mat4 viewMod = view * mod;
+	glm::mat4 projviewmodel = proj * viewMod;
+	glm::mat4 transInvViewMod = glm::transpose(glm::inverse(view*mod));
+
+	sp->getVertexShader().setUniformMat4("matProjViewModel", projviewmodel);
+	sp->getVertexShader().setUniformMat4("matModelView", viewMod);
+	sp->getVertexShader().setUniformMat4("matModelViewTransInv", transInvViewMod);
 }
 
 void PAG::Renderer::drawLightCube(Light& l)
@@ -153,27 +160,23 @@ PAG::Renderer* PAG::Renderer::getInstance()
 void PAG::Renderer::refreshWindow()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	if (!triangle.get() && drawingTriangle) //If it's destroyed and we need to draw
-		triangle = std::make_unique<Model>(shaderProgram, PAG::ModelType::TRIANGLE, mat);
-
-	if (!tetrahedron.get() && !drawingTriangle) //If it's destroyed and we need to draw
-		tetrahedron = std::make_unique<Model>(shaderProgram, PAG::ModelType::TETRAHEDRON, mat);
-
-	//sp->useProgram();
-	//activateLight(ambL);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	draw(lights[0]);
-	drawLightCube(lights[0]);
-	//activateLight(point);
-	//loadUniforms();
-	
-	if (lights.size() > 1)
+	//For each model
+	for (size_t i = 0; i < models.size(); i++)
 	{
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-		for (size_t i = 1; i < lights.size(); i++)
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		//Draw with ambient
+		draw(lights[0], models[i].get());
+		drawLightCube(lights[0]);
+		//For each light
+		if (lights.size() > 1)
 		{
-			draw(lights[i]);
-			drawLightCube(lights[i]);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+			//Draw with light
+			for (size_t j = 1; j < lights.size(); j++)
+			{
+				draw(lights[j], models[i].get());
+				drawLightCube(lights[j]);
+			}
 		}
 	}
 }
@@ -237,36 +240,21 @@ void PAG::Renderer::printInfo()
 	Log::getInstance()->printMessage(PAG::msgType::INFO, "SHADING LANGUAGE VERSION: " + shadingVersion);
 }
 
-void PAG::Renderer::draw(Light& l)
+void PAG::Renderer::draw(Light& l, Model* model)
 {
 	try
 	{
-		if (drawingTriangle)
-		{	//WE ACTIVATE THE PROGRAM HERE
-			triangle->useProgram();
-			
-			//Set the light
-			activateLight(l, triangle->getShaderProgram(), triangle.get());
-
-			loadCameraUniforms(triangle->getShaderProgram());
-			//Set the drawing mode.
-			triangle->setDrawingMode(renderType);
-			//Ready
-			triangle->draw();
-		}
-		else
-		{
-			tetrahedron->useProgram();
-			loadCameraUniforms(tetrahedron->getShaderProgram());
-			//Set the drawing mode.
-			tetrahedron->setDrawingMode(renderType);
-			//Set the light
-			activateLight(l, tetrahedron->getShaderProgram(), tetrahedron.get());
-			//Ready
-			tetrahedron->draw();
-		}
-		//if(l.type != LightType::AMBIENT)
-		//	drawLightCube(l);
+		//First use shader program
+		model->useProgram();
+		//Then activate the light
+		activateLight(l, model->getShaderProgram(), model);
+		//Load camera uniforms
+		loadUniforms(model->getShaderProgram(), model);
+		//Render
+		model->setDrawingMode(renderType);
+		model->draw();
+		if(l.type != LightType::AMBIENT)
+			drawLightCube(l);
 	}
 	catch (const std::exception& e)
 	{
@@ -274,13 +262,18 @@ void PAG::Renderer::draw(Light& l)
 	}
 }
 
+std::unique_ptr<PAG::Model> PAG::Renderer::createModel(ModelType type, std::shared_ptr<ShaderProgram>& sp, Material& mat)
+{
+	return std::make_unique<Model>(sp, type, mat);
+}
+
 void PAG::Renderer::erase()
 {
-	if (triangle.get()) //if there is a triangle
-		triangle.reset(); //Destroy the triangle, but do it once!
-	
-	if (tetrahedron.get())
-		tetrahedron.reset();
+	//if (triangle.get()) //if there is a triangle
+	//	triangle.reset(); //Destroy the triangle, but do it once!
+	//
+	//if (tetrahedron.get())
+	//	tetrahedron.reset();
 }
 
 void PAG::Renderer::configViewport(int width, int height)

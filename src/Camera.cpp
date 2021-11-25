@@ -100,7 +100,7 @@ void PAG::Camera::tilt(float offset)
 	//1 transladar el punto donde miro a donde esta la camara. o transladar la camara en el origen
 	//2 rotacion
 	//3 transladar todo a donde estaba
-	float degrees = offset * 0.01f;
+	//float degrees = offset * 0.01f;
 	updateCameraAxis();
 	//paso 1
 	glm::mat4 trans1 = glm::translate(glm::mat4(1.0f), -pos);

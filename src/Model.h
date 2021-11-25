@@ -7,6 +7,7 @@ namespace PAG
 	{
 		TRIANGLE,
 		TETRAHEDRON,
+		EXTERN,
 		LIGHT_CUBE
 	};
 
@@ -30,6 +31,8 @@ namespace PAG
 		unsigned int idNormalVBO = 0;
 		//Pointer to the shader program
 		std::shared_ptr<ShaderProgram> sp;
+		//Model matrix
+		glm::mat4 modelMatrix;
 		//Create models
 		void createTriangle();
 		void createTetrahedron();
@@ -38,12 +41,16 @@ namespace PAG
 		RenderType renderType = RenderType::SOLID;
 		ModelType modelType;
 		Material material;
+		void processNode(aiNode* node, const aiScene* scene);
+		void processMesh(aiMesh* mesh, const aiScene* scene);
 	public:
 		Model();
 		Model(GLfloat* v, GLfloat* c, GLuint* i, std::shared_ptr<ShaderProgram>& shaderProgram);
 		Model(std::shared_ptr<ShaderProgram> shaderProgram, ModelType model, Material& m);
 		Model(std::shared_ptr<ShaderProgram> shaderProgram, ModelType model);
+		Model(std::shared_ptr<ShaderProgram> shaderProgram, std::string filename, Material mat);
 		Model(const Model& model);
+		Model& operator=(const Model& orig) = default;
 
 		void initModel();
 		void draw();
@@ -52,6 +59,8 @@ namespace PAG
 
 		Material getMaterial();
 		ShaderProgram* getShaderProgram();
+		glm::mat4 getModelMatrix();
+
 		virtual ~Model();
 	};
 }
