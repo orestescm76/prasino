@@ -29,7 +29,7 @@ subroutine (lightMode)
 vec3 wire()
 {
 	//returns a simple blue color
-	return vec3(0,0,1);
+	return Kd;
 }
 
 subroutine (lightMode)

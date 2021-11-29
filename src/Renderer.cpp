@@ -10,8 +10,9 @@ PAG::Renderer* PAG::Renderer::instance = nullptr;
 const std::string PAG::Renderer::version = "0.9.0a1";
 
 PAG::Renderer::Renderer() :
+	mat(glm::vec3(0.135, 	0.2225, 	0.1575), glm::vec3(0.54 ,0.89, 	0.63), glm::vec3(.316228),.1*128),
 	//mat(glm::vec3(.1745f, .01175f,.01175f), glm::vec3(.61424f, .04136f, .04136f), glm::vec3(.727811f,.626959,.626959f), 0.6f*128.0f),
-	mat(glm::vec3(0.0215,0.1745,0.0215),glm::vec3(0.07568,	0.61424 ,	0.07568),glm::vec3(0.633, 	0.727811 ,	0.633), .6f*128.0f),
+	//mat(glm::vec3(0.0215,0.1745,0.0215),glm::vec3(0.07568,	0.61424 ,	0.07568),glm::vec3(0.633, 	0.727811 ,	0.633), .6f*128.0f),
 	camera(),
 	lights(),
 	models()
@@ -25,13 +26,13 @@ PAG::Renderer::Renderer() :
 	{
 		throw std::runtime_error("PAG::Renderer::Renderer -> " + (std::string)e.what());
 	}
-	//models.push_back(createModel(ModelType::TRIANGLE, shaderProgram, mat));
-	//models.push_back(createModel(ModelType::TETRAHEDRON, shaderProgram, mat));
+	models.push_back(createModel(ModelType::TRIANGLE, shaderProgram, mat));
+	models.push_back(createModel(ModelType::TETRAHEDRON, shaderProgram, mat));
 	lightCube = std::make_unique<Model>(spLightCube, ModelType::LIGHT_CUBE);
-	models.push_back(std::make_unique<Model>(shaderProgram,"ChessKnight.obj",mat));
+	models.push_back(std::make_unique<Model>(shaderProgram,"gato.3mf",mat, "Knight"));
 	Light ambL(glm::vec3(.12,.12,.12));
-	Light point(glm::vec3(1), glm::vec3(1), glm::vec3(-.2,.3,.2), LightType::POINT);
-	Light dir(glm::vec3(.1f,.1f,.9f), glm::vec3(.9),glm::vec3(0,0,1), LightType::DIRECTIONAL);
+	Light point(glm::vec3(1,1,0), glm::vec3(1), glm::vec3(-.5,.5,.2), LightType::POINT);
+	Light dir(glm::vec3(.4f,.5f,.2f), glm::vec3(.9),glm::vec3(0,0,1), LightType::DIRECTIONAL);
 	Light spot(glm::vec3(1.0f), glm::vec3(1.0f), glm::vec3(1,1,1), glm::vec3(-1,-1,-1), 64.0f);
 
 	lights.push_back(ambL);

@@ -47,7 +47,7 @@ PAG::Model::Model()
 }
 
 PAG::Model::Model(std::shared_ptr<ShaderProgram> shaderProgram, ModelType model, Material& m): sp(shaderProgram), modelType(model), material(m),
-vertices(), normals(), indices(), modelMatrix(1)
+vertices(), normals(), indices(), modelMatrix(1), mName()
 {
 	switch (modelType)
 	{
@@ -67,7 +67,7 @@ vertices(), normals(), indices(), modelMatrix(1)
 }
 
 PAG::Model::Model(std::shared_ptr<ShaderProgram> shaderProgram, ModelType model) : sp(shaderProgram), modelType(model),
-vertices(), normals(), indices(), modelMatrix(1)
+vertices(), normals(), indices(), modelMatrix(1), mName()
 {
 	switch (modelType)
 	{
@@ -86,50 +86,28 @@ vertices(), normals(), indices(), modelMatrix(1)
 	initModel();
 }
 
-PAG::Model::Model(std::shared_ptr<ShaderProgram> shaderProgram, std::string filename, Material mat): sp(shaderProgram), modelType(ModelType::EXTERN), modelMatrix(1),
-normals(), vertices(), indices(), material(mat)
+PAG::Model::Model(std::shared_ptr<ShaderProgram> shaderProgram, std::string filename, Material mat, std::string name): sp(shaderProgram), modelType(ModelType::EXTERN), modelMatrix(1),
+normals(), vertices(), indices(), material(mat), mName(name)
 {
+	Log::getInstance()->printMessage(msgType::INFO, "Loading " + filename);
 	Assimp::Importer importer;
 	const aiScene* scene = importer.ReadFile(filename, aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_GenSmoothNormals);
 	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 		throw;
 	processNode(scene->mRootNode, scene);
+	Log::getInstance()->printMessage(msgType::OK, "Loaded " + filename);
+	Log::getInstance()->printMessage(msgType::INFO, "Num vertices: " + std::to_string(vertices.size()));
+	Log::getInstance()->printMessage(msgType::INFO, "Num triangles: " + std::to_string(indices.size()/3));
 	initModel();
-	modelMatrix = glm::scale(modelMatrix, glm::vec3(.3));
-	//Log::getInstance()->printMessage(msgType::INFO, "Loading model");
-	//objl::Loader loader;
-	//bool loaded = loader.LoadFile(filename);
-	//if (loaded)
-	//{
-	//	//vertices
-	//	int numvertices = loader.LoadedVertices.size();
-	//	//mount the data
-	//	for (size_t i = 0; i < numvertices*3; i+=3)
-	//	{
-	//		vertices.push_back(loader.LoadedVertices[i / 3].Position.X);
-	//		vertices.push_back(loader.LoadedVertices[i / 3].Position.Y);
-	//		vertices.push_back(loader.LoadedVertices[i / 3].Position.Z);
-
-	//		normals.push_back(loader.LoadedVertices[i / 3].Normal.X);
-	//		normals.push_back(loader.LoadedVertices[i / 3].Normal.Y);
-	//		normals.push_back(loader.LoadedVertices[i / 3].Normal.Z);
-	//	}
-	//	for (size_t i = 0; i < loader.LoadedIndices.size(); i++)
-	//	{
-	//		indices.push_back(loader.LoadedIndices[i]);
-	//	}
-	//}
-	//modelMatrix = glm::scale(modelMatrix, glm::vec3(.05));
-	//initModel();
 }
 
 PAG::Model::Model(GLfloat* v, GLfloat* c, GLuint* i, std::shared_ptr<ShaderProgram>& shaderProgram): sp(shaderProgram),
-vertices(), normals(), indices(), modelMatrix(1)
+vertices(), normals(), indices(), modelMatrix(1), mName()
 {
 	initModel();
 }
 //creo que no es lo mejor
-PAG::Model::Model(const Model& model): sp(model.sp), modelMatrix(model.modelMatrix)
+PAG::Model::Model(const Model& model): sp(model.sp), modelMatrix(model.modelMatrix), mName(model.mName)
 {
 	initModel();
 }
@@ -156,6 +134,7 @@ void PAG::Model::createTriangle()
 				0,0,-1,
 				0,0,-1,
 				0,0,-1 };
+	mName = "Triangle";
 	////colores de los vertices
 	//GLfloat colorsArr[9] = { 0.0f, 0.733f, 0.176f,
 	//					0.835f, 0.188f, 0.196f,
@@ -211,6 +190,7 @@ void PAG::Model::createTetrahedron()
 				aux.x,aux.y,aux.z,
 				aux.x,aux.y,aux.z
 	};
+	mName = "Tetrahedron";
 	//vertices = { 0, 1, 0,
 	//		1, 0, 0,
 	//		0, 0, 1,
@@ -324,6 +304,11 @@ PAG::ShaderProgram* PAG::Model::getShaderProgram()
 glm::mat4 PAG::Model::getModelMatrix()
 {
 	return modelMatrix;
+}
+
+std::string PAG::Model::name()
+{
+	return mName;
 }
 
 void PAG::Model::useProgram()

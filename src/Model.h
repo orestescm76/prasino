@@ -41,6 +41,7 @@ namespace PAG
 		RenderType renderType = RenderType::SOLID;
 		ModelType modelType;
 		Material material;
+		std::string mName;
 		void processNode(aiNode* node, const aiScene* scene);
 		void processMesh(aiMesh* mesh, const aiScene* scene);
 	public:
@@ -48,7 +49,7 @@ namespace PAG
 		Model(GLfloat* v, GLfloat* c, GLuint* i, std::shared_ptr<ShaderProgram>& shaderProgram);
 		Model(std::shared_ptr<ShaderProgram> shaderProgram, ModelType model, Material& m);
 		Model(std::shared_ptr<ShaderProgram> shaderProgram, ModelType model);
-		Model(std::shared_ptr<ShaderProgram> shaderProgram, std::string filename, Material mat);
+		Model(std::shared_ptr<ShaderProgram> shaderProgram, std::string filename, Material mat, std::string name);
 		Model(const Model& model);
 		Model& operator=(const Model& orig) = default;
 
@@ -60,7 +61,7 @@ namespace PAG
 		Material getMaterial();
 		ShaderProgram* getShaderProgram();
 		glm::mat4 getModelMatrix();
-
+		std::string name();
 		virtual ~Model();
 	};
 }

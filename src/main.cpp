@@ -276,7 +276,7 @@ int main()
 	glfwTerminate();
 	delete PAG::Renderer::getInstance();
 	PAG::Log::getInstance()->printMessage(PAG::msgType::INFO, "PAR2122 is finished!");
-	std::cout << "Press enter to continue..." << std::endl;
-	std::cin.get();
+	//std::cout << "Press enter to continue..." << std::endl;
+	//std::cin.get();
 	return 0;
 }
