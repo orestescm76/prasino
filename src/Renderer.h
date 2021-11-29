@@ -16,6 +16,7 @@ namespace PAG
 		unsigned int activeModel;
 		std::unique_ptr<Model> lightCube;
 		std::shared_ptr<ShaderProgram> shaderProgram;
+		std::shared_ptr<ShaderProgram> shaderProgramTexture;
 		std::shared_ptr<ShaderProgram> spLightCube;
 		Camera camera;
 		Renderer();

@@ -92,21 +92,24 @@ std::string& PAG::Shader::getSrc()
 	return src;
 }
 
-void PAG::Shader::setUniformVec3(std::string uniform, glm::vec3 vec) const
+void PAG::Shader::setUniform(std::string uniform, glm::vec3 vec) const
 {
 	glUniform3fv(getUniformLocation(uniform), 1, &vec[0]);
 }
 
-void PAG::Shader::setUniformMat4(std::string uniform, glm::mat4 mat) const
+void PAG::Shader::setUniform(std::string uniform, glm::mat4 mat) const
 {
 	glUniformMatrix4fv(getUniformLocation(uniform), 1, GL_FALSE, &mat[0][0]);
 }
 
-void PAG::Shader::setUniformFloat(std::string uniform, float num) const
+void PAG::Shader::setUniform(std::string uniform, float num) const
 {
 	glUniform1f(getUniformLocation(uniform), num);
 }
-
+void PAG::Shader::setUniform(std::string uniform, unsigned int num) const
+{
+	glUniform1i(getUniformLocation(uniform), num);
+}
 void PAG::Shader::setUniformSubroutine(std::string uniform, std::string func) const
 {
 	//unsigned int subId = glGetSubroutineUniformLocation(idSP, shaderType, func.c_str());

@@ -1,6 +1,7 @@
 #pragma once
 #include "ShaderProgram.h"
 #include "Material.h"
+#include "Texture.h"
 namespace PAG
 {
 	enum class ModelType
@@ -23,14 +24,18 @@ namespace PAG
 		std::vector<float> vertices;
 		std::vector<float> normals;
 		std::vector<unsigned int> indices;
+		std::vector<float> texCoords;
 		//IDENTIFICADORES
 		unsigned int idVAO = 0;
 		unsigned int idVBO = 0;
 		unsigned int idColor = 0;
 		unsigned int idIBO = 0;
 		unsigned int idNormalVBO = 0;
+		unsigned int idVBOTex = 0;
 		//Pointer to the shader program
 		std::shared_ptr<ShaderProgram> sp;
+		//pointer to a texture
+		std::shared_ptr<Texture> texture;
 		//Model matrix
 		glm::mat4 modelMatrix;
 		//Create models
@@ -57,7 +62,7 @@ namespace PAG
 		void draw();
 		void setDrawingMode(RenderType mode);
 		void useProgram();
-
+		void setTexture(std::shared_ptr<Texture> tex);
 		Material getMaterial();
 		ShaderProgram* getShaderProgram();
 		glm::mat4 getModelMatrix();

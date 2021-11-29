@@ -30,6 +30,16 @@ void PAG::Model::processMesh(aiMesh* mesh, const aiScene* scene)
 			normals.push_back(mesh->mNormals[i].y);
 			normals.push_back(mesh->mNormals[i].z);
 		}
+		if (mesh->mTextureCoords[0])
+		{
+			texCoords.push_back(mesh->mTextureCoords[0][i].x);
+			texCoords.push_back(mesh->mTextureCoords[0][i].y);
+		}
+		else
+		{
+			texCoords.push_back(0.0f);
+			texCoords.push_back(0.0f);
+		}
 	}
 	for (size_t i = 0; i < mesh->mNumFaces; i++)
 	{
@@ -39,6 +49,7 @@ void PAG::Model::processMesh(aiMesh* mesh, const aiScene* scene)
 			indices.push_back(face.mIndices[j]);
 		}
 	}
+	modelMatrix = glm::scale(modelMatrix, glm::vec3(.10));
 }
 
 PAG::Model::Model()
@@ -91,13 +102,14 @@ normals(), vertices(), indices(), material(mat), mName(name)
 {
 	Log::getInstance()->printMessage(msgType::INFO, "Loading " + filename);
 	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile(filename, aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_GenSmoothNormals);
+	const aiScene* scene = importer.ReadFile(filename, aiProcess_JoinIdenticalVertices | aiProcess_Triangulate);
 	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 		throw;
 	processNode(scene->mRootNode, scene);
 	Log::getInstance()->printMessage(msgType::OK, "Loaded " + filename);
 	Log::getInstance()->printMessage(msgType::INFO, "Num vertices: " + std::to_string(vertices.size()));
 	Log::getInstance()->printMessage(msgType::INFO, "Num triangles: " + std::to_string(indices.size()/3));
+	Log::getInstance()->printMessage(msgType::INFO, "Num texcoords: " + std::to_string(texCoords.size() / 2));
 	initModel();
 }
 
@@ -134,6 +146,14 @@ void PAG::Model::createTriangle()
 				0,0,-1,
 				0,0,-1,
 				0,0,-1 };
+
+	texCoords = { 1.0f, 0.0f,
+				  0.0f, 0.0f,
+				  0.5f, 1.0f,
+				1.0f, 0.0f,
+				  0.0f, 0.0f,
+				  0.5f, 1.0f
+	};
 	mName = "Triangle";
 	////colores de los vertices
 	//GLfloat colorsArr[9] = { 0.0f, 0.733f, 0.176f,
@@ -150,8 +170,8 @@ void PAG::Model::createTetrahedron()
 	* Είναι το πολύεδρο που έχει τέσσερις έδρες, δηλαδή η τριγωνική πυραμίδα.
 	*/
 	vertices = { 0.0f, 1.0f, 0.0f,
-				0.0f, 0.0f, 0.0f,
 				1.0f, 0.0f, 0.0f,
+				0.0f, 0.0f, 0.0f,
 
 				0.0f, 1.0f, 0.0f,
 				0.0f, 0.0f, 1.0f,
@@ -161,11 +181,29 @@ void PAG::Model::createTetrahedron()
 				1.0f, 0.0f, 0.0f,
 				0.0f, 0.0f, 0.0f,
 				
-					
 				0.0f, 1.0f, 0.0f,
 				1.0f, 0.0f, 0.0f,
 				0.0f, 0.0f, 1.0f };
-	
+
+	texCoords = { 1.0f, 1.0f,
+				 0.0f, 0.0f,
+				  1.0f, 0.0f,
+				
+
+				0.0f,1.0f,
+				1.0f,0.0f,
+				0.0f,0.0f,
+
+
+
+				0.0f,0.0f,
+				1.0f,0.0f,
+				0.0f,1.0f,
+				.5f,1.0f,
+				1.0f,0.0f,
+				0.0f,0.0f,
+
+	};
 	indices = {0,1,2,
 				3,4,5,
 				6,7,8,
@@ -248,7 +286,7 @@ void PAG::Model::initModel()
 		nullptr);
 	glEnableVertexAttribArray(0);
 	//normales, si hubiera
-	if (normals.size() != 0)
+	if (normals.size() >=3)
 	{
 		Log::getInstance()->printMessage(msgType::INFO, "Creating Normals VBO");
 		glGenBuffers(1, &idNormalVBO);
@@ -258,6 +296,18 @@ void PAG::Model::initModel()
 		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat),
 			nullptr);
 		glEnableVertexAttribArray(1);
+	}
+	if (texCoords.size() >= 2)
+	{
+		// Creación de un VBO para las coordenadas de textura. Atributo 2
+		Log::getInstance()->printMessage(msgType::INFO, "Creating Texcoords VBO");
+		glGenBuffers(1, &idVBOTex);
+		glBindBuffer(GL_ARRAY_BUFFER, idVBOTex);
+		glBufferData(GL_ARRAY_BUFFER, texCoords.size() * sizeof(GLfloat), texCoords.data(), 
+			GL_STATIC_DRAW);
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 2*sizeof(GLfloat),
+			nullptr);
+		glEnableVertexAttribArray(2);
 	}
 	//indices
 	Log::getInstance()->printMessage(msgType::INFO, "Creating IBO");
@@ -269,6 +319,11 @@ void PAG::Model::initModel()
 
 void PAG::Model::draw()
 {
+	if (texture.get())
+	{
+		sp->getFragmentShader().setUniform("texSampler", texture->getTexID());
+		texture->activate();
+	}
 	//Bind the vertices and indices
 	glBindVertexArray(idVAO);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, idIBO);
@@ -283,6 +338,7 @@ void PAG::Model::draw()
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		break;
 	}
+
 	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, nullptr);
 }
 
@@ -316,6 +372,11 @@ void PAG::Model::useProgram()
 	sp->useProgram();
 }
 
+void PAG::Model::setTexture(std::shared_ptr<Texture> tex)
+{
+	texture = tex;
+}
+
 PAG::Model::~Model()
 {
 	if(idVBO != 0)
@@ -328,5 +389,7 @@ PAG::Model::~Model()
 		glDeleteVertexArrays(1, &idVAO);
 	if(idNormalVBO != 0)
 		glDeleteBuffers(1, &idNormalVBO);
+	if (idVBOTex != 0)
+		glDeleteBuffers(1, &idVBOTex);
 	//std::vector destroys on its own
 }

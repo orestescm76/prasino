@@ -15,7 +15,9 @@ namespace PAG
 
 	class Camera
 	{
-		glm::vec3 pos = { 4.0f, 1.0f, 4.0f };
+		//glm::vec3 pos = { 4.0f, 1.0f, 4.0f };
+		
+		glm::vec3 pos = { 0.0f, 0.0f, 4.0f };
 		glm::vec3 target = { 0.0f, 0.0f, 0.0f };
 		glm::vec3 up = { 0.0f, 1.0f, 0.0f };
 		//ejes de la camara
