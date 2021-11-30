@@ -7,9 +7,10 @@
 #include "Renderer.h"
 
 PAG::Renderer* PAG::Renderer::instance = nullptr;
-const std::string PAG::Renderer::version = "0.9.0a2";
+const std::string PAG::Renderer::version = "0.9.0a3";
 
 PAG::Renderer::Renderer() :
+	activeModel(-1),
 	mat(glm::vec3(0.135, 	0.2225, 	0.1575), glm::vec3(0.54 ,0.89, 	0.63), glm::vec3(.316228),.1*128),
 	//mat(glm::vec3(.1745f, .01175f,.01175f), glm::vec3(.61424f, .04136f, .04136f), glm::vec3(.727811f,.626959,.626959f), 0.6f*128.0f),
 	//mat(glm::vec3(0.0215,0.1745,0.0215),glm::vec3(0.07568,	0.61424 ,	0.07568),glm::vec3(0.633, 	0.727811 ,	0.633), .6f*128.0f),
@@ -27,10 +28,9 @@ PAG::Renderer::Renderer() :
 	{
 		throw std::runtime_error("PAG::Renderer::Renderer -> " + (std::string)e.what());
 	}
-	//models.push_back(createModel(ModelType::TRIANGLE, shaderProgramTexture, mat));
-	models.push_back(createModel(ModelType::TETRAHEDRON, shaderProgramTexture, mat));
+
+	
 	lightCube = std::make_unique<Model>(spLightCube, ModelType::LIGHT_CUBE);
-	//models.push_back(std::make_unique<Model>(shaderProgramTexture,"vaca.obj",mat, "Knight"));
 	Light ambL(glm::vec3(.12,.12,.12));
 	Light point(glm::vec3(1,1,0), glm::vec3(1), glm::vec3(-.5,.5,.2), LightType::POINT);
 	Light dir(glm::vec3(.4f,.5f,.2f), glm::vec3(.9),glm::vec3(0,0,1), LightType::DIRECTIONAL);
@@ -42,8 +42,7 @@ PAG::Renderer::Renderer() :
 	lights.push_back(spot);
 
 	backColor = { 0,0,0,1 };
-	std::shared_ptr<Texture> tex = std::make_shared<Texture>("blacksad.png");
-	models[0]->setTexture(tex);
+
 }
 
 void PAG::Renderer::configBackColor(glm::vec4 color)
@@ -53,9 +52,54 @@ void PAG::Renderer::configBackColor(glm::vec4 color)
 }
 
 
+void PAG::Renderer::printActiveModel()
+{
+	if(activeModel != -1)
+		Log::getInstance()->printMessage(msgType::INFO, "Active model: " + models[activeModel]->name());
+	else
+		Log::getInstance()->printMessage(msgType::INFO, "No model is active");
+}
+
+void PAG::Renderer::deleteActiveModel()
+{
+	if (activeModel != -1)
+	{
+		models[activeModel].reset();
+		std::vector<std::unique_ptr<Model>>::iterator it;
+		it = models.begin();
+		it += activeModel;
+		models.erase(it);
+		activeModel--;
+		printActiveModel();
+	}
+	if (models.size() > 0)
+		activeModel = 0;
+}
+
 PAG::Renderer::~Renderer()
 {
 	//std::unique_ptr and std::shared_ptr destroys on its own and we do not need to delete it manually
+}
+
+void PAG::Renderer::setTextureToActiveModel()
+{
+	if (activeModel != -1)
+	{
+		Model* ptr = models[activeModel].get();
+		if (!models[activeModel]->isDrawingTexture())
+		{
+			std::shared_ptr<Texture> tex = std::make_shared<Texture>("vaca.png");
+			ptr->setShaderProgram(shaderProgramTexture);
+			ptr->setTexture(tex);
+			ptr->setDrawTexture(true);
+		}
+		else
+		{
+			ptr->setDrawTexture(false);
+			ptr->setShaderProgram(shaderProgram);
+			ptr->unBindTexture();
+		}
+	}
 }
 
 void PAG::Renderer::activateLight(Light& l, ShaderProgram* sp, Model* model)
@@ -270,14 +314,18 @@ std::unique_ptr<PAG::Model> PAG::Renderer::createModel(ModelType type, std::shar
 {
 	return std::make_unique<Model>(sp, type, mat);
 }
-
-void PAG::Renderer::erase()
+std::unique_ptr<PAG::Model> PAG::Renderer::createModel(std::shared_ptr<ShaderProgram>& shaderProgram, std::string filename, Material mat, std::string name)
 {
-	//if (triangle.get()) //if there is a triangle
-	//	triangle.reset(); //Destroy the triangle, but do it once!
-	//
-	//if (tetrahedron.get())
-	//	tetrahedron.reset();
+	return std::make_unique<Model>(shaderProgram, filename, mat, name);
+}
+bool PAG::Renderer::checkExistingModel(ModelType type)
+{
+	for (size_t i = 0; i < models.size(); i++)
+	{
+		if (models[i]->getType() == type)
+			return true;
+	}
+	return false;
 }
 
 void PAG::Renderer::configViewport(int width, int height)
@@ -326,4 +374,48 @@ void PAG::Renderer::resetCamera()
 void PAG::Renderer::zoomCamera(float yoffset)
 {
 	camera.zoom(yoffset);
+}
+
+void PAG::Renderer::step()
+{
+	if (activeModel == -1)
+		return;
+	if (++activeModel >= models.size())
+		activeModel = 0;
+	printActiveModel();
+}
+
+void PAG::Renderer::addModel(ModelType type)
+{
+	if (!checkExistingModel(type))
+	{
+		switch (type)
+		{
+		case PAG::ModelType::TRIANGLE:
+			models.push_back(createModel(ModelType::TRIANGLE, shaderProgram, mat));
+			break;
+		case PAG::ModelType::TETRAHEDRON:
+			models.push_back(createModel(ModelType::TETRAHEDRON, shaderProgramTexture, mat));
+			break;
+		default:
+			break;
+		}
+		if (activeModel == -1)
+			activeModel = 0;
+		else if (activeModel >= 0)
+			activeModel++;
+		printActiveModel();
+	}
+	else
+		Log::getInstance()->printMessage(msgType::INFO, "You added that model");
+}
+
+void PAG::Renderer::addModel(std::string filename)
+{
+	models.push_back(createModel(shaderProgram, filename, mat, filename));
+	if (activeModel == -1)
+		activeModel = 0;
+	else if (activeModel >= 0)
+		activeModel++;
+	printActiveModel();
 }

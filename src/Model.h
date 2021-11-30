@@ -36,6 +36,7 @@ namespace PAG
 		std::shared_ptr<ShaderProgram> sp;
 		//pointer to a texture
 		std::shared_ptr<Texture> texture;
+		bool drawTexture = false;
 		//Model matrix
 		glm::mat4 modelMatrix;
 		//Create models
@@ -49,6 +50,8 @@ namespace PAG
 		std::string mName;
 		void processNode(aiNode* node, const aiScene* scene);
 		void processMesh(aiMesh* mesh, const aiScene* scene);
+		glm::vec3 position = {0,0,0};
+		void initModel();
 	public:
 		Model();
 		Model(GLfloat* v, GLfloat* c, GLuint* i, std::shared_ptr<ShaderProgram>& shaderProgram);
@@ -58,15 +61,30 @@ namespace PAG
 		Model(const Model& model);
 		Model& operator=(const Model& orig) = default;
 
-		void initModel();
 		void draw();
 		void setDrawingMode(RenderType mode);
 		void useProgram();
 		void setTexture(std::shared_ptr<Texture> tex);
+		void setShaderProgram(std::shared_ptr<ShaderProgram>& shaderProgram);
+		void setDrawTexture(bool flag);
 		Material getMaterial();
 		ShaderProgram* getShaderProgram();
 		glm::mat4 getModelMatrix();
 		std::string name();
+		ModelType getType();
+		bool isDrawingTexture();
+		//Transformations
+		//Translate. This doesn't translate to the origin.
+		void move(glm::vec3 pos);
+		//Rotate. This translates to the origin, rotates and then translates.
+		void rotate(float deg, glm::vec3 axis);
+		//Scale.
+		void scale(glm::vec3 vec);
+		//Translate. Translates to the origin and then translates to the position of choice.
+		void translate(glm::vec3 pos);
+		//Resets the model matrix.
+		void resetMatrix();
+		void unBindTexture();
 		virtual ~Model();
 	};
 }

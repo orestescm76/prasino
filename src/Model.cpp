@@ -49,7 +49,8 @@ void PAG::Model::processMesh(aiMesh* mesh, const aiScene* scene)
 			indices.push_back(face.mIndices[j]);
 		}
 	}
-	modelMatrix = glm::scale(modelMatrix, glm::vec3(.10));
+	//modelMatrix = glm::scale(modelMatrix, glm::vec3(1));
+	rotate(-90.0f, {1,0,0});
 }
 
 PAG::Model::Model()
@@ -272,6 +273,8 @@ void PAG::Model::createLightCube()
 
 void PAG::Model::initModel()
 {
+	//genero la matriz de translado al 0,0,0
+	modelMatrix = glm::translate(modelMatrix, position);
 	//generamos el vao y la vinculamos
 	Log::getInstance()->printMessage(msgType::INFO, "Creating VAO");
 	glGenVertexArrays(1, &idVAO);
@@ -319,7 +322,7 @@ void PAG::Model::initModel()
 
 void PAG::Model::draw()
 {
-	if (texture.get())
+	if (texture.get() && drawTexture)
 	{
 		sp->getFragmentShader().setUniform("texSampler", texture->getTexID());
 		texture->activate();
@@ -367,6 +370,41 @@ std::string PAG::Model::name()
 	return mName;
 }
 
+PAG::ModelType PAG::Model::getType()
+{
+	return modelType;
+}
+
+bool PAG::Model::isDrawingTexture()
+{
+	return drawTexture;
+}
+
+void PAG::Model::move(glm::vec3 pos)
+{
+	modelMatrix = glm::translate(modelMatrix, pos);
+	position += pos;
+}
+
+void PAG::Model::rotate(float deg, glm::vec3 axis)
+{
+	modelMatrix = glm::translate(modelMatrix, -position);
+	modelMatrix = glm::rotate(modelMatrix, glm::radians(deg), axis);
+	modelMatrix = glm::translate(modelMatrix, position);
+}
+
+void PAG::Model::scale(glm::vec3 vec)
+{
+	modelMatrix = glm::scale(modelMatrix, vec);
+}
+
+void PAG::Model::translate(glm::vec3 pos)
+{
+	modelMatrix = glm::translate(modelMatrix, -position);
+	modelMatrix = glm::translate(modelMatrix, pos);
+	position = pos;
+}
+
 void PAG::Model::useProgram()
 {
 	sp->useProgram();
@@ -375,6 +413,27 @@ void PAG::Model::useProgram()
 void PAG::Model::setTexture(std::shared_ptr<Texture> tex)
 {
 	texture = tex;
+}
+
+void PAG::Model::setShaderProgram(std::shared_ptr<ShaderProgram>& shaderProgram)
+{
+	sp = shaderProgram;
+}
+
+void PAG::Model::setDrawTexture(bool flag)
+{
+	drawTexture = flag;
+}
+
+void PAG::Model::resetMatrix()
+{
+	modelMatrix = glm::mat4(1);
+}
+
+void PAG::Model::unBindTexture()
+{
+	if (texture.get())
+		texture.reset();
 }
 
 PAG::Model::~Model()

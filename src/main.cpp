@@ -1,7 +1,7 @@
 /*
 * @author orestescm76
 * @brief main
-* VERSION 0.9.0a2
+* VERSION 0.9.0a3
 * 
 */
 #include "pch.h"
@@ -15,8 +15,9 @@ bool hideMouse = false;
 void printHelp()
 {
 	std::cout
-		<< "'1' shows the triangle" << std::endl
-		<< "'2' shows the tetrahedron" << std::endl
+		<< "'1' adds the triangle" << std::endl
+		<< "'2' adds the tetrahedron" << std::endl
+		<< "'3' adds the cow" << std::endl
 		<< "'p' for panning" << std::endl
 		<< "'t' for tilting" << std::endl
 		<< "'o' for orbit" << std::endl
@@ -27,6 +28,8 @@ void printHelp()
 		<< "'v' to set the render to Fill" << std::endl
 		<< "'b' to set the render to Wire" << std::endl
 		<< "'r' to reset the camera" << std::endl
+		<< "'d' deletes the active model" << std::endl
+		<< "'TAB' changes the active model" << std::endl
 		<< "Mouse wheel to change the color and zoom!" << std::endl;
 }
 
@@ -126,12 +129,13 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 			PAG::Renderer::getInstance()->moveCamera(key);
 			break;
 		case GLFW_KEY_1:
-			PAG::Renderer::getInstance()->setDrawingTriangle(true);
-			PAG::Renderer::getInstance()->erase();
+			PAG::Renderer::getInstance()->addModel(PAG::ModelType::TRIANGLE);
 			break;
 		case GLFW_KEY_2:
-			PAG::Renderer::getInstance()->setDrawingTriangle(false);
-			PAG::Renderer::getInstance()->erase();
+			PAG::Renderer::getInstance()->addModel(PAG::ModelType::TETRAHEDRON);
+			break;
+		case GLFW_KEY_3:
+			PAG::Renderer::getInstance()->addModel("vaca.obj");
 			break;
 		case GLFW_KEY_Z:
 			hideShowMouse(window);
@@ -141,6 +145,15 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 			break;
 		case GLFW_KEY_R:
 			PAG::Renderer::getInstance()->resetCamera();
+			break;
+		case GLFW_KEY_D:
+			PAG::Renderer::getInstance()->deleteActiveModel();
+			break;
+		case GLFW_KEY_U:
+			PAG::Renderer::getInstance()->setTextureToActiveModel();
+			break;
+		case GLFW_KEY_TAB:
+			PAG::Renderer::getInstance()->step();
 			break;
 		default:
 			std::cout << "Press 'h' for the keybinds" << std::endl;
@@ -269,7 +282,7 @@ int main()
 	//Ciclo de eventos
 	while (!glfwWindowShouldClose(window))
 	{
-		glfwPollEvents();
+		glfwWaitEvents();
 	}
 	glfwDestroyWindow(window);
 	window = nullptr;

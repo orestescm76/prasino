@@ -13,7 +13,6 @@ namespace PAG
 		static Renderer* instance;
 		glm::vec4 backColor;
 		std::vector<std::unique_ptr<Model>> models;
-		unsigned int activeModel;
 		std::unique_ptr<Model> lightCube;
 		std::shared_ptr<ShaderProgram> shaderProgram;
 		std::shared_ptr<ShaderProgram> shaderProgramTexture;
@@ -33,6 +32,9 @@ namespace PAG
 		void drawLightCube(Light& l);
 		void draw(Light& l, Model* model);
 		std::unique_ptr<Model> createModel(ModelType type, std::shared_ptr<ShaderProgram>& sp, Material& mat);
+		std::unique_ptr<Model> createModel(std::shared_ptr<ShaderProgram>& shaderProgram, std::string filename, Material mat, std::string name);
+		int activeModel;
+		bool checkExistingModel(ModelType type);
 	public:
 		static const std::string version;
 		// Lo único que necesito estático de la clase Renderer es la instancia y el método de la instancia
@@ -46,16 +48,20 @@ namespace PAG
 		void minusColor();
 		void configViewport(int width, int height);
 		void printInfo();
-		void erase();
 		bool isDrawingTriangle();
 		void setDrawingTriangle(bool draw);
 		void setRenderType(RenderType rt);
-		//Camera& getCamera();
 		void moveCamera(int key);
 		void moveCamera(float xoffset, float yoffset);
 		void setCamera(MovType mov);
 		void resetCamera();
 		void zoomCamera(float yoffset);
+		void step();
+		void addModel(ModelType type);
+		void addModel(std::string filename);
+		void printActiveModel();
+		void deleteActiveModel();
+		void setTextureToActiveModel();
 		virtual ~Renderer();
 	};
 }
