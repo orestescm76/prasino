@@ -7,16 +7,17 @@
 #include "Renderer.h"
 
 PAG::Renderer* PAG::Renderer::instance = nullptr;
-const std::string PAG::Renderer::version = "0.9.0a3";
+const std::string PAG::Renderer::version = "0.9.0";
 
 PAG::Renderer::Renderer() :
 	activeModel(-1),
-	mat(glm::vec3(0.135, 	0.2225, 	0.1575), glm::vec3(0.54 ,0.89, 	0.63), glm::vec3(.316228),.1*128),
+	mat(glm::vec3(0.135, 0.2225, 0.1575), glm::vec3(0.54, 0.89, 0.63), glm::vec3(.316228), .1 * 128),
 	//mat(glm::vec3(.1745f, .01175f,.01175f), glm::vec3(.61424f, .04136f, .04136f), glm::vec3(.727811f,.626959,.626959f), 0.6f*128.0f),
 	//mat(glm::vec3(0.0215,0.1745,0.0215),glm::vec3(0.07568,	0.61424 ,	0.07568),glm::vec3(0.633, 	0.727811 ,	0.633), .6f*128.0f),
-	camera(),
+	camera({3,2,3}, 90, .1,50,wViewport, hViewport),
 	lights(),
-	models()
+	models(),
+	textures()
 {
 	try
 	{
@@ -31,10 +32,10 @@ PAG::Renderer::Renderer() :
 
 	
 	lightCube = std::make_unique<Model>(spLightCube, ModelType::LIGHT_CUBE);
-	Light ambL(glm::vec3(.12,.12,.12));
-	Light point(glm::vec3(1,1,0), glm::vec3(1), glm::vec3(-.5,.5,.2), LightType::POINT);
-	Light dir(glm::vec3(.4f,.5f,.2f), glm::vec3(.9),glm::vec3(0,0,1), LightType::DIRECTIONAL);
-	Light spot(glm::vec3(1.0f), glm::vec3(1.0f), glm::vec3(1,1,1), glm::vec3(-1,-1,-1), 64.0f);
+	Light ambL(glm::vec3(.18));
+	Light point(glm::vec3(.3), glm::vec3(1), glm::vec3(-.5,.5,.2), LightType::POINT);
+	Light dir(glm::vec3(.8,1,.2), glm::vec3(.9),glm::vec3(0,0,1), LightType::DIRECTIONAL);
+	Light spot(glm::vec3(1), glm::vec3(1.0f), glm::vec3(1,1,1), glm::vec3(-1,-1,-1), 64.0f);
 
 	lights.push_back(ambL);
 	lights.push_back(point);
@@ -43,6 +44,9 @@ PAG::Renderer::Renderer() :
 
 	backColor = { 0,0,0,1 };
 
+	textures.insert({ "cow", std::make_shared<Texture>("./textures/vaca.png") });
+	textures.insert({ "win95", std::make_shared<Texture>("./textures/win95.png") });
+	textures.insert({ "marble", std::make_shared<Texture>("./textures/marble.png") });
 }
 
 void PAG::Renderer::configBackColor(glm::vec4 color)
@@ -85,19 +89,25 @@ void PAG::Renderer::setTextureToActiveModel()
 {
 	if (activeModel != -1)
 	{
-		Model* ptr = models[activeModel].get();
-		if (!models[activeModel]->isDrawingTexture())
+		Model* model = models[activeModel].get();
+		//If it is not drawing texture
+		if (!model->isDrawingTexture())
 		{
-			std::shared_ptr<Texture> tex = std::make_shared<Texture>("vaca.png");
-			ptr->setShaderProgram(shaderProgramTexture);
-			ptr->setTexture(tex);
-			ptr->setDrawTexture(true);
+			model->setShaderProgram(shaderProgramTexture);
+			//Check models
+			if (model->name() == "cow")
+				model->setTexture(textures["cow"]);
+			else if (model->name() == "rook")
+				model->setTexture(textures["marble"]);
+			else
+				model->setTexture(textures["win95"]);
+			model->setDrawTexture(true);
 		}
 		else
 		{
-			ptr->setDrawTexture(false);
-			ptr->setShaderProgram(shaderProgram);
-			ptr->unBindTexture();
+			model->setDrawTexture(false);
+			model->setShaderProgram(shaderProgram);
+			model->unBindTexture();
 		}
 	}
 }
@@ -110,7 +120,8 @@ void PAG::Renderer::activateLight(Light& l, ShaderProgram* sp, Model* model)
 	case LightType::AMBIENT:
 		sp->getFragmentShader().setUniformSubroutine("", "ambientColor");
 		sp->getFragmentShader().setUniform("Ia", l.ambient);
-		sp->getFragmentShader().setUniform("Ka", model->getMaterial().ambient);
+		if(!model->isDrawingTexture())
+			sp->getFragmentShader().setUniform("Ka", model->getMaterial().ambient);
 		break;
 	//WORKS
 	case LightType::POINT:
@@ -120,7 +131,8 @@ void PAG::Renderer::activateLight(Light& l, ShaderProgram* sp, Model* model)
 		//Apply transform
 		lPos = glm::vec3(camera.getViewMatrix() * glm::vec4(l.position, 1.0f));
 		sp->getFragmentShader().setUniform("lPos", lPos);
-		sp->getFragmentShader().setUniform("Kd", model->getMaterial().diffuse);
+		if (!model->isDrawingTexture())
+			sp->getFragmentShader().setUniform("Kd", model->getMaterial().diffuse);
 		sp->getFragmentShader().setUniform("Ks", model->getMaterial().specular);
 		sp->getFragmentShader().setUniform("shininess", model->getMaterial().shininess);
 
@@ -134,7 +146,8 @@ void PAG::Renderer::activateLight(Light& l, ShaderProgram* sp, Model* model)
 		glm::vec3 lDir = glm::vec3(matrix * glm::vec4(l.direction, 0));
 		lDir = glm::normalize(lDir);
 		sp->getFragmentShader().setUniform("lDir", lDir);
-		sp->getFragmentShader().setUniform("Kd", model->getMaterial().diffuse);
+		if (!model->isDrawingTexture())
+			sp->getFragmentShader().setUniform("Kd", model->getMaterial().diffuse);
 		sp->getFragmentShader().setUniform("Ks", model->getMaterial().specular);
 		sp->getFragmentShader().setUniform("shininess", model->getMaterial().shininess);
 		break;
@@ -153,8 +166,8 @@ void PAG::Renderer::activateLight(Light& l, ShaderProgram* sp, Model* model)
 		sp->getFragmentShader().setUniform("lDir", lDir);
 
 		
-
-		sp->getFragmentShader().setUniform("Kd", model->getMaterial().diffuse);
+		if (!model->isDrawingTexture())
+			sp->getFragmentShader().setUniform("Kd", model->getMaterial().diffuse);
 		sp->getFragmentShader().setUniform("Ks", model->getMaterial().specular);
 		sp->getFragmentShader().setUniform("shininess", model->getMaterial().shininess);
 		break;
@@ -328,22 +341,22 @@ bool PAG::Renderer::checkExistingModel(ModelType type)
 	return false;
 }
 
+bool PAG::Renderer::checkExistingModel(std::string name)
+{
+	for (size_t i = 0; i < models.size(); i++)
+	{
+		if (models[i]->name() == name)
+			return true;
+	}
+	return false;
+}
+
 void PAG::Renderer::configViewport(int width, int height)
 {
 	wViewport = width;
 	hViewport = height;
 	camera.setViewport(width, height);
 	glViewport(0, 0, width, height);
-}
-
-bool PAG::Renderer::isDrawingTriangle()
-{
-	return drawingTriangle;
-}
-
-void PAG::Renderer::setDrawingTriangle(bool draw)
-{
-	drawingTriangle = draw;
 }
 
 void PAG::Renderer::setRenderType(RenderType rt)
@@ -395,7 +408,7 @@ void PAG::Renderer::addModel(ModelType type)
 			models.push_back(createModel(ModelType::TRIANGLE, shaderProgram, mat));
 			break;
 		case PAG::ModelType::TETRAHEDRON:
-			models.push_back(createModel(ModelType::TETRAHEDRON, shaderProgramTexture, mat));
+			models.push_back(createModel(ModelType::TETRAHEDRON, shaderProgram, mat));
 			break;
 		default:
 			break;
@@ -410,12 +423,29 @@ void PAG::Renderer::addModel(ModelType type)
 		Log::getInstance()->printMessage(msgType::INFO, "You added that model");
 }
 
-void PAG::Renderer::addModel(std::string filename)
+void PAG::Renderer::addModel(std::string filename, std::string name)
 {
-	models.push_back(createModel(shaderProgram, filename, mat, filename));
-	if (activeModel == -1)
-		activeModel = 0;
-	else if (activeModel >= 0)
-		activeModel++;
-	printActiveModel();
+	if (!checkExistingModel(name))
+	{
+		models.push_back(createModel(shaderProgram, filename, mat, name));
+		if (activeModel == -1)
+			activeModel = 0;
+		else if (activeModel >= 0)
+			activeModel++;
+
+		if (name == "cow")
+		{
+			models[activeModel]->rotate(-90, { 1,0,0 });
+			models[activeModel]->move({ 2,0,0 });
+		}
+		if (name == "rook")
+		{
+			models[activeModel]->move({ 2,0,2 });
+			models[activeModel]->scale(glm::vec3(.05));
+
+		}
+		printActiveModel();
+	}
+	else
+		Log::getInstance()->printMessage(msgType::INFO, "You added that model");
 }

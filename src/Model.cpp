@@ -50,7 +50,7 @@ void PAG::Model::processMesh(aiMesh* mesh, const aiScene* scene)
 		}
 	}
 	//modelMatrix = glm::scale(modelMatrix, glm::vec3(1));
-	rotate(-90.0f, {1,0,0});
+	
 }
 
 PAG::Model::Model()
@@ -274,7 +274,8 @@ void PAG::Model::createLightCube()
 void PAG::Model::initModel()
 {
 	//genero la matriz de translado al 0,0,0
-	modelMatrix = glm::translate(modelMatrix, position);
+	modelMatrix = glm::mat4(1);
+	//scale(glm::vec3(.05f));
 	//generamos el vao y la vinculamos
 	Log::getInstance()->printMessage(msgType::INFO, "Creating VAO");
 	glGenVertexArrays(1, &idVAO);
@@ -384,6 +385,7 @@ void PAG::Model::move(glm::vec3 pos)
 {
 	modelMatrix = glm::translate(modelMatrix, pos);
 	position += pos;
+
 }
 
 void PAG::Model::rotate(float deg, glm::vec3 axis)

@@ -38,7 +38,8 @@ vec3 wire()
 subroutine (lightMode)
 vec3 ambientColor()
 {
-	vec3 amb = (Ka*Ia);
+	vec3 c = texture(texSampler, inputVS.texCoords).rgb;
+	vec3 amb = (c*Ia);
 	return amb;
 }
 

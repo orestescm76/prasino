@@ -5,7 +5,9 @@
 #include <fstream>
 #include <sstream>
 #include <memory>
+//Estructuras de datos
 #include <vector>
+#include <map>
 //en este orden que si no la jodemos
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>

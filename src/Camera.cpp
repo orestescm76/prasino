@@ -10,7 +10,7 @@ PAG::Camera::Camera(float w, float h): wViewport(w), hViewport(h)
 
 }
 
-PAG::Camera::Camera(glm::vec3 p, float a, float zn, float zf, float w, float h): pos(p), fovX(a), zNear(zn), zFar(zf), wViewport(w), hViewport(h)
+PAG::Camera::Camera(glm::vec3 _pos, float _fovX, float _zn, float _zf, float _w, float _h): pos(_pos), fovX(_fovX), zNear(_zn), zFar(_zf), wViewport(_w), hViewport(_h)
 {
 }
 

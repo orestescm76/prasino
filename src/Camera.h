@@ -21,7 +21,7 @@ namespace PAG
 		glm::vec3 target = { 0.0f, 0.0f, 0.0f };
 		glm::vec3 up = { 0.0f, 1.0f, 0.0f };
 		//ejes de la camara
-		glm::vec3 n, v, u;
+		glm::vec3 n, v, u = {0,0,0};
 		float fovX = 45.0f;
 		float zNear =  0.1f;
 		float zFar = 100.0f;
@@ -35,7 +35,7 @@ namespace PAG
 	public:
 		Camera();
 		Camera(float w, float h);
-		Camera(glm::vec3 p, float a, float zn, float zf, float w, float h);
+		Camera(glm::vec3 _pos, float _fovX, float _zn, float _zf, float _w, float _h);
 		Camera& operator=(const Camera& orig) = default;
 		~Camera();
 		void setViewport(float w, float h);

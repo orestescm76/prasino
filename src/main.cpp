@@ -1,7 +1,7 @@
 /*
 * @author orestescm76
 * @brief main
-* VERSION 0.9.0a3
+* VERSION 0.9.0
 * 
 */
 #include "pch.h"
@@ -18,6 +18,7 @@ void printHelp()
 		<< "'1' adds the triangle" << std::endl
 		<< "'2' adds the tetrahedron" << std::endl
 		<< "'3' adds the cow" << std::endl
+		<< "'4' adds the Rook" << std::endl
 		<< "'p' for panning" << std::endl
 		<< "'t' for tilting" << std::endl
 		<< "'o' for orbit" << std::endl
@@ -29,6 +30,7 @@ void printHelp()
 		<< "'b' to set the render to Wire" << std::endl
 		<< "'r' to reset the camera" << std::endl
 		<< "'d' deletes the active model" << std::endl
+		<< "'u' adds the texture to the active model" << std::endl
 		<< "'TAB' changes the active model" << std::endl
 		<< "Mouse wheel to change the color and zoom!" << std::endl;
 }
@@ -135,7 +137,10 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 			PAG::Renderer::getInstance()->addModel(PAG::ModelType::TETRAHEDRON);
 			break;
 		case GLFW_KEY_3:
-			PAG::Renderer::getInstance()->addModel("vaca.obj");
+			PAG::Renderer::getInstance()->addModel("./models/vaca.obj", "cow");
+			break;
+		case GLFW_KEY_4:
+			PAG::Renderer::getInstance()->addModel("./models/Rook.obj", "rook");
 			break;
 		case GLFW_KEY_Z:
 			hideShowMouse(window);
