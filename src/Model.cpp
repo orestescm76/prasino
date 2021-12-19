@@ -40,6 +40,16 @@ void PAG::Model::processMesh(aiMesh* mesh, const aiScene* scene)
 			texCoords.push_back(0.0f);
 			texCoords.push_back(0.0f);
 		}
+		if (mesh->mTangents)
+		{
+			tangents.push_back(mesh->mTangents[i].x);
+			tangents.push_back(mesh->mTangents[i].y);
+			tangents.push_back(mesh->mTangents[i].z);
+
+			biTangents.push_back(mesh->mBitangents[i].x);
+			biTangents.push_back(mesh->mBitangents[i].x);
+			biTangents.push_back(mesh->mBitangents[i].x);
+		}
 	}
 	for (size_t i = 0; i < mesh->mNumFaces; i++)
 	{
@@ -58,8 +68,8 @@ PAG::Model::Model()
 
 }
 
-PAG::Model::Model(std::shared_ptr<ShaderProgram> shaderProgram, ModelType model, Material& m): sp(shaderProgram), modelType(model), material(m),
-vertices(), normals(), indices(), modelMatrix(1), mName()
+PAG::Model::Model(std::shared_ptr<ShaderProgram> shaderProgram, ModelType model, Material& m) : sp(shaderProgram), modelType(model), material(m),
+vertices(), normals(), indices(), modelMatrix(1), mName(), textures()
 {
 	switch (modelType)
 	{
@@ -79,7 +89,7 @@ vertices(), normals(), indices(), modelMatrix(1), mName()
 }
 
 PAG::Model::Model(std::shared_ptr<ShaderProgram> shaderProgram, ModelType model) : sp(shaderProgram), modelType(model),
-vertices(), normals(), indices(), modelMatrix(1), mName()
+vertices(), normals(), indices(), modelMatrix(1), mName(), textures()
 {
 	switch (modelType)
 	{
@@ -99,11 +109,11 @@ vertices(), normals(), indices(), modelMatrix(1), mName()
 }
 
 PAG::Model::Model(std::shared_ptr<ShaderProgram> shaderProgram, std::string filename, Material mat, std::string name): sp(shaderProgram), modelType(ModelType::EXTERN), modelMatrix(1),
-normals(), vertices(), indices(), material(mat), mName(name)
+normals(), vertices(), indices(), material(mat), mName(name), textures()
 {
 	Log::getInstance()->printMessage(msgType::INFO, "Loading " + filename);
 	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile(filename, aiProcess_JoinIdenticalVertices | aiProcess_Triangulate);
+	const aiScene* scene = importer.ReadFile(filename, aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace);
 	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 		throw;
 	processNode(scene->mRootNode, scene);
@@ -115,7 +125,7 @@ normals(), vertices(), indices(), material(mat), mName(name)
 }
 
 PAG::Model::Model(GLfloat* v, GLfloat* c, GLuint* i, std::shared_ptr<ShaderProgram>& shaderProgram): sp(shaderProgram),
-vertices(), normals(), indices(), modelMatrix(1), mName()
+vertices(), normals(), indices(), modelMatrix(1), mName(), textures()
 {
 	initModel();
 }
@@ -275,7 +285,6 @@ void PAG::Model::initModel()
 {
 	//genero la matriz de translado al 0,0,0
 	modelMatrix = glm::mat4(1);
-	//scale(glm::vec3(.05f));
 	//generamos el vao y la vinculamos
 	Log::getInstance()->printMessage(msgType::INFO, "Creating VAO");
 	glGenVertexArrays(1, &idVAO);
@@ -313,6 +322,28 @@ void PAG::Model::initModel()
 			nullptr);
 		glEnableVertexAttribArray(2);
 	}
+	if (tangents.size() >= 3)
+	{
+		Log::getInstance()->printMessage(msgType::INFO, "Creating Tangents VBO");
+		glGenBuffers(1, &idTangent);
+		glBindBuffer(GL_ARRAY_BUFFER, idTangent);
+		glBufferData(GL_ARRAY_BUFFER, tangents.size() * sizeof(GLfloat), tangents.data(),
+			GL_STATIC_DRAW);
+		glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat),
+			nullptr);
+		glEnableVertexAttribArray(3);
+	}
+	if (biTangents.size() >= 3)
+	{
+		Log::getInstance()->printMessage(msgType::INFO, "Creating BiTangents VBO");
+		glGenBuffers(1, &idBiTangent);
+		glBindBuffer(GL_ARRAY_BUFFER, idBiTangent);
+		glBufferData(GL_ARRAY_BUFFER, biTangents.size() * sizeof(GLfloat), biTangents.data(),
+			GL_STATIC_DRAW);
+		glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat),
+			nullptr);
+		glEnableVertexAttribArray(4);
+	}
 	//indices
 	Log::getInstance()->printMessage(msgType::INFO, "Creating IBO");
 	glGenBuffers(1, &idIBO);
@@ -323,10 +354,20 @@ void PAG::Model::initModel()
 
 void PAG::Model::draw()
 {
-	if (texture.get() && drawTexture)
+	for (size_t i = 0; i < textures.size(); i++)
 	{
-		sp->getFragmentShader().setUniform("texSampler", texture->getTexID());
-		texture->activate();
+		if (drawTexture)
+		{
+			sp->getFragmentShader().setUniform("texSampler", textures[i]->getTexID());
+			textures[i]->activate();
+			if (normalMapping)
+			{
+				i++;
+				sp->getFragmentShader().setUniform("texSamplerNM", textures[i]->getTexID());
+				textures[i]->activate();
+			}
+		}
+
 	}
 	//Bind the vertices and indices
 	glBindVertexArray(idVAO);
@@ -349,6 +390,16 @@ void PAG::Model::draw()
 void PAG::Model::setDrawingMode(PAG::RenderType mode)
 {
 	renderType = mode;
+}
+
+void PAG::Model::addTexture(std::shared_ptr<Texture>& tex)
+{
+	textures.push_back(tex);
+}
+
+void PAG::Model::deleteTexutres()
+{
+	textures.clear();
 }
 
 PAG::Material PAG::Model::getMaterial()
@@ -379,6 +430,16 @@ PAG::ModelType PAG::Model::getType()
 bool PAG::Model::isDrawingTexture()
 {
 	return drawTexture;
+}
+
+bool PAG::Model::isDrawingNormalMapping()
+{
+	return normalMapping;
+}
+
+void PAG::Model::setNormalMapping(bool nm)
+{
+	normalMapping = nm;
 }
 
 void PAG::Model::move(glm::vec3 pos)
@@ -412,11 +473,6 @@ void PAG::Model::useProgram()
 	sp->useProgram();
 }
 
-void PAG::Model::setTexture(std::shared_ptr<Texture> tex)
-{
-	texture = tex;
-}
-
 void PAG::Model::setShaderProgram(std::shared_ptr<ShaderProgram>& shaderProgram)
 {
 	sp = shaderProgram;
@@ -434,8 +490,11 @@ void PAG::Model::resetMatrix()
 
 void PAG::Model::unBindTexture()
 {
-	if (texture.get())
-		texture.reset();
+	for (size_t i = 0; i < textures.size(); i++)
+	{
+		if (textures[i].get())
+			textures[i].reset();
+	}
 }
 
 PAG::Model::~Model()
@@ -452,5 +511,9 @@ PAG::Model::~Model()
 		glDeleteBuffers(1, &idNormalVBO);
 	if (idVBOTex != 0)
 		glDeleteBuffers(1, &idVBOTex);
+	if (idTangent != 0)
+		glDeleteBuffers(1, &idTangent);
+	if (idBiTangent != 0)
+		glDeleteBuffers(1, &idBiTangent);
 	//std::vector destroys on its own
 }

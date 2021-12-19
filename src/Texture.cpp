@@ -2,14 +2,26 @@
 #include "Texture.h"
 #include "Log.h"
 
-PAG::Texture::Texture(std::string filename)
+PAG::Texture::Texture(std::string filename, TextureType type): textureType(type)
 {
 	initTexture(filename);
+	if (textureType == TextureType::NORMAL_MAP)
+		texID = 1;
+}
+
+void PAG::Texture::setTexID(unsigned id)
+{
+	texID = id;
 }
 
 unsigned int PAG::Texture::getTexID()
 {
 	return texID;
+}
+
+unsigned int PAG::Texture::getOpenGLID()
+{
+	return id;
 }
 
 void PAG::Texture::bindTexture()
@@ -21,7 +33,11 @@ void PAG::Texture::activate()
 {
 	glActiveTexture(GL_TEXTURE0 + texID);
 	bindTexture();
+}
 
+PAG::TextureType PAG::Texture::type()
+{
+	return textureType;
 }
 
 void PAG::Texture::initTexture(std::string filename)

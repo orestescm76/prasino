@@ -1,7 +1,7 @@
 /*
 * @author orestescm76
 * @brief main
-* VERSION 0.9.0
+* VERSION 1.0.0a1
 * 
 */
 #include "pch.h"
@@ -19,6 +19,7 @@ void printHelp()
 		<< "'2' adds the tetrahedron" << std::endl
 		<< "'3' adds the cow" << std::endl
 		<< "'4' adds the Rook" << std::endl
+		<< "'5' adds the Tottenham Spurs cube" << std::endl
 		<< "'p' for panning" << std::endl
 		<< "'t' for tilting" << std::endl
 		<< "'o' for orbit" << std::endl
@@ -141,6 +142,9 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 			break;
 		case GLFW_KEY_4:
 			PAG::Renderer::getInstance()->addModel("./models/Rook.obj", "rook");
+			break;
+		case GLFW_KEY_5:
+			PAG::Renderer::getInstance()->addModel("./models/cube.obj", "spurs");
 			break;
 		case GLFW_KEY_Z:
 			hideShowMouse(window);

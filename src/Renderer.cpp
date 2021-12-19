@@ -7,7 +7,7 @@
 #include "Renderer.h"
 
 PAG::Renderer* PAG::Renderer::instance = nullptr;
-const std::string PAG::Renderer::version = "0.9.0";
+const std::string PAG::Renderer::version = "1.0.0a1";
 
 PAG::Renderer::Renderer() :
 	activeModel(-1),
@@ -24,6 +24,7 @@ PAG::Renderer::Renderer() :
 		shaderProgram = std::make_shared<ShaderProgram>("pag09-vs.glsl", "pag09-fs.glsl");
 		spLightCube = std::make_shared<ShaderProgram>("pag09-vs.glsl", "pag08-light-fs.glsl");
 		shaderProgramTexture = std::make_shared<ShaderProgram>("pag09-vs.glsl", "pag09-fs-tex.glsl");
+		shaderProgramTextureNM = std::make_shared<ShaderProgram>("pag10-vs-nm.glsl", "pag10-fs-nm-tex.glsl");
 	}
 	catch (const std::exception& e)
 	{
@@ -44,9 +45,11 @@ PAG::Renderer::Renderer() :
 
 	backColor = { 0,0,0,1 };
 
-	textures.insert({ "cow", std::make_shared<Texture>("./textures/vaca.png") });
-	textures.insert({ "win95", std::make_shared<Texture>("./textures/win95.png") });
-	textures.insert({ "marble", std::make_shared<Texture>("./textures/marble.png") });
+	textures.insert({ "cow", std::make_shared<Texture>("./textures/vaca.png",TextureType::IMAGE) });
+	textures.insert({ "win95", std::make_shared<Texture>("./textures/win95.png",TextureType::IMAGE) });
+	textures.insert({ "marble", std::make_shared<Texture>("./textures/marble.png",TextureType::IMAGE) });
+	textures.insert({ "spurs", std::make_shared<Texture>("./textures/tottenham.png",TextureType::IMAGE)});
+	textures.insert({ "spursNM", std::make_shared<Texture>("./textures/tottenham_nm.png",TextureType::NORMAL_MAP) });
 }
 
 void PAG::Renderer::configBackColor(glm::vec4 color)
@@ -96,11 +99,13 @@ void PAG::Renderer::setTextureToActiveModel()
 			model->setShaderProgram(shaderProgramTexture);
 			//Check models
 			if (model->name() == "cow")
-				model->setTexture(textures["cow"]);
+				model->addTexture(textures["cow"]);
 			else if (model->name() == "rook")
-				model->setTexture(textures["marble"]);
+				model->addTexture(textures["marble"]);
+			else if (model->name() == "spurs")
+				model->addTexture(textures["spurs"]);
 			else
-				model->setTexture(textures["win95"]);
+				model->addTexture(textures["win95"]);
 			model->setDrawTexture(true);
 		}
 		else
@@ -188,7 +193,8 @@ void PAG::Renderer::loadUniforms(ShaderProgram* sp, Model* model)
 
 	sp->getVertexShader().setUniform("matProjViewModel", projviewmodel);
 	sp->getVertexShader().setUniform("matModelView", viewMod);
-	sp->getVertexShader().setUniform("matModelViewTransInv", transInvViewMod);
+	if(!model->isDrawingNormalMapping())
+		sp->getVertexShader().setUniform("matModelViewTransInv", transInvViewMod);
 }
 
 void PAG::Renderer::drawLightCube(Light& l)
@@ -327,9 +333,19 @@ std::unique_ptr<PAG::Model> PAG::Renderer::createModel(ModelType type, std::shar
 {
 	return std::make_unique<Model>(sp, type, mat);
 }
-std::unique_ptr<PAG::Model> PAG::Renderer::createModel(std::shared_ptr<ShaderProgram>& shaderProgram, std::string filename, Material mat, std::string name)
+std::unique_ptr<PAG::Model> PAG::Renderer::createModel(std::shared_ptr<ShaderProgram>& shaderProgram, std::string filename, Material mat, std::string name, bool NM = false)
 {
-	return std::make_unique<Model>(shaderProgram, filename, mat, name);
+	if(!NM)
+		return std::make_unique<Model>(shaderProgram, filename, mat, name);
+	else
+	{
+		std::unique_ptr<Model> model = std::make_unique<Model>(shaderProgram, filename, mat, name);
+		model->setNormalMapping(true);
+		model->setDrawTexture(true);
+		model->addTexture(textures["spurs"]);
+		model->addTexture(textures["spursNM"]);
+		return model;
+	}
 }
 bool PAG::Renderer::checkExistingModel(ModelType type)
 {
@@ -427,7 +443,10 @@ void PAG::Renderer::addModel(std::string filename, std::string name)
 {
 	if (!checkExistingModel(name))
 	{
-		models.push_back(createModel(shaderProgram, filename, mat, name));
+		if (name == "spurs")
+			models.push_back(createModel(shaderProgramTextureNM, filename, mat, name, true));
+		else
+			models.push_back(createModel(shaderProgram, filename, mat, name));
 		if (activeModel == -1)
 			activeModel = 0;
 		else if (activeModel >= 0)
@@ -444,6 +463,7 @@ void PAG::Renderer::addModel(std::string filename, std::string name)
 			models[activeModel]->scale(glm::vec3(.05));
 
 		}
+
 		printActiveModel();
 	}
 	else

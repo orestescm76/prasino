@@ -15,6 +15,7 @@ namespace PAG
 		std::unique_ptr<Model> lightCube;
 		std::shared_ptr<ShaderProgram> shaderProgram;
 		std::shared_ptr<ShaderProgram> shaderProgramTexture;
+		std::shared_ptr<ShaderProgram> shaderProgramTextureNM;
 		std::shared_ptr<ShaderProgram> spLightCube;
 		Camera camera;
 		Renderer();
@@ -29,7 +30,7 @@ namespace PAG
 		void drawLightCube(Light& l);
 		void draw(Light& l, Model* model);
 		std::unique_ptr<Model> createModel(ModelType type, std::shared_ptr<ShaderProgram>& sp, Material& mat);
-		std::unique_ptr<Model> createModel(std::shared_ptr<ShaderProgram>& shaderProgram, std::string filename, Material mat, std::string name);
+		std::unique_ptr<Model> createModel(std::shared_ptr<ShaderProgram>& shaderProgram, std::string filename, Material mat, std::string name, bool NM);
 		int activeModel;
 		bool checkExistingModel(ModelType type);
 		bool checkExistingModel(std::string name);

@@ -25,6 +25,8 @@ namespace PAG
 		std::vector<float> normals;
 		std::vector<unsigned int> indices;
 		std::vector<float> texCoords;
+		std::vector<float> tangents;
+		std::vector<float> biTangents;
 		//IDENTIFICADORES
 		unsigned int idVAO = 0;
 		unsigned int idVBO = 0;
@@ -32,10 +34,12 @@ namespace PAG
 		unsigned int idIBO = 0;
 		unsigned int idNormalVBO = 0;
 		unsigned int idVBOTex = 0;
+		unsigned int idTangent = 0;
+		unsigned int idBiTangent = 0;
 		//Pointer to the shader program
 		std::shared_ptr<ShaderProgram> sp;
 		//pointer to a texture
-		std::shared_ptr<Texture> texture;
+		std::vector<std::shared_ptr<Texture>> textures;
 		bool drawTexture = false;
 		//Model matrix
 		glm::mat4 modelMatrix;
@@ -52,6 +56,7 @@ namespace PAG
 		void processMesh(aiMesh* mesh, const aiScene* scene);
 		glm::vec3 position = {0,0,0};
 		void initModel();
+		bool normalMapping = false;
 	public:
 		Model();
 		Model(GLfloat* v, GLfloat* c, GLuint* i, std::shared_ptr<ShaderProgram>& shaderProgram);
@@ -64,7 +69,8 @@ namespace PAG
 		void draw();
 		void setDrawingMode(RenderType mode);
 		void useProgram();
-		void setTexture(std::shared_ptr<Texture> tex);
+		void addTexture(std::shared_ptr<Texture>& tex);
+		void deleteTexutres();
 		void setShaderProgram(std::shared_ptr<ShaderProgram>& shaderProgram);
 		void setDrawTexture(bool flag);
 		Material getMaterial();
@@ -73,6 +79,8 @@ namespace PAG
 		std::string name();
 		ModelType getType();
 		bool isDrawingTexture();
+		bool isDrawingNormalMapping();
+		void setNormalMapping(bool nm);
 		//Transformations
 		//Translate. This doesn't translate to the origin.
 		void move(glm::vec3 pos);
