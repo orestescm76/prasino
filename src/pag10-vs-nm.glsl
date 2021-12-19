@@ -21,8 +21,7 @@ void main ()
 {
 	vec3 N = normalize(vec3(matModelView*vec4(vNormal,0)));
 	vec3 T = normalize(vec3(matModelView*vec4(vTangents,0)));
-	vec3 B = normalize(vec3(matModelView*vec4(vBiTangents,0)));
-	//vec3 B = cross(N,T);
+	vec3 B = cross(N,T);
 	mat3 TBNInv = transpose(mat3(T,B,N));
 	vec3 P = vec3(matModelView * vec4(vPos, 1.0));
 	outVS.pos = P;
