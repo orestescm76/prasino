@@ -67,6 +67,7 @@ namespace PAG
 		Model& operator=(const Model& orig) = default;
 
 		void draw();
+		void drawTriangles();
 		void setDrawingMode(RenderType mode);
 		void useProgram();
 		void addTexture(std::shared_ptr<Texture>& tex);

@@ -7,7 +7,7 @@
 #include "Renderer.h"
 
 PAG::Renderer* PAG::Renderer::instance = nullptr;
-const std::string PAG::Renderer::version = "1.0.0a2";
+const std::string PAG::Renderer::version = "1.0.0a3";
 
 PAG::Renderer::Renderer() :
 	activeModel(-1),
@@ -21,10 +21,11 @@ PAG::Renderer::Renderer() :
 {
 	try
 	{
-		shaderProgram = std::make_shared<ShaderProgram>("pag09-vs.glsl", "pag09-fs.glsl");
+		shaderProgram = std::make_shared<ShaderProgram>("pag10-vs.glsl", "pag10-fs.glsl");
 		spLightCube = std::make_shared<ShaderProgram>("pag09-vs.glsl", "pag08-light-fs.glsl");
-		shaderProgramTexture = std::make_shared<ShaderProgram>("pag09-vs.glsl", "pag09-fs-tex.glsl");
+		shaderProgramTexture = std::make_shared<ShaderProgram>("pag10-vs.glsl", "pag10-fs-tex.glsl");
 		shaderProgramTextureNM = std::make_shared<ShaderProgram>("pag10-vs-nm.glsl", "pag10-fs-nm-tex.glsl");
+		shaderProgramShadow = std::make_shared<ShaderProgram>("pag10-shadow-vs.glsl", "pag10-shadow-fs.glsl");
 	}
 	catch (const std::exception& e)
 	{
@@ -34,12 +35,12 @@ PAG::Renderer::Renderer() :
 	
 	lightCube = std::make_unique<Model>(spLightCube, ModelType::LIGHT_CUBE);
 	Light ambL(glm::vec3(.18));
-	Light point(glm::vec3(.3), glm::vec3(1), glm::vec3(-.5,.5,.2), LightType::POINT);
-	Light dir(glm::vec3(.8,1,.2), glm::vec3(.9),glm::vec3(0,0,1), LightType::DIRECTIONAL);
-	Light spot(glm::vec3(1), glm::vec3(1.0f), glm::vec3(1,1,1), glm::vec3(-1,-1,-1), 64.0f);
+	//Light point(glm::vec3(.3), glm::vec3(1), glm::vec3(-.5,.5,.2), LightType::POINT);
+	Light dir(glm::vec3(.8,1,.2), glm::vec3(.9),glm::vec3(-1,0,0), LightType::DIRECTIONAL);
+	Light spot(glm::vec3(1), glm::vec3(1.0f), glm::vec3(3,1,3), glm::vec3(-3,-1,-3), 64.0f);
 
 	lights.push_back(ambL);
-	lights.push_back(point);
+	//lights.push_back(point);
 	lights.push_back(dir);
 	lights.push_back(spot);
 
@@ -50,6 +51,20 @@ PAG::Renderer::Renderer() :
 	textures.insert({ "marble", std::make_shared<Texture>("./textures/marble.png",TextureType::IMAGE) });
 	textures.insert({ "spurs", std::make_shared<Texture>("./textures/tottenham.png",TextureType::IMAGE)});
 	textures.insert({ "spursNM", std::make_shared<Texture>("./textures/tottenham_nm.png",TextureType::NORMAL_MAP) });
+
+	//Create FBO
+	glGenFramebuffers(1, &fboShadowId);
+	for (size_t i = 0; i < lights.size(); i++)
+	{
+		switch (lights[i].type)
+		{
+		case LightType::DIRECTIONAL:
+		case LightType::SPOTLIGHT:
+			createShadowMap(lights[i]);
+		default:
+			break;
+		}
+	}
 }
 
 void PAG::Renderer::configBackColor(glm::vec4 color)
@@ -77,6 +92,7 @@ void PAG::Renderer::deleteActiveModel()
 		it += activeModel;
 		models.erase(it);
 		activeModel--;
+		updateShadowMaps();
 		printActiveModel();
 	}
 	if (models.size() > 0)
@@ -149,6 +165,9 @@ void PAG::Renderer::setNormalMappingToActiveModel()
 void PAG::Renderer::activateLight(Light& l, ShaderProgram* sp, Model* model)
 {
 	glm::vec3 lPos, lDir;
+	glm::mat4 viewCL, projCL;
+	glm::mat4 shadowMat = glm::scale(glm::mat4(1), glm::vec3(.5));
+	shadowMat[3][0] = shadowMat[3][1] = shadowMat[3][2] = 0.5;
 	switch (l.type)
 	{
 	case LightType::AMBIENT:
@@ -172,6 +191,9 @@ void PAG::Renderer::activateLight(Light& l, ShaderProgram* sp, Model* model)
 
 		break;
 	case LightType::DIRECTIONAL:
+		viewCL = glm::lookAt(glm::vec3(5) * -l.direction, glm::vec3(0), glm::vec3(0, 1, 0));
+		projCL = glm::ortho(-3.0, 3.0, -3.0, 3.0, .1, 10.0);
+		shadowMat = shadowMat * projCL * viewCL * model->getModelMatrix();
 		sp->getFragmentShader().setUniformSubroutine("", "directional");
 		sp->getFragmentShader().setUniform("Id", l.diffuse);
 		sp->getFragmentShader().setUniform("Is", l.specular);
@@ -184,8 +206,15 @@ void PAG::Renderer::activateLight(Light& l, ShaderProgram* sp, Model* model)
 			sp->getFragmentShader().setUniform("Kd", model->getMaterial().diffuse);
 		sp->getFragmentShader().setUniform("Ks", model->getMaterial().specular);
 		sp->getFragmentShader().setUniform("shininess", model->getMaterial().shininess);
+		sp->getVertexShader().setUniform("matShadow", shadowMat);
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, l.texID);
+		sp->getFragmentShader().setUniform("samplerShadow", (unsigned)2);
 		break;
 	case LightType::SPOTLIGHT:
+		viewCL = glm::lookAt(l.position, l.position + l.direction, glm::vec3(0, 1, 0));
+		projCL = glm::perspective(2 * glm::radians(l.angle), 1024.0f / 1024.0f, .1f, 10.0f);
+		shadowMat = shadowMat * projCL * viewCL * model->getModelMatrix();
 		sp->getFragmentShader().setUniformSubroutine("", "spot");
 		sp->getFragmentShader().setUniform("sAngle", glm::radians(l.angle));
 		sp->getFragmentShader().setUniform("Id", l.diffuse);
@@ -193,17 +222,18 @@ void PAG::Renderer::activateLight(Light& l, ShaderProgram* sp, Model* model)
 		//Apply transform
 		lPos = glm::vec3(camera.getViewMatrix() * glm::vec4(l.position, 1));
 		sp->getFragmentShader().setUniform("lPos", lPos);
-
+		sp->getVertexShader().setUniform("matShadow", shadowMat);
 		//Apply transform
 		lDir = glm::vec3(camera.getViewMatrix() * glm::vec4(l.direction, 0));
 		lDir = glm::normalize(lDir);
 		sp->getFragmentShader().setUniform("lDir", lDir);
-
-		
 		if (!model->isDrawingTexture())
 			sp->getFragmentShader().setUniform("Kd", model->getMaterial().diffuse);
 		sp->getFragmentShader().setUniform("Ks", model->getMaterial().specular);
 		sp->getFragmentShader().setUniform("shininess", model->getMaterial().shininess);
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, l.texID);
+		sp->getFragmentShader().setUniform("samplerShadow", (unsigned)2);
 		break;
 	}
 
@@ -396,6 +426,97 @@ bool PAG::Renderer::checkExistingModel(std::string name)
 	return false;
 }
 
+void PAG::Renderer::createFramebufferShadow()
+{
+	
+}
+
+void PAG::Renderer::createShadowMap(Light& l)
+{
+	glGenTextures(1, &l.texID);
+	GLfloat borde[] = { 1.0, 1.0, 1.0, 1.0 };
+	//PLACEHOLDER
+	GLsizei _anchoMS = 1024; 
+	GLsizei _altoMS = 1024;
+	glBindTexture(GL_TEXTURE_2D, l.texID);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, _anchoMS, _altoMS, 0,
+		GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, nullptr);
+	//parameters...
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borde);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LESS);
+}
+
+void PAG::Renderer::updateShadowMaps()
+{
+	for (size_t i = 0; i < lights.size(); i++)
+	{
+		if(lights[i].type == LightType::DIRECTIONAL || lights[i].type == LightType::SPOTLIGHT)
+			updateShadowMap(lights[i]);
+	}
+}
+
+void PAG::Renderer::updateShadowMap(Light& l)
+{	
+	//Bind the texture to the framebuffer
+	glBindFramebuffer(GL_FRAMEBUFFER, fboShadowId);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, l.texID, 0);
+
+	glReadBuffer(GL_NONE);
+	glDrawBuffer(GL_NONE);
+	//check framebuffer
+	GLenum state = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+	if (state != GL_FRAMEBUFFER_COMPLETE)
+	{
+		throw std::runtime_error("PAG::Renderer::createShadowMap(Light& l). Failed to create the shadow map");
+	}
+	//Activate texture unit
+	glActiveTexture(GL_TEXTURE2);
+	//Bind to FBO
+	glBindTexture(GL_TEXTURE_2D, l.texID);
+	//Ignore color
+	glClear(GL_DEPTH_BUFFER_BIT);
+	//Set viewport
+	glViewport(0, 0, 1024, 1024);
+	//change zbuffer
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LESS);
+	//Avoid shadow acne ???
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_FRONT);
+	//Take view and proj matrix from light
+	glm::mat4 view, proj;
+	if (l.type == LightType::DIRECTIONAL)
+	{
+		view = glm::lookAt(glm::vec3(5) * -l.direction, glm::vec3(0), glm::vec3(0, 1, 0));
+		proj = glm::ortho(-3.0, 3.0, -3.0, 3.0, .1, 10.0);
+	}
+	else
+	{
+		view = glm::lookAt(l.position, l.position + l.direction, glm::vec3(0, 1, 0));
+		proj = glm::perspective(2 * glm::radians(l.angle), 1024.0f / 1024.0f, .1f, 10.0f);
+	}
+	//use the shadow shaderprogram
+	shaderProgramShadow->useProgram();
+	
+	for (size_t i = 0; i < models.size(); i++)
+	{
+		Model* model = models[i].get();
+		glm::mat4 mvp = proj * view * model->getModelMatrix();
+		shaderProgramShadow->getVertexShader().setUniform("matModVisProj", mvp);
+		model->drawTriangles();
+	}
+	//back to normal
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glViewport(0,0, wViewport, hViewport);
+	glDepthFunc(GL_LEQUAL);
+	glDisable(GL_CULL_FACE);
+}
+
 void PAG::Renderer::configViewport(int width, int height)
 {
 	wViewport = width;
@@ -443,31 +564,6 @@ void PAG::Renderer::step()
 	printActiveModel();
 }
 
-void PAG::Renderer::addModel(ModelType type)
-{
-	if (!checkExistingModel(type))
-	{
-		switch (type)
-		{
-		case PAG::ModelType::TRIANGLE:
-			models.push_back(createModel(ModelType::TRIANGLE, shaderProgram, mat));
-			break;
-		case PAG::ModelType::TETRAHEDRON:
-			models.push_back(createModel(ModelType::TETRAHEDRON, shaderProgram, mat));
-			break;
-		default:
-			break;
-		}
-		if (activeModel == -1)
-			activeModel = 0;
-		else if (activeModel >= 0)
-			activeModel++;
-		printActiveModel();
-	}
-	else
-		Log::getInstance()->printMessage(msgType::INFO, "You added that model");
-}
-
 void PAG::Renderer::addModel(std::string filename, std::string name)
 {
 	if (!checkExistingModel(name))
@@ -492,7 +588,35 @@ void PAG::Renderer::addModel(std::string filename, std::string name)
 			models[activeModel]->scale(glm::vec3(.05));
 
 		}
+		updateShadowMaps();
+		printActiveModel();
+	}
+	else
+		Log::getInstance()->printMessage(msgType::INFO, "You added that model");
 
+}
+
+void PAG::Renderer::addModel(ModelType type)
+{
+	if (!checkExistingModel(type))
+	{
+		switch (type)
+		{
+		case PAG::ModelType::TRIANGLE:
+			models.push_back(createModel(ModelType::TRIANGLE, shaderProgram, mat));
+			break;
+		case PAG::ModelType::TETRAHEDRON:
+			models.push_back(createModel(ModelType::TETRAHEDRON, shaderProgram, mat));
+			break;
+		default:
+			break;
+		}
+		if (activeModel == -1)
+			activeModel = 0;
+		else if (activeModel >= 0)
+			activeModel++;
+
+		updateShadowMaps();
 		printActiveModel();
 	}
 	else

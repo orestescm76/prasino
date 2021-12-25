@@ -5,6 +5,7 @@ in outputVS
 	vec3 pos;
 	vec2 texCoords;
 	vec3 posTg;
+	vec4 shadowCoords;
 } inputVS;
 
 in mat3 TBNI;
@@ -24,7 +25,7 @@ uniform float sAngle;
 
 uniform sampler2D texSampler;
 uniform sampler2D texSamplerNM;
-
+uniform sampler2DShadow samplerShadow;
 layout (location = 0) out vec4 fragColor;
 //Set the subroutine
 subroutine vec3 lightMode();
@@ -66,6 +67,7 @@ vec3 point()
 subroutine (lightMode)
 vec3 directional()
 {
+	float shadow = textureProj(samplerShadow, inputVS.shadowCoords);
 	vec3 lightDir = TBNI * lDir;
 	vec3 n = texture(texSamplerNM, inputVS.texCoords).rgb;
 	n = normalize(n*2.0-1.0);
@@ -78,12 +80,13 @@ vec3 directional()
 
 	vec3 diff = (Id * c * max( dot (l,n), 0.0));
 	vec3 spec = (Is * Ks * pow( max( dot(r,v), 0.0),shininess));
-	return diff+spec;
+	return shadow*(diff+spec);
 }
 
 subroutine (lightMode)
 vec3 spot()
 {
+	float shadow = textureProj(samplerShadow, inputVS.shadowCoords);
 	vec3 lightPos = TBNI * lPos;
 	vec3 lightDir = TBNI * lDir;
 	vec3 n = texture(texSamplerNM, inputVS.texCoords).rgb;
@@ -104,7 +107,7 @@ vec3 spot()
 	vec3 diff = (Id*c * max(dot(l,n),0.0));
 	vec3 spec= (Is*Ks * pow( max( dot(r,v), 0.0 ) , shininess));
 	sFactor = pow(cosD, 16);
-	return sFactor*(diff+spec);
+	return shadow*sFactor*(diff+spec);
 }
 void main()
 {

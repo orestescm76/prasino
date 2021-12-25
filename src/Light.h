@@ -18,6 +18,7 @@ namespace PAG
 		glm::vec3 direction = { 0,0,0 };
 		float angle = 0.0f;
 		LightType type = LightType::AMBIENT;
+		unsigned texID = 0;
 		//Ambient constructor
 		Light(glm::vec3 amb);
 		//Point or directional constructor

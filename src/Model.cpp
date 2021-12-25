@@ -386,7 +386,14 @@ void PAG::Model::draw()
 
 	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, nullptr);
 }
-
+void PAG::Model::drawTriangles()
+{
+	//Bind the vertices and indices
+	glBindVertexArray(idVAO);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, idIBO);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, nullptr);
+}
 void PAG::Model::setDrawingMode(PAG::RenderType mode)
 {
 	renderType = mode;

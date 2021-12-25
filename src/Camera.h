@@ -1,5 +1,5 @@
 #pragma once
-
+#include "Light.h"
 namespace PAG
 {
 	enum class MovType
@@ -32,11 +32,13 @@ namespace PAG
 		MovType movType = MovType::LOCK;
 		void updateCameraAxis();
 		float getFovY();
+		Light* light = nullptr;
 	public:
 		Camera();
 		Camera(float w, float h);
 		Camera(glm::vec3 _pos, float _fovX, float _zn, float _zf, float _w, float _h);
-		Camera& operator=(const Camera& orig) = default;
+		Camera(Light* l);
+		Camera& operator=(const Camera& orig) = delete;
 		~Camera();
 		void setViewport(float w, float h);
 		//Returns the camera direction. NORMALIZED.
@@ -56,6 +58,7 @@ namespace PAG
 		void zoom(float yoffset);
 		float getPanAngle();
 		void reset();
+		void setLight(Light* l);
 	};
 }
 

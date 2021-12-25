@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "Camera.h"
+
 PAG::Camera::Camera()
 {
 
@@ -12,6 +13,11 @@ PAG::Camera::Camera(float w, float h): wViewport(w), hViewport(h)
 
 PAG::Camera::Camera(glm::vec3 _pos, float _fovX, float _zn, float _zf, float _w, float _h): pos(_pos), fovX(_fovX), zNear(_zn), zFar(_zf), wViewport(_w), hViewport(_h)
 {
+}
+
+PAG::Camera::Camera(Light* l):light(l), pos(l->position)
+{
+
 }
 
 glm::vec3 PAG::Camera::getUp()
@@ -186,6 +192,11 @@ void PAG::Camera::reset()
 	target = { 1.0f, 0.0f, 1.0f };
 }
 
+void PAG::Camera::setLight(Light* l)
+{
+	light = l;
+}
+
 glm::vec3 PAG::Camera::cameraDirection(bool norm)
 {
 	if (norm)
@@ -196,12 +207,28 @@ glm::vec3 PAG::Camera::cameraDirection(bool norm)
 
 glm::mat4 PAG::Camera::getViewMatrix()
 {
-	return glm::lookAt(pos, target, up);
+	if(!light)
+		return glm::lookAt(pos, target, up);
+	else
+	{
+		if (light->type == LightType::DIRECTIONAL)
+			return glm::lookAt(pos, glm::vec3(0, 0, 0), up);
+		else if (light->type == LightType::SPOTLIGHT)
+			return glm::lookAt(pos, pos + light->direction, up);
+	}
 }
 
 glm::mat4 PAG::Camera::getProjMatrix()
 {
-	return glm::perspective(getFovY(), wViewport / hViewport, zNear, zFar);
+	if(!light)
+		return glm::perspective(getFovY(), wViewport / hViewport, zNear, zFar);
+	else
+	{
+		if (light->type == LightType::DIRECTIONAL)
+			return glm::ortho(-10.0, 10.0, -10.0, 10.0, 0.1, 10.0);
+		else if(light->type == LightType::SPOTLIGHT)
+			return glm::perspective(glm::radians(light->angle), wViewport / hViewport, 0.1f, 10.0f);
+	}
 }
 
 void PAG::Camera::setViewport(float w, float h)

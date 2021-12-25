@@ -17,6 +17,7 @@ namespace PAG
 		std::shared_ptr<ShaderProgram> shaderProgramTexture;
 		std::shared_ptr<ShaderProgram> shaderProgramTextureNM;
 		std::shared_ptr<ShaderProgram> spLightCube;
+		std::shared_ptr<ShaderProgram> shaderProgramShadow;
 		Camera camera;
 		Renderer();
 		void configBackColor(glm::vec4 color);
@@ -35,6 +36,10 @@ namespace PAG
 		bool checkExistingModel(ModelType type);
 		bool checkExistingModel(std::string name);
 		std::map<std::string, std::shared_ptr<Texture>> textures;
+		unsigned int fboShadowId = 0;
+		void createFramebufferShadow();
+		void createShadowMap(Light& l);
+		void updateShadowMap(Light& l);
 	public:
 		static const std::string version;
 		// Lo único que necesito estático de la clase Renderer es la instancia y el método de la instancia
@@ -61,6 +66,7 @@ namespace PAG
 		void deleteActiveModel();
 		void setTextureToActiveModel();
 		void setNormalMappingToActiveModel();
+		void updateShadowMaps();
 		virtual ~Renderer();
 	};
 }
