@@ -60,6 +60,7 @@ namespace PAG
 		void printActiveModel();
 		void deleteActiveModel();
 		void setTextureToActiveModel();
+		void setNormalMappingToActiveModel();
 		virtual ~Renderer();
 	};
 }

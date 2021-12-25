@@ -1,7 +1,7 @@
 /*
 * @author orestescm76
 * @brief main
-* VERSION 1.0.0a1
+* VERSION 1.0.0a2
 * 
 */
 #include "pch.h"
@@ -160,6 +160,9 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 			break;
 		case GLFW_KEY_U:
 			PAG::Renderer::getInstance()->setTextureToActiveModel();
+			break;
+		case GLFW_KEY_I:
+			PAG::Renderer::getInstance()->setNormalMappingToActiveModel();
 			break;
 		case GLFW_KEY_TAB:
 			PAG::Renderer::getInstance()->step();

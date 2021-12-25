@@ -488,13 +488,24 @@ void PAG::Model::resetMatrix()
 	modelMatrix = glm::mat4(1);
 }
 
+void PAG::Model::removeNormalMapping()
+{
+	auto it = textures.begin();
+	it++;
+	//iterator points to the normal map
+	textures.erase(it);
+}
+
 void PAG::Model::unBindTexture()
 {
 	for (size_t i = 0; i < textures.size(); i++)
 	{
 		if (textures[i].get())
+		{
 			textures[i].reset();
+		}
 	}
+	textures.clear();
 }
 
 PAG::Model::~Model()

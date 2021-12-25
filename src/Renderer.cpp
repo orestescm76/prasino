@@ -7,11 +7,11 @@
 #include "Renderer.h"
 
 PAG::Renderer* PAG::Renderer::instance = nullptr;
-const std::string PAG::Renderer::version = "1.0.0a1";
+const std::string PAG::Renderer::version = "1.0.0a2";
 
 PAG::Renderer::Renderer() :
 	activeModel(-1),
-	mat(glm::vec3(0.135, 0.2225, 0.1575), glm::vec3(0.54, 0.89, 0.63), glm::vec3(.316228), .1 * 128),
+	mat(glm::vec3(0.135, 0.2225, 0.1575), glm::vec3(0.54, 0.89, 0.63), glm::vec3(1), .1 * 128),
 	//mat(glm::vec3(.1745f, .01175f,.01175f), glm::vec3(.61424f, .04136f, .04136f), glm::vec3(.727811f,.626959,.626959f), 0.6f*128.0f),
 	//mat(glm::vec3(0.0215,0.1745,0.0215),glm::vec3(0.07568,	0.61424 ,	0.07568),glm::vec3(0.633, 	0.727811 ,	0.633), .6f*128.0f),
 	camera({3,2,3}, 90, .1,50,wViewport, hViewport),
@@ -111,9 +111,38 @@ void PAG::Renderer::setTextureToActiveModel()
 		else
 		{
 			model->setDrawTexture(false);
+			model->setNormalMapping(false);
 			model->setShaderProgram(shaderProgram);
 			model->unBindTexture();
 		}
+	}
+}
+void PAG::Renderer::setNormalMappingToActiveModel()
+{
+	if (activeModel != -1)
+	{
+		Model* model = models[activeModel].get();
+		//If it is not drawing normal mapping texture
+		if (model->isDrawingTexture())
+		{
+			if (!model->isDrawingNormalMapping())
+			{
+				//Check models
+				if (model->name() == "spurs")
+				{
+					model->setShaderProgram(shaderProgramTextureNM);
+					model->addTexture(textures["spursNM"]);
+					model->setNormalMapping(true);
+				}
+			}
+			else
+			{
+				model->setNormalMapping(false);
+				model->removeNormalMapping();
+				model->setShaderProgram(shaderProgramTexture);
+			}
+		}
+		else return;
 	}
 }
 
@@ -444,7 +473,7 @@ void PAG::Renderer::addModel(std::string filename, std::string name)
 	if (!checkExistingModel(name))
 	{
 		if (name == "spurs")
-			models.push_back(createModel(shaderProgramTextureNM, filename, mat, name, true));
+			models.push_back(createModel(shaderProgram, filename, mat, name));
 		else
 			models.push_back(createModel(shaderProgram, filename, mat, name));
 		if (activeModel == -1)

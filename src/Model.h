@@ -92,6 +92,7 @@ namespace PAG
 		void translate(glm::vec3 pos);
 		//Resets the model matrix.
 		void resetMatrix();
+		void removeNormalMapping();
 		void unBindTexture();
 		virtual ~Model();
 	};
