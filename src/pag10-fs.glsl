@@ -1,4 +1,4 @@
-#version 410
+#version 410 core
 
 in outputVS
 {
@@ -60,6 +60,7 @@ subroutine (lightMode)
 vec3 directional()
 {
 	float shadow = textureProj(samplerShadow, inputVS.shadowCoords);
+	float shadowFactor = clamp(shadow, 0.005, 1);
 	vec3 n = normalize(inputVS.normal);
 	vec3 l = -lDir;
 	vec3 v = normalize(-inputVS.pos);
@@ -69,18 +70,19 @@ vec3 directional()
 
 	vec3 diff = (Id * Kd * max( dot (l,n), 0.0));
 	vec3 spec = (Is * Ks * pow( max( dot(r,v), 0.0),shininess));
-	return shadow*(diff+spec);
+	return shadowFactor*(diff+spec);
 }
 
 subroutine (lightMode)
 vec3 spot()
 {
 	float shadow = textureProj(samplerShadow, inputVS.shadowCoords);
+	//l -> dir luz
 	vec3 l = normalize(lPos-inputVS.pos);
-	vec3 d = lDir;
+	vec3 d = normalize(lDir);
 	float cosG = cos(sAngle);
 	float sFactor = 1.0;
-	float cosD = dot(-l,d);
+	float cosD = dot(l, -d);
 	if(cosD < cosG)
 	{
 		cosD = 0.0;
@@ -90,7 +92,7 @@ vec3 spot()
 	vec3 r = reflect(-l,n);
 	vec3 diff = (Id*Kd * max(dot(l,n),0.0));
 	vec3 spec = (Is*Ks * pow( max( dot(r,v), 0.0 ) , shininess));
-	sFactor = pow(cosD, 16);
+	sFactor = pow(cosD, 64);
 	return shadow*sFactor*(diff+spec);
 }
 void main()

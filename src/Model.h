@@ -9,6 +9,7 @@ namespace PAG
 		TRIANGLE,
 		TETRAHEDRON,
 		EXTERN,
+		QUAD,
 		LIGHT_CUBE
 	};
 
@@ -47,6 +48,7 @@ namespace PAG
 		void createTriangle();
 		void createTetrahedron();
 		void createLightCube();
+		void createQuad();
 		//Other data
 		RenderType renderType = RenderType::SOLID;
 		ModelType modelType;

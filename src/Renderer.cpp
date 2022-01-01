@@ -12,7 +12,7 @@ const std::string PAG::Renderer::version = "1.0.0a3";
 PAG::Renderer::Renderer() :
 	activeModel(-1),
 	mat(glm::vec3(0.135, 0.2225, 0.1575), glm::vec3(0.54, 0.89, 0.63), glm::vec3(1), .1 * 128),
-	//mat(glm::vec3(.1745f, .01175f,.01175f), glm::vec3(.61424f, .04136f, .04136f), glm::vec3(.727811f,.626959,.626959f), 0.6f*128.0f),
+	qMat(glm::vec3(.1), glm::vec3(.60), glm::vec3(.7), 0.25f*128.0f),
 	//mat(glm::vec3(0.0215,0.1745,0.0215),glm::vec3(0.07568,	0.61424 ,	0.07568),glm::vec3(0.633, 	0.727811 ,	0.633), .6f*128.0f),
 	camera({3,2,3}, 90, .1,50,wViewport, hViewport),
 	lights(),
@@ -36,8 +36,8 @@ PAG::Renderer::Renderer() :
 	lightCube = std::make_unique<Model>(spLightCube, ModelType::LIGHT_CUBE);
 	Light ambL(glm::vec3(.18));
 	//Light point(glm::vec3(.3), glm::vec3(1), glm::vec3(-.5,.5,.2), LightType::POINT);
-	Light dir(glm::vec3(.8,1,.2), glm::vec3(.9),glm::vec3(-1,0,0), LightType::DIRECTIONAL);
-	Light spot(glm::vec3(1), glm::vec3(1.0f), glm::vec3(3,1,3), glm::vec3(-3,-1,-3), 64.0f);
+	Light dir(glm::vec3(.8,1,.2), glm::vec3(.9),glm::vec3(1,0,0), LightType::DIRECTIONAL);
+	Light spot(glm::vec3(1), glm::vec3(1.0f), glm::vec3(3,2,3), glm::vec3(-3,-2,-3), 128.0f);
 
 	lights.push_back(ambL);
 	//lights.push_back(point);
@@ -47,10 +47,11 @@ PAG::Renderer::Renderer() :
 	backColor = { 0,0,0,1 };
 
 	textures.insert({ "cow", std::make_shared<Texture>("./textures/vaca.png",TextureType::IMAGE) });
-	textures.insert({ "win95", std::make_shared<Texture>("./textures/win95.png",TextureType::IMAGE) });
+	textures.insert({ "win95", std::make_shared<Texture>("./textures/Blocks.png",TextureType::IMAGE) });
 	textures.insert({ "marble", std::make_shared<Texture>("./textures/marble.png",TextureType::IMAGE) });
 	textures.insert({ "spurs", std::make_shared<Texture>("./textures/tottenham.png",TextureType::IMAGE)});
 	textures.insert({ "spursNM", std::make_shared<Texture>("./textures/tottenham_nm.png",TextureType::NORMAL_MAP) });
+	models.push_back(std::make_unique<Model>(shaderProgram, ModelType::QUAD, qMat));
 
 	//Create FBO
 	glGenFramebuffers(1, &fboShadowId);
@@ -61,6 +62,7 @@ PAG::Renderer::Renderer() :
 		case LightType::DIRECTIONAL:
 		case LightType::SPOTLIGHT:
 			createShadowMap(lights[i]);
+			updateShadowMap(lights[i]);
 		default:
 			break;
 		}
@@ -86,6 +88,8 @@ void PAG::Renderer::deleteActiveModel()
 {
 	if (activeModel != -1)
 	{
+		if (models[activeModel]->name() == "Quad")
+			return;
 		models[activeModel].reset();
 		std::vector<std::unique_ptr<Model>>::iterator it;
 		it = models.begin();
@@ -166,6 +170,8 @@ void PAG::Renderer::activateLight(Light& l, ShaderProgram* sp, Model* model)
 {
 	glm::vec3 lPos, lDir;
 	glm::mat4 viewCL, projCL;
+	//applied comments from practice 8
+	glm::mat4 mInvTrans = glm::inverse(glm::transpose(camera.getViewMatrix()));
 	glm::mat4 shadowMat = glm::scale(glm::mat4(1), glm::vec3(.5));
 	shadowMat[3][0] = shadowMat[3][1] = shadowMat[3][2] = 0.5;
 	switch (l.type)
@@ -198,9 +204,7 @@ void PAG::Renderer::activateLight(Light& l, ShaderProgram* sp, Model* model)
 		sp->getFragmentShader().setUniform("Id", l.diffuse);
 		sp->getFragmentShader().setUniform("Is", l.specular);
 		//Apply transform
-		glm::mat4 matrix = glm::inverse(glm::transpose(camera.getViewMatrix()));
-		glm::vec3 lDir = glm::vec3(matrix * glm::vec4(l.direction, 0));
-		lDir = glm::normalize(lDir);
+		lDir = glm::normalize(mInvTrans * glm::vec4(l.direction, 0));
 		sp->getFragmentShader().setUniform("lDir", lDir);
 		if (!model->isDrawingTexture())
 			sp->getFragmentShader().setUniform("Kd", model->getMaterial().diffuse);
@@ -213,19 +217,18 @@ void PAG::Renderer::activateLight(Light& l, ShaderProgram* sp, Model* model)
 		break;
 	case LightType::SPOTLIGHT:
 		viewCL = glm::lookAt(l.position, l.position + l.direction, glm::vec3(0, 1, 0));
-		projCL = glm::perspective(2 * glm::radians(l.angle), 1024.0f / 1024.0f, .1f, 10.0f);
+		projCL = glm::perspective(2 * glm::radians(l.angle), 2048.0f / 2048.0f, .1f, 10.0f);
 		shadowMat = shadowMat * projCL * viewCL * model->getModelMatrix();
 		sp->getFragmentShader().setUniformSubroutine("", "spot");
 		sp->getFragmentShader().setUniform("sAngle", glm::radians(l.angle));
 		sp->getFragmentShader().setUniform("Id", l.diffuse);
 		sp->getFragmentShader().setUniform("Is", l.specular);
-		//Apply transform
+		//Apply transform pos
 		lPos = glm::vec3(camera.getViewMatrix() * glm::vec4(l.position, 1));
 		sp->getFragmentShader().setUniform("lPos", lPos);
 		sp->getVertexShader().setUniform("matShadow", shadowMat);
-		//Apply transform
-		lDir = glm::vec3(camera.getViewMatrix() * glm::vec4(l.direction, 0));
-		lDir = glm::normalize(lDir);
+		//Apply transform direction
+		lDir = glm::normalize(camera.getViewMatrix() * glm::vec4(l.direction, 0));
 		sp->getFragmentShader().setUniform("lDir", lDir);
 		if (!model->isDrawingTexture())
 			sp->getFragmentShader().setUniform("Kd", model->getMaterial().diffuse);
@@ -426,18 +429,13 @@ bool PAG::Renderer::checkExistingModel(std::string name)
 	return false;
 }
 
-void PAG::Renderer::createFramebufferShadow()
-{
-	
-}
-
 void PAG::Renderer::createShadowMap(Light& l)
 {
 	glGenTextures(1, &l.texID);
 	GLfloat borde[] = { 1.0, 1.0, 1.0, 1.0 };
 	//PLACEHOLDER
-	GLsizei _anchoMS = 1024; 
-	GLsizei _altoMS = 1024;
+	GLsizei _anchoMS = 2048; 
+	GLsizei _altoMS = 2048;
 	glBindTexture(GL_TEXTURE_2D, l.texID);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, _anchoMS, _altoMS, 0,
 		GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, nullptr);
@@ -472,7 +470,7 @@ void PAG::Renderer::updateShadowMap(Light& l)
 	GLenum state = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 	if (state != GL_FRAMEBUFFER_COMPLETE)
 	{
-		throw std::runtime_error("PAG::Renderer::createShadowMap(Light& l). Failed to create the shadow map");
+		throw std::runtime_error("PAG::Renderer::createShadowMap(Light& l). Failed to update the shadow map");
 	}
 	//Activate texture unit
 	glActiveTexture(GL_TEXTURE2);
@@ -481,7 +479,7 @@ void PAG::Renderer::updateShadowMap(Light& l)
 	//Ignore color
 	glClear(GL_DEPTH_BUFFER_BIT);
 	//Set viewport
-	glViewport(0, 0, 1024, 1024);
+	glViewport(0, 0, 2048, 2048);
 	//change zbuffer
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
@@ -498,11 +496,11 @@ void PAG::Renderer::updateShadowMap(Light& l)
 	else
 	{
 		view = glm::lookAt(l.position, l.position + l.direction, glm::vec3(0, 1, 0));
-		proj = glm::perspective(2 * glm::radians(l.angle), 1024.0f / 1024.0f, .1f, 10.0f);
+		proj = glm::perspective(2 * glm::radians(l.angle), 2048.0f / 2048.0f, .1f, 10.0f);
 	}
 	//use the shadow shaderprogram
 	shaderProgramShadow->useProgram();
-	
+	//render the models
 	for (size_t i = 0; i < models.size(); i++)
 	{
 		Model* model = models[i].get();
@@ -568,26 +566,25 @@ void PAG::Renderer::addModel(std::string filename, std::string name)
 {
 	if (!checkExistingModel(name))
 	{
-		if (name == "spurs")
-			models.push_back(createModel(shaderProgram, filename, mat, name));
-		else
-			models.push_back(createModel(shaderProgram, filename, mat, name));
-		if (activeModel == -1)
-			activeModel = 0;
-		else if (activeModel >= 0)
-			activeModel++;
+		models.push_back(createModel(shaderProgram, filename, mat, name));
+		Model* model = models.back().get();
 
 		if (name == "cow")
 		{
-			models[activeModel]->rotate(-90, { 1,0,0 });
-			models[activeModel]->move({ 2,0,0 });
+			model->rotate(-90, { 1,0,0 });
+			model->move({ 2,0,0 });
 		}
 		if (name == "rook")
 		{
-			models[activeModel]->move({ 2,0,2 });
-			models[activeModel]->scale(glm::vec3(.05));
+			model->move({ 2,0,2 });
+			model->scale(glm::vec3(.05));
 
 		}
+		
+		if (activeModel == -1)
+			activeModel = 1;
+		else if (activeModel >= 0)
+			activeModel++;
 		updateShadowMaps();
 		printActiveModel();
 	}
@@ -612,7 +609,7 @@ void PAG::Renderer::addModel(ModelType type)
 			break;
 		}
 		if (activeModel == -1)
-			activeModel = 0;
+			activeModel = 1;
 		else if (activeModel >= 0)
 			activeModel++;
 

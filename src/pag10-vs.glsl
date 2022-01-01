@@ -23,5 +23,6 @@ void main ()
 	outVS.texCoords = vTexCoords;
 	//gl_Position = vec4 ( posicion, 1 );
 	outVS.shadowCoords = matShadow*vec4(vPos,1);
+	outVS.shadowCoords.z -= 0.005;
 	gl_Position = matProjViewModel * vec4(vPos, 1.0);
 }

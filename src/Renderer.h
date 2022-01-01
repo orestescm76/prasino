@@ -24,6 +24,7 @@ namespace PAG
 		float wViewport, hViewport;
 		RenderType renderType = RenderType::SOLID;
 		Material mat;
+		Material qMat;
 		std::vector<Light> lights;
 		//Activate the light and set the uniforms with the model shader program
 		void activateLight(Light& l, ShaderProgram* sp, Model* model);

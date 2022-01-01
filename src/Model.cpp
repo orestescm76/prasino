@@ -82,6 +82,8 @@ vertices(), normals(), indices(), modelMatrix(1), mName(), textures()
 	case PAG::ModelType::LIGHT_CUBE:
 		createLightCube();
 		break;
+	case PAG::ModelType::QUAD:
+		createQuad();
 	default:
 		break;
 	}
@@ -102,6 +104,8 @@ vertices(), normals(), indices(), modelMatrix(1), mName(), textures()
 	case PAG::ModelType::LIGHT_CUBE:
 		createLightCube();
 		break;
+	case PAG::ModelType::QUAD:
+		createQuad();
 	default:
 		break;
 	}
@@ -279,6 +283,39 @@ void PAG::Model::createLightCube()
 		1, 4, 0,
 		4, 5, 6,
 		4, 6, 7 };
+}
+
+void PAG::Model::createQuad()
+{
+	/*
+	* Τετράγωνο
+	*/
+ //vertices
+	vertices = { 25, -.5, 25,
+				-25, -.5, 25,
+				-25, -.5, -25,
+				25, -.5,  25,
+				-25, -.5, -25,
+				25, -.5, -25};
+	//indices para pintarlo
+	indices = { 0, 1, 2,
+				3, 4, 5 };
+
+	normals = { 0,1,0,
+				0,1,0, 
+				0,1,0, 
+				0,1,0, 
+				0,1,0, 
+				0,1,0};
+
+	texCoords = { 25, 0,
+				  0, 0,
+				  0, 25,
+				25, 0,
+				  0, 25,
+				  25,25
+	};
+	mName = "Quad";
 }
 
 void PAG::Model::initModel()
