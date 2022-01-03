@@ -15,6 +15,7 @@ namespace PAG
 		TextureType textureType;
 	public:
 		Texture(std::string filename, TextureType type);
+		Texture(const Texture& orig);
 		void setTexID(unsigned id);
 		unsigned int getTexID();
 		unsigned int getOpenGLID();

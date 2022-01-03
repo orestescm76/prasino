@@ -146,6 +146,9 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 		case GLFW_KEY_5:
 			PAG::Renderer::getInstance()->addModel("./models/cube.obj", "spurs");
 			break;
+		case GLFW_KEY_6:
+			PAG::Renderer::getInstance()->addModel("./models/Knight.obj", "knight");
+			break;
 		case GLFW_KEY_Z:
 			hideShowMouse(window);
 			break;

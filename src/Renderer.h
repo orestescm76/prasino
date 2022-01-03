@@ -38,7 +38,6 @@ namespace PAG
 		bool checkExistingModel(std::string name);
 		std::map<std::string, std::shared_ptr<Texture>> textures;
 		unsigned int fboShadowId = 0;
-		void createFramebufferShadow();
 		void createShadowMap(Light& l);
 		void updateShadowMap(Light& l);
 	public:

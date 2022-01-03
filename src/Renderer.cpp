@@ -14,7 +14,7 @@ PAG::Renderer::Renderer() :
 	mat(glm::vec3(0.135, 0.2225, 0.1575), glm::vec3(0.54, 0.89, 0.63), glm::vec3(1), .1 * 128),
 	qMat(glm::vec3(.1), glm::vec3(.60), glm::vec3(.7), 0.25f*128.0f),
 	//mat(glm::vec3(0.0215,0.1745,0.0215),glm::vec3(0.07568,	0.61424 ,	0.07568),glm::vec3(0.633, 	0.727811 ,	0.633), .6f*128.0f),
-	camera({3,2,3}, 90, .1,50,wViewport, hViewport),
+	camera({3,3,3}, 90, .1,50,wViewport, hViewport),
 	lights(),
 	models(),
 	textures()
@@ -35,8 +35,8 @@ PAG::Renderer::Renderer() :
 	
 	lightCube = std::make_unique<Model>(spLightCube, ModelType::LIGHT_CUBE);
 	Light ambL(glm::vec3(.18));
-	//Light point(glm::vec3(.3), glm::vec3(1), glm::vec3(-.5,.5,.2), LightType::POINT);
-	Light dir(glm::vec3(.8,1,.2), glm::vec3(.9),glm::vec3(1,0,0), LightType::DIRECTIONAL);
+	Light point(glm::vec3(.3), glm::vec3(1), glm::vec3(-.5,.5,.2), LightType::POINT);
+	Light dir(glm::vec3(.1,.1,.3), glm::vec3(.9),glm::vec3(1,0,0), LightType::DIRECTIONAL);
 	Light spot(glm::vec3(1), glm::vec3(1.0f), glm::vec3(3,2,3), glm::vec3(-3,-2,-3), 128.0f);
 
 	lights.push_back(ambL);
@@ -47,11 +47,18 @@ PAG::Renderer::Renderer() :
 	backColor = { 0,0,0,1 };
 
 	textures.insert({ "cow", std::make_shared<Texture>("./textures/vaca.png",TextureType::IMAGE) });
-	textures.insert({ "win95", std::make_shared<Texture>("./textures/Blocks.png",TextureType::IMAGE) });
+	textures.insert({ "grass", std::make_shared<Texture>("./textures/grass.png",TextureType::IMAGE) });
 	textures.insert({ "marble", std::make_shared<Texture>("./textures/marble.png",TextureType::IMAGE) });
 	textures.insert({ "spurs", std::make_shared<Texture>("./textures/tottenham.png",TextureType::IMAGE)});
 	textures.insert({ "spursNM", std::make_shared<Texture>("./textures/tottenham_nm.png",TextureType::NORMAL_MAP) });
+	textures.insert({ "stone", std::make_shared<Texture>("./textures/stone.png", TextureType::IMAGE) });
+	textures.insert({ "stoneNM", std::make_shared<Texture>("./textures/stone_nm.png", TextureType::NORMAL_MAP) });
+	textures.insert({ "polish", std::make_shared<Texture>("./textures/polish.png", TextureType::IMAGE) });
+
 	models.push_back(std::make_unique<Model>(shaderProgram, ModelType::QUAD, qMat));
+	models[0]->addTexture(textures["grass"]);
+	models[0]->setDrawTexture(true);
+	models[0]->setShaderProgram(shaderProgramTexture);
 
 	//Create FBO
 	glGenFramebuffers(1, &fboShadowId);
@@ -88,8 +95,6 @@ void PAG::Renderer::deleteActiveModel()
 {
 	if (activeModel != -1)
 	{
-		if (models[activeModel]->name() == "Quad")
-			return;
 		models[activeModel].reset();
 		std::vector<std::unique_ptr<Model>>::iterator it;
 		it = models.begin();
@@ -97,6 +102,11 @@ void PAG::Renderer::deleteActiveModel()
 		models.erase(it);
 		activeModel--;
 		updateShadowMaps();
+		if (models[activeModel]->name() == "Quad")
+		{
+			activeModel = -1;
+			return;
+		}
 		printActiveModel();
 	}
 	if (models.size() > 0)
@@ -106,6 +116,7 @@ void PAG::Renderer::deleteActiveModel()
 PAG::Renderer::~Renderer()
 {
 	//std::unique_ptr and std::shared_ptr destroys on its own and we do not need to delete it manually
+	std::cout << "Destroying renderer";
 }
 
 void PAG::Renderer::setTextureToActiveModel()
@@ -124,8 +135,12 @@ void PAG::Renderer::setTextureToActiveModel()
 				model->addTexture(textures["marble"]);
 			else if (model->name() == "spurs")
 				model->addTexture(textures["spurs"]);
-			else
-				model->addTexture(textures["win95"]);
+			else if(model->name() == "queen")
+				model->addTexture(textures["stone"]);
+			else if(model->getType() == ModelType::TETRAHEDRON || model->getType() == ModelType::TRIANGLE)
+				model->addTexture(textures["polish"]);
+			else if(model->name() == "knight")
+				model->addTexture(textures["stone"]);
 			model->setDrawTexture(true);
 		}
 		else
@@ -154,6 +169,12 @@ void PAG::Renderer::setNormalMappingToActiveModel()
 					model->addTexture(textures["spursNM"]);
 					model->setNormalMapping(true);
 				}
+				else if (model->name() == "knight")
+				{
+					model->setShaderProgram(shaderProgramTextureNM);
+					model->addTexture(textures["stoneNM"]);
+					model->setNormalMapping(true);
+				}	
 			}
 			else
 			{
@@ -204,7 +225,9 @@ void PAG::Renderer::activateLight(Light& l, ShaderProgram* sp, Model* model)
 		sp->getFragmentShader().setUniform("Id", l.diffuse);
 		sp->getFragmentShader().setUniform("Is", l.specular);
 		//Apply transform
-		lDir = glm::normalize(mInvTrans * glm::vec4(l.direction, 0));
+		glm::vec3 lDir = glm::vec3(mInvTrans * glm::vec4(l.direction, 0));
+		lDir = glm::normalize(lDir);
+		//lDir = glm::vec3(glm::normalize(mInvTrans * glm::vec4(l.direction, 0)));
 		sp->getFragmentShader().setUniform("lDir", lDir);
 		if (!model->isDrawingTexture())
 			sp->getFragmentShader().setUniform("Kd", model->getMaterial().diffuse);
@@ -397,17 +420,17 @@ std::unique_ptr<PAG::Model> PAG::Renderer::createModel(ModelType type, std::shar
 }
 std::unique_ptr<PAG::Model> PAG::Renderer::createModel(std::shared_ptr<ShaderProgram>& shaderProgram, std::string filename, Material mat, std::string name, bool NM = false)
 {
-	if(!NM)
+	//if(!NM)
 		return std::make_unique<Model>(shaderProgram, filename, mat, name);
-	else
-	{
-		std::unique_ptr<Model> model = std::make_unique<Model>(shaderProgram, filename, mat, name);
-		model->setNormalMapping(true);
-		model->setDrawTexture(true);
-		model->addTexture(textures["spurs"]);
-		model->addTexture(textures["spursNM"]);
-		return model;
-	}
+	////else
+	//{
+	//	std::unique_ptr<Model> model = std::make_unique<Model>(shaderProgram, filename, mat, name);
+	//	//model->setNormalMapping(true);
+	//	//model->setDrawTexture(true);
+	//	//model->addTexture(textures["spurs"]);
+	//	//model->addTexture(textures["spursNM"]);
+	//	return model;
+	//}
 }
 bool PAG::Renderer::checkExistingModel(ModelType type)
 {
@@ -555,10 +578,12 @@ void PAG::Renderer::zoomCamera(float yoffset)
 
 void PAG::Renderer::step()
 {
-	if (activeModel == -1)
+	if(models.size() == 1 || activeModel == -1)
 		return;
 	if (++activeModel >= models.size())
 		activeModel = 0;
+	if (models[activeModel]->getType() == ModelType::QUAD)
+		step();
 	printActiveModel();
 }
 
@@ -571,16 +596,25 @@ void PAG::Renderer::addModel(std::string filename, std::string name)
 
 		if (name == "cow")
 		{
+			model->move({ 2,.3,.5 });
 			model->rotate(-90, { 1,0,0 });
-			model->move({ 2,0,0 });
+			
 		}
 		if (name == "rook")
 		{
-			model->move({ 2,0,2 });
-			model->scale(glm::vec3(.05));
+			model->move({ 2,-.5,2 });
+			model->scale(glm::vec3(.07));
 
 		}
-		
+		if (name == "knight")
+		{
+			model->move({ -1,0,-1 });
+			model->scale(glm::vec3(.1));
+			model->rotate(270, { 1,0,0 });
+			model->rotate(90, { 0,1,0 });
+		}
+		if (name == "spurs")
+			model->move({ 0,.001,0 });
 		if (activeModel == -1)
 			activeModel = 1;
 		else if (activeModel >= 0)

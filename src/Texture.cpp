@@ -9,6 +9,10 @@ PAG::Texture::Texture(std::string filename, TextureType type): textureType(type)
 		texID = 1;
 }
 
+PAG::Texture::Texture(const Texture& orig): id(orig.id), texID(orig.texID), textureType(orig.textureType)
+{
+}
+
 void PAG::Texture::setTexID(unsigned id)
 {
 	texID = id;

@@ -495,9 +495,10 @@ void PAG::Model::move(glm::vec3 pos)
 
 void PAG::Model::rotate(float deg, glm::vec3 axis)
 {
-	modelMatrix = glm::translate(modelMatrix, -position);
-	modelMatrix = glm::rotate(modelMatrix, glm::radians(deg), axis);
-	modelMatrix = glm::translate(modelMatrix, position);
+	modelMatrix *= glm::rotate(glm::mat4(1), glm::radians(deg), axis);
+	//modelMatrix = glm::translate(modelMatrix, -position);
+	//
+	//modelMatrix = glm::translate(modelMatrix, position);
 }
 
 void PAG::Model::scale(glm::vec3 vec)
