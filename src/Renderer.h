@@ -53,7 +53,7 @@ namespace PAG
 		void minusColor();
 		void configViewport(int width, int height);
 		void printInfo();
-		void setRenderType(RenderType rt);
+		void setRenderTypeToActiveModel(RenderType rt);
 		void moveCamera(int key);
 		void moveCamera(float xoffset, float yoffset);
 		void setCamera(MovType mov);

@@ -34,7 +34,7 @@ subroutine (lightMode)
 vec3 wire()
 {
 	//returns a simple blue color
-	return Kd;
+	return texture(texSampler, inputVS.texCoords).rgb;
 }
 
 subroutine (lightMode)

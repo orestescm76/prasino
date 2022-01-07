@@ -1,7 +1,7 @@
 /*
 * @author orestescm76
 * @brief main
-* VERSION 1.0.0a3
+* VERSION 1.0.0
 * 
 */
 #include "pch.h"
@@ -19,7 +19,8 @@ void printHelp()
 		<< "'2' adds the tetrahedron" << std::endl
 		<< "'3' adds the cow" << std::endl
 		<< "'4' adds the Rook" << std::endl
-		<< "'5' adds the Tottenham Spurs cube" << std::endl
+		<< "'5' adds the Tottenham Spurs cube (NM)" << std::endl
+		<< "'6' adds the Fallen Knight (NM)" << std::endl
 		<< "'p' for panning" << std::endl
 		<< "'t' for tilting" << std::endl
 		<< "'o' for orbit" << std::endl
@@ -32,6 +33,8 @@ void printHelp()
 		<< "'r' to reset the camera" << std::endl
 		<< "'d' deletes the active model" << std::endl
 		<< "'u' adds the texture to the active model" << std::endl
+		<< "'i' adds normal mapping to the active model, if possible" << std::endl
+		<< "'z' locks the cursor inside the window" << std::endl
 		<< "'TAB' changes the active model" << std::endl
 		<< "Mouse wheel to change the color and zoom!" << std::endl;
 }
@@ -117,11 +120,11 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 			break;
 		case GLFW_KEY_V:
 			PAG::Log::getInstance()->printMessage(PAG::msgType::INFO, "Set fill");
-			PAG::Renderer::getInstance()->setRenderType(PAG::RenderType::SOLID);
+			PAG::Renderer::getInstance()->setRenderTypeToActiveModel(PAG::RenderType::SOLID);
 			break;
 		case GLFW_KEY_B:
 			PAG::Log::getInstance()->printMessage(PAG::msgType::INFO, "Set wire");
-			PAG::Renderer::getInstance()->setRenderType(PAG::RenderType::WIRE);
+			PAG::Renderer::getInstance()->setRenderTypeToActiveModel(PAG::RenderType::WIRE);
 			break;
 		case GLFW_KEY_UP:
 		case GLFW_KEY_DOWN:

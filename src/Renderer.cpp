@@ -7,7 +7,7 @@
 #include "Renderer.h"
 
 PAG::Renderer* PAG::Renderer::instance = nullptr;
-const std::string PAG::Renderer::version = "1.0.0a3";
+const std::string PAG::Renderer::version = "1.0.0";
 
 PAG::Renderer::Renderer() :
 	activeModel(-1),
@@ -102,21 +102,20 @@ void PAG::Renderer::deleteActiveModel()
 		models.erase(it);
 		activeModel--;
 		updateShadowMaps();
-		if (models[activeModel]->name() == "Quad")
+		//check if we are pointing the quad, which is not removable
+		if (models[activeModel]->getType() == ModelType::QUAD)
 		{
-			activeModel = -1;
+			//change the active model and if there is only quad, set to -1
+			step();
 			return;
 		}
 		printActiveModel();
 	}
-	if (models.size() > 0)
-		activeModel = 0;
 }
 
 PAG::Renderer::~Renderer()
 {
 	//std::unique_ptr and std::shared_ptr destroys on its own and we do not need to delete it manually
-	std::cout << "Destroying renderer";
 }
 
 void PAG::Renderer::setTextureToActiveModel()
@@ -403,7 +402,6 @@ void PAG::Renderer::draw(Light& l, Model* model)
 		//Load camera uniforms
 		loadUniforms(model->getShaderProgram(), model);
 		//Render
-		model->setDrawingMode(renderType);
 		model->draw();
 		if(l.type != LightType::AMBIENT)
 			drawLightCube(l);
@@ -482,60 +480,60 @@ void PAG::Renderer::updateShadowMaps()
 }
 
 void PAG::Renderer::updateShadowMap(Light& l)
-{	
-	//Bind the texture to the framebuffer
-	glBindFramebuffer(GL_FRAMEBUFFER, fboShadowId);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, l.texID, 0);
+{
+//Bind the texture to the framebuffer
+glBindFramebuffer(GL_FRAMEBUFFER, fboShadowId);
+glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, l.texID, 0);
 
-	glReadBuffer(GL_NONE);
-	glDrawBuffer(GL_NONE);
-	//check framebuffer
-	GLenum state = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-	if (state != GL_FRAMEBUFFER_COMPLETE)
-	{
-		throw std::runtime_error("PAG::Renderer::createShadowMap(Light& l). Failed to update the shadow map");
-	}
-	//Activate texture unit
-	glActiveTexture(GL_TEXTURE2);
-	//Bind to FBO
-	glBindTexture(GL_TEXTURE_2D, l.texID);
-	//Ignore color
-	glClear(GL_DEPTH_BUFFER_BIT);
-	//Set viewport
-	glViewport(0, 0, 2048, 2048);
-	//change zbuffer
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LESS);
-	//Avoid shadow acne ???
-	glEnable(GL_CULL_FACE);
-	glCullFace(GL_FRONT);
-	//Take view and proj matrix from light
-	glm::mat4 view, proj;
-	if (l.type == LightType::DIRECTIONAL)
-	{
-		view = glm::lookAt(glm::vec3(5) * -l.direction, glm::vec3(0), glm::vec3(0, 1, 0));
-		proj = glm::ortho(-3.0, 3.0, -3.0, 3.0, .1, 10.0);
-	}
-	else
-	{
-		view = glm::lookAt(l.position, l.position + l.direction, glm::vec3(0, 1, 0));
-		proj = glm::perspective(2 * glm::radians(l.angle), 2048.0f / 2048.0f, .1f, 10.0f);
-	}
-	//use the shadow shaderprogram
-	shaderProgramShadow->useProgram();
-	//render the models
-	for (size_t i = 0; i < models.size(); i++)
-	{
-		Model* model = models[i].get();
-		glm::mat4 mvp = proj * view * model->getModelMatrix();
-		shaderProgramShadow->getVertexShader().setUniform("matModVisProj", mvp);
-		model->drawTriangles();
-	}
-	//back to normal
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glViewport(0,0, wViewport, hViewport);
-	glDepthFunc(GL_LEQUAL);
-	glDisable(GL_CULL_FACE);
+glReadBuffer(GL_NONE);
+glDrawBuffer(GL_NONE);
+//check framebuffer
+GLenum state = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+if (state != GL_FRAMEBUFFER_COMPLETE)
+{
+	throw std::runtime_error("PAG::Renderer::createShadowMap(Light& l). Failed to update the shadow map");
+}
+//Activate texture unit
+glActiveTexture(GL_TEXTURE2);
+//Bind to FBO
+glBindTexture(GL_TEXTURE_2D, l.texID);
+//Ignore color
+glClear(GL_DEPTH_BUFFER_BIT);
+//Set viewport
+glViewport(0, 0, 2048, 2048);
+//change zbuffer
+glEnable(GL_DEPTH_TEST);
+glDepthFunc(GL_LESS);
+//Avoid shadow acne ???
+glEnable(GL_CULL_FACE);
+glCullFace(GL_FRONT);
+//Take view and proj matrix from light
+glm::mat4 view, proj;
+if (l.type == LightType::DIRECTIONAL)
+{
+	view = glm::lookAt(glm::vec3(5) * -l.direction, glm::vec3(0), glm::vec3(0, 1, 0));
+	proj = glm::ortho(-3.0, 3.0, -3.0, 3.0, .1, 10.0);
+}
+else
+{
+	view = glm::lookAt(l.position, l.position + l.direction, glm::vec3(0, 1, 0));
+	proj = glm::perspective(2 * glm::radians(l.angle), 2048.0f / 2048.0f, .1f, 10.0f);
+}
+//use the shadow shaderprogram
+shaderProgramShadow->useProgram();
+//render the models
+for (size_t i = 0; i < models.size(); i++)
+{
+	Model* model = models[i].get();
+	glm::mat4 mvp = proj * view * model->getModelMatrix();
+	shaderProgramShadow->getVertexShader().setUniform("matModVisProj", mvp);
+	model->drawTriangles();
+}
+//back to normal
+glBindFramebuffer(GL_FRAMEBUFFER, 0);
+glViewport(0, 0, wViewport, hViewport);
+glDepthFunc(GL_LEQUAL);
+glDisable(GL_CULL_FACE);
 }
 
 void PAG::Renderer::configViewport(int width, int height)
@@ -546,9 +544,12 @@ void PAG::Renderer::configViewport(int width, int height)
 	glViewport(0, 0, width, height);
 }
 
-void PAG::Renderer::setRenderType(RenderType rt)
+void PAG::Renderer::setRenderTypeToActiveModel(RenderType rt)
 {
-	renderType = rt;
+	if (activeModel != -1)
+	{
+		models[activeModel]->setDrawingMode(rt);
+	}
 }
 
 void PAG::Renderer::moveCamera(int key)
@@ -578,12 +579,20 @@ void PAG::Renderer::zoomCamera(float yoffset)
 
 void PAG::Renderer::step()
 {
-	if(models.size() == 1 || activeModel == -1)
+	if (models.size() == 1)
+	{
+		activeModel = -1;
 		return;
+	}
 	if (++activeModel >= models.size())
-		activeModel = 0;
+		activeModel = 1;
 	if (models[activeModel]->getType() == ModelType::QUAD)
+	{
 		step();
+		return;
+	}
+		
+
 	printActiveModel();
 }
 
@@ -591,7 +600,15 @@ void PAG::Renderer::addModel(std::string filename, std::string name)
 {
 	if (!checkExistingModel(name))
 	{
-		models.push_back(createModel(shaderProgram, filename, mat, name));
+		try
+		{
+			models.push_back(createModel(shaderProgram, filename, mat, name));
+		}
+		catch (const std::exception& e)
+		{
+			throw std::runtime_error("void PAG::Renderer::addModel(std::string filename, std::string name) -> " + (std::string)e.what());
+		}
+
 		Model* model = models.back().get();
 
 		if (name == "cow")
