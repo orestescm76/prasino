@@ -13,10 +13,10 @@ namespace PAG
 		glm::vec4 backColor;
 		std::vector<std::unique_ptr<Model>> models;
 		std::unique_ptr<Model> lightCube;
-		std::shared_ptr<ShaderProgram> shaderProgram;
-		std::shared_ptr<ShaderProgram> shaderProgramTexture;
+		std::unique_ptr<ShaderProgram> shaderProgram;
+		//std::shared_ptr<ShaderProgram> shaderProgramTexture;
 		std::shared_ptr<ShaderProgram> shaderProgramTextureNM;
-		std::shared_ptr<ShaderProgram> spLightCube;
+		std::unique_ptr<ShaderProgram> spLightCube;
 		std::shared_ptr<ShaderProgram> shaderProgramShadow;
 		Camera camera;
 		Renderer();
@@ -31,8 +31,8 @@ namespace PAG
 		void loadUniforms(ShaderProgram* sp, Model* model);
 		void drawLightCube(Light& l);
 		void draw(Light& l, Model* model);
-		std::unique_ptr<Model> createModel(ModelType type, std::shared_ptr<ShaderProgram>& sp, Material& mat);
-		std::unique_ptr<Model> createModel(std::shared_ptr<ShaderProgram>& shaderProgram, std::string filename, Material mat, std::string name, bool NM);
+		std::unique_ptr<Model> createModel(ModelType type, std::unique_ptr<ShaderProgram>& sp, Material& mat);
+		std::unique_ptr<Model> createModel(std::unique_ptr<ShaderProgram>& shaderProgram, std::string filename, Material mat, std::string name, bool NM);
 		int activeModel;
 		bool checkExistingModel(ModelType type);
 		bool checkExistingModel(std::string name);

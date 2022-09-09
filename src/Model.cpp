@@ -68,7 +68,7 @@ PAG::Model::Model()
 
 }
 
-PAG::Model::Model(std::shared_ptr<ShaderProgram> shaderProgram, ModelType model, Material& m) : sp(shaderProgram), modelType(model), material(m),
+PAG::Model::Model(std::unique_ptr<ShaderProgram>& shaderProgram, ModelType model, Material& m) : sp(shaderProgram.get()), modelType(model), material(m),
 vertices(), normals(), indices(), modelMatrix(1), mName(), textures()
 {
 	switch (modelType)
@@ -90,7 +90,7 @@ vertices(), normals(), indices(), modelMatrix(1), mName(), textures()
 	initModel();
 }
 
-PAG::Model::Model(std::shared_ptr<ShaderProgram> shaderProgram, ModelType model) : sp(shaderProgram), modelType(model),
+PAG::Model::Model(std::unique_ptr<ShaderProgram>& shaderProgram, ModelType model) : sp(shaderProgram.get()), modelType(model),
 vertices(), normals(), indices(), modelMatrix(1), mName(), textures()
 {
 	switch (modelType)
@@ -112,7 +112,7 @@ vertices(), normals(), indices(), modelMatrix(1), mName(), textures()
 	initModel();
 }
 
-PAG::Model::Model(std::shared_ptr<ShaderProgram> shaderProgram, std::string filename, Material mat, std::string name): sp(shaderProgram), modelType(ModelType::EXTERN), modelMatrix(1),
+PAG::Model::Model(std::unique_ptr<ShaderProgram>& shaderProgram, std::string filename, Material mat, std::string name): sp(shaderProgram.get()), modelType(ModelType::EXTERN), modelMatrix(1),
 normals(), vertices(), indices(), material(mat), mName(name), textures()
 {
 	Log::getInstance()->printMessage(msgType::INFO, "Loading " + filename);
@@ -131,7 +131,7 @@ normals(), vertices(), indices(), material(mat), mName(name), textures()
 	initModel();
 }
 
-PAG::Model::Model(GLfloat* v, GLfloat* c, GLuint* i, std::shared_ptr<ShaderProgram>& shaderProgram): sp(shaderProgram),
+PAG::Model::Model(GLfloat* v, GLfloat* c, GLuint* i, std::shared_ptr<ShaderProgram>& shaderProgram): sp(shaderProgram.get()),
 vertices(), normals(), indices(), modelMatrix(1), mName(), textures()
 {
 	initModel();
@@ -398,7 +398,15 @@ void PAG::Model::draw()
 	{
 		if (drawTexture)
 		{
+			//sp->getFragmentShader().setUniformSubroutine("", "textured");
 			sp->getFragmentShader().setUniform("texSampler", textures[i]->getTexID());
+			GLuint idLuz = glGetSubroutineUniformLocation(sp->getIdSP(), GL_FRAGMENT_SHADER, "light");
+			GLuint idCol = glGetSubroutineUniformLocation(sp->getIdSP(), GL_FRAGMENT_SHADER, "color");
+			sp->subroutineIndex[idLuz] = glGetSubroutineIndex(sp->getIdSP(), GL_FRAGMENT_SHADER, "ambientColor");
+			sp->subroutineIndex[idCol] = glGetSubroutineIndex(sp->getIdSP(), GL_FRAGMENT_SHADER, "textured");
+			std::cout << "idLuz: " << idLuz << "\nidCol: " << idCol << "\nambientColor: " << glGetSubroutineIndex(sp->getIdSP(), GL_FRAGMENT_SHADER, "ambientColor") << 
+				"\ntextured: " << glGetSubroutineIndex(sp->getIdSP(), GL_FRAGMENT_SHADER, "textured") << "\n";
+			sp->getFragmentShader().setUniformSubroutine(sp->subroutineIndex, 2);
 			textures[i]->activate();
 			if (normalMapping)
 			{
@@ -417,7 +425,7 @@ void PAG::Model::draw()
 	{
 	case RenderType::WIRE:
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		sp->getFragmentShader().setUniformSubroutine("", "wire");
+		//sp->getFragmentShader().setUniformSubroutine("", "wire");
 		break;
 	case RenderType::SOLID:
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -456,7 +464,7 @@ PAG::Material PAG::Model::getMaterial()
 
 PAG::ShaderProgram* PAG::Model::getShaderProgram()
 {
-	return sp.get();
+	return sp;
 }
 
 glm::mat4 PAG::Model::getModelMatrix()
@@ -521,9 +529,9 @@ void PAG::Model::useProgram()
 	sp->useProgram();
 }
 
-void PAG::Model::setShaderProgram(std::shared_ptr<ShaderProgram>& shaderProgram)
+void PAG::Model::setShaderProgram(std::unique_ptr<ShaderProgram>& shaderProgram)
 {
-	sp = shaderProgram;
+	sp = shaderProgram.get();
 }
 
 void PAG::Model::setDrawTexture(bool flag)

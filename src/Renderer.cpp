@@ -21,11 +21,11 @@ PAG::Renderer::Renderer() :
 {
 	try
 	{
-		shaderProgram = std::make_shared<ShaderProgram>("pag10-vs.glsl", "pag10-fs.glsl");
-		spLightCube = std::make_shared<ShaderProgram>("pag09-vs.glsl", "pag08-light-fs.glsl");
-		shaderProgramTexture = std::make_shared<ShaderProgram>("pag10-vs.glsl", "pag10-fs-tex.glsl");
-		shaderProgramTextureNM = std::make_shared<ShaderProgram>("pag10-vs-nm.glsl", "pag10-fs-nm-tex.glsl");
-		shaderProgramShadow = std::make_shared<ShaderProgram>("pag10-shadow-vs.glsl", "pag10-shadow-fs.glsl");
+		shaderProgram = std::make_unique<ShaderProgram>("vertex.glsl", "frag.glsl");
+		spLightCube = std::make_unique<ShaderProgram>("pag09-vs.glsl", "pag08-light-fs.glsl");
+		//shaderProgramTexture = std::make_shared<ShaderProgram>("pag10-vs.glsl", "pag10-fs-tex.glsl");
+		shaderProgramTextureNM = std::make_shared<ShaderProgram>("vertex.glsl", "frag.glsl");
+		shaderProgramShadow = std::make_shared<ShaderProgram>("vertex_shadow.glsl", "frag_shadow.glsl");
 	}
 	catch (const std::exception& e)
 	{
@@ -41,8 +41,8 @@ PAG::Renderer::Renderer() :
 
 	lights.push_back(ambL);
 	//lights.push_back(point);
-	lights.push_back(dir);
-	lights.push_back(spot);
+	//lights.push_back(dir);
+	//lights.push_back(spot);
 
 	backColor = { 0,0,0,1 };
 
@@ -58,7 +58,7 @@ PAG::Renderer::Renderer() :
 	models.push_back(std::make_unique<Model>(shaderProgram, ModelType::QUAD, qMat));
 	models[0]->addTexture(textures["grass"]);
 	models[0]->setDrawTexture(true);
-	models[0]->setShaderProgram(shaderProgramTexture);
+	//models[0]->setShaderProgram(shaderProgram);
 
 	//Create FBO
 	glGenFramebuffers(1, &fboShadowId);
@@ -124,9 +124,10 @@ void PAG::Renderer::setTextureToActiveModel()
 	{
 		Model* model = models[activeModel].get();
 		//If it is not drawing texture
+		model->setShaderProgram(shaderProgram);
 		if (!model->isDrawingTexture())
 		{
-			model->setShaderProgram(shaderProgramTexture);
+		
 			//Check models
 			if (model->name() == "cow")
 				model->addTexture(textures["cow"]);
@@ -159,18 +160,19 @@ void PAG::Renderer::setNormalMappingToActiveModel()
 		//If it is not drawing normal mapping texture
 		if (model->isDrawingTexture())
 		{
+			
 			if (!model->isDrawingNormalMapping())
 			{
 				//Check models
 				if (model->name() == "spurs")
 				{
-					model->setShaderProgram(shaderProgramTextureNM);
+					//model->setShaderProgram(shaderProgramTextureNM);
 					model->addTexture(textures["spursNM"]);
 					model->setNormalMapping(true);
 				}
 				else if (model->name() == "knight")
 				{
-					model->setShaderProgram(shaderProgramTextureNM);
+					//model->setShaderProgram(shaderProgramTextureNM);
 					model->addTexture(textures["stoneNM"]);
 					model->setNormalMapping(true);
 				}	
@@ -179,7 +181,7 @@ void PAG::Renderer::setNormalMappingToActiveModel()
 			{
 				model->setNormalMapping(false);
 				model->removeNormalMapping();
-				model->setShaderProgram(shaderProgramTexture);
+				//model->setShaderProgram(shaderProgramTexture);
 			}
 		}
 		else return;
@@ -194,13 +196,13 @@ void PAG::Renderer::activateLight(Light& l, ShaderProgram* sp, Model* model)
 	glm::mat4 mInvTrans = glm::inverse(glm::transpose(camera.getViewMatrix()));
 	glm::mat4 shadowMat = glm::scale(glm::mat4(1), glm::vec3(.5));
 	shadowMat[3][0] = shadowMat[3][1] = shadowMat[3][2] = 0.5;
+
 	switch (l.type)
 	{
 	case LightType::AMBIENT:
-		sp->getFragmentShader().setUniformSubroutine("", "ambientColor");
+		//sp->getFragmentShader().setUniformSubroutine("", "ambientColor");
 		sp->getFragmentShader().setUniform("Ia", l.ambient);
-		if(!model->isDrawingTexture())
-			sp->getFragmentShader().setUniform("Ka", model->getMaterial().ambient);
+		sp->getFragmentShader().setUniform("Ka", model->getMaterial().ambient);
 		break;
 	//WORKS
 	case LightType::POINT:
@@ -395,6 +397,7 @@ void PAG::Renderer::draw(Light& l, Model* model)
 {
 	try
 	{
+	
 		//First use shader program
 		model->useProgram();
 		//Then activate the light
@@ -412,11 +415,11 @@ void PAG::Renderer::draw(Light& l, Model* model)
 	}
 }
 
-std::unique_ptr<PAG::Model> PAG::Renderer::createModel(ModelType type, std::shared_ptr<ShaderProgram>& sp, Material& mat)
+std::unique_ptr<PAG::Model> PAG::Renderer::createModel(ModelType type, std::unique_ptr<ShaderProgram>& sp, Material& mat)
 {
 	return std::make_unique<Model>(sp, type, mat);
 }
-std::unique_ptr<PAG::Model> PAG::Renderer::createModel(std::shared_ptr<ShaderProgram>& shaderProgram, std::string filename, Material mat, std::string name, bool NM = false)
+std::unique_ptr<PAG::Model> PAG::Renderer::createModel(std::unique_ptr<ShaderProgram>& shaderProgram, std::string filename, Material mat, std::string name, bool NM = false)
 {
 	//if(!NM)
 		return std::make_unique<Model>(shaderProgram, filename, mat, name);

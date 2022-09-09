@@ -15,7 +15,9 @@ PAG::ShaderProgram::ShaderProgram(std::string filevs, std::string filefs) try :
 {
 	//Todo bien, los creamos
 	linkShaders();
-
+	int numRutinas = 0;
+	glGetProgramStageiv(idSP, GL_FRAGMENT_SHADER, GL_ACTIVE_SUBROUTINE_UNIFORMS, &numRutinas);
+	subroutineIndex = new GLuint[numRutinas];
 }
 catch (const std::exception& e)
 {
@@ -41,6 +43,7 @@ PAG::ShaderProgram::~ShaderProgram()
 {
 	if(idSP != 0)
 		glDeleteProgram(idSP);
+	delete[] subroutineIndex;
 }
 
 void PAG::ShaderProgram::linkShaders()

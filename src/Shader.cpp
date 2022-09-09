@@ -15,6 +15,7 @@ PAG::Shader::Shader(std::string path, std::string name, GLenum type, GLint sp) :
 	{
 		src = loadShader();
 		createShader();
+
 	}
 	catch (const std::exception& e)
 	{
@@ -110,11 +111,17 @@ void PAG::Shader::setUniform(std::string uniform, unsigned int num) const
 {
 	glUniform1i(getUniformLocation(uniform), num);
 }
+
 void PAG::Shader::setUniformSubroutine(std::string uniform, std::string func) const
 {
 	//unsigned int subId = glGetSubroutineUniformLocation(idSP, shaderType, func.c_str());
-	GLuint id = glGetSubroutineIndex(idSP, shaderType, func.c_str());
-	glUniformSubroutinesuiv(shaderType, 1, &id);
+	GLuint idFunc = glGetSubroutineIndex(idSP, shaderType, func.c_str());
+	glUniformSubroutinesuiv(shaderType, 1, &idFunc);
+}
+
+void PAG::Shader::setUniformSubroutine(GLuint* param, GLsizei numParams) const
+{
+	glUniformSubroutinesuiv(shaderType, numParams, param);
 }
 
 void PAG::Shader::checkErrors(GLint status, GLint shaderId, std::string msg)

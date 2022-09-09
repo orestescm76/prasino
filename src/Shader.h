@@ -17,6 +17,7 @@ namespace PAG
 		void createShader();
 		//Returns the Shader's source code
 		std::string& getSrc();
+		
 	public:
 		Shader();
 		Shader(std::string path, std::string name, GLenum type, GLint sp);
@@ -31,6 +32,7 @@ namespace PAG
 		void setUniform(std::string uniform, float num) const;
 		void setUniform(std::string uniform, unsigned int num) const;
 		void setUniformSubroutine(std::string uniform, std::string func) const;
+		void setUniformSubroutine(GLuint* param, GLsizei numParams) const;
 	};
 }
 

@@ -21,46 +21,49 @@ uniform vec3 lDir;
 uniform float shininess;
 uniform float sAngle;
 
+uniform sampler2D texSampler;
+uniform sampler2DShadow samplerShadow;
+
 layout (location = 0) out vec4 fragColor;
 //Set the subroutine
-subroutine vec3 lightMode();
+subroutine vec3 lightMode(vec3 difColor);
 //Set the uniform to the subroutine and give it a name we can use
 subroutine uniform lightMode light;
 
-uniform sampler2DShadow samplerShadow;
+subroutine vec3 getColor();
+subroutine uniform getColor color;
 
 subroutine (lightMode)
-vec3 wire()
+vec3 wire(vec3 difColor)
 {
 	//returns a simple blue color
-	return Kd;
+	return difColor;
 }
 
 subroutine (lightMode)
-vec3 ambientColor()
+vec3 ambientColor(vec3 difColor)
 {
-	vec3 amb = (Ka*Ia);
-	return amb;
+	return Ia * difColor;
 }
 
 subroutine (lightMode)
-vec3 point()
+vec3 point(vec3 difColor)
 {
 	vec3 n = normalize(inputVS.normal);
 	vec3 l = normalize(lPos - inputVS.pos);
 	vec3 v = normalize(-inputVS.pos);
 	
 	vec3 r = normalize(reflect(-l,n));
-	vec3 diff = (Id * Kd * max( dot (l,n), 0.0));
+	vec3 diff = (Id * difColor * max( dot (l,n), 0.0));
 	vec3 spec = (Is * Ks * pow( max( dot(r,v),0.0),shininess));
 	return diff+spec;
 }
 
 subroutine (lightMode)
-vec3 directional()
+vec3 directional(vec3 difColor)
 {
 	float shadow = textureProj(samplerShadow, inputVS.shadowCoords);
-	float shadowFactor = clamp(shadow, 0.005, 1);
+	float shadowFactor = clamp(shadow, 0.005, 1.0);
 	vec3 n = normalize(inputVS.normal);
 	vec3 l = -lDir;
 	vec3 v = normalize(-inputVS.pos);
@@ -68,13 +71,13 @@ vec3 directional()
 	vec3 r = reflect(-l,n);
 
 
-	vec3 diff = (Id * Kd * max( dot (l,n), 0.0));
+	vec3 diff = (Id * difColor * max( dot (l,n), 0.0));
 	vec3 spec = (Is * Ks * pow( max( dot(r,v), 0.0),shininess));
 	return shadowFactor*(diff+spec);
 }
 
 subroutine (lightMode)
-vec3 spot()
+vec3 spot(vec3 difColor)
 {
 	float shadow = textureProj(samplerShadow, inputVS.shadowCoords);
 	//l -> dir luz
@@ -90,12 +93,26 @@ vec3 spot()
 	vec3 n = normalize(inputVS.normal);
 	vec3 v = normalize(-inputVS.pos);
 	vec3 r = reflect(-l,n);
-	vec3 diff = (Id*Kd * max(dot(l,n),0.0));
+	vec3 diff = (Id*difColor * max(dot(l,n),0.0));
 	vec3 spec = (Is*Ks * pow( max( dot(r,v), 0.0 ) , shininess));
 	sFactor = pow(cosD, 64);
 	return shadow*sFactor*(diff+spec);
 }
+
+subroutine (getColor)
+vec3 textured()
+{
+
+	return texture(texSampler, inputVS.texCoords).rgb;
+}
+
+subroutine (getColor)
+vec3 simpleColor()
+{
+	return Ka;
+}
+
 void main()
 {
-	fragColor = vec4(light(),1.0);
+	fragColor = vec4(light(color()),1.0);
 }

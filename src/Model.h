@@ -38,7 +38,7 @@ namespace PAG
 		unsigned int idTangent = 0;
 		unsigned int idBiTangent = 0;
 		//Pointer to the shader program
-		std::shared_ptr<ShaderProgram> sp;
+		ShaderProgram* sp;
 		//pointer to a texture
 		std::vector<std::shared_ptr<Texture>> textures;
 		bool drawTexture = false;
@@ -62,9 +62,9 @@ namespace PAG
 	public:
 		Model();
 		Model(GLfloat* v, GLfloat* c, GLuint* i, std::shared_ptr<ShaderProgram>& shaderProgram);
-		Model(std::shared_ptr<ShaderProgram> shaderProgram, ModelType model, Material& m);
-		Model(std::shared_ptr<ShaderProgram> shaderProgram, ModelType model);
-		Model(std::shared_ptr<ShaderProgram> shaderProgram, std::string filename, Material mat, std::string name);
+		Model(std::unique_ptr<ShaderProgram>& shaderProgram, ModelType model, Material& m);
+		Model(std::unique_ptr<ShaderProgram>& shaderProgram, ModelType model);
+		Model(std::unique_ptr<ShaderProgram>& shaderProgram, std::string filename, Material mat, std::string name);
 		Model(const Model& model);
 		Model& operator=(const Model& orig) = default;
 
@@ -74,7 +74,7 @@ namespace PAG
 		void useProgram();
 		void addTexture(std::shared_ptr<Texture>& tex);
 		void deleteTexutres();
-		void setShaderProgram(std::shared_ptr<ShaderProgram>& shaderProgram);
+		void setShaderProgram(std::unique_ptr<ShaderProgram>& shaderProgram);
 		void setDrawTexture(bool flag);
 		Material getMaterial();
 		ShaderProgram* getShaderProgram();
