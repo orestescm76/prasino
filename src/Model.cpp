@@ -398,15 +398,8 @@ void PAG::Model::draw()
 	{
 		if (drawTexture)
 		{
-			//sp->getFragmentShader().setUniformSubroutine("", "textured");
 			sp->getFragmentShader().setUniform("texSampler", textures[i]->getTexID());
-			GLuint idLuz = glGetSubroutineUniformLocation(sp->getIdSP(), GL_FRAGMENT_SHADER, "light");
-			GLuint idCol = glGetSubroutineUniformLocation(sp->getIdSP(), GL_FRAGMENT_SHADER, "color");
-			sp->subroutineIndex[idLuz] = glGetSubroutineIndex(sp->getIdSP(), GL_FRAGMENT_SHADER, "ambientColor");
-			sp->subroutineIndex[idCol] = glGetSubroutineIndex(sp->getIdSP(), GL_FRAGMENT_SHADER, "textured");
-			std::cout << "idLuz: " << idLuz << "\nidCol: " << idCol << "\nambientColor: " << glGetSubroutineIndex(sp->getIdSP(), GL_FRAGMENT_SHADER, "ambientColor") << 
-				"\ntextured: " << glGetSubroutineIndex(sp->getIdSP(), GL_FRAGMENT_SHADER, "textured") << "\n";
-			sp->getFragmentShader().setUniformSubroutine(sp->subroutineIndex, 2);
+			sp->getFragmentShader().setUniformSubroutine("textured", "color");
 			textures[i]->activate();
 			if (normalMapping)
 			{
@@ -431,7 +424,7 @@ void PAG::Model::draw()
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		break;
 	}
-
+	sp->getFragmentShader().setSubroutines();
 	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, nullptr);
 }
 void PAG::Model::drawTriangles()

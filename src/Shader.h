@@ -13,11 +13,14 @@ namespace PAG
 		std::string loadShader();
 		//Checks and returns the error log messages if there's anything wrong.
 		void checkErrors(GLint status, GLint id, std::string msg);
-		GLint getUniformLocation(std::string uniform) const;
+		GLint getUniformLocation(std::string uniform);
 		void createShader();
 		//Returns the Shader's source code
 		std::string& getSrc();
-		
+		GLuint* subroutineIndex;
+		GLsizei numSubroutines;
+		std::map<std::string, int> uniformLocation;
+		GLint shaderProgramID;
 	public:
 		Shader();
 		Shader(std::string path, std::string name, GLenum type, GLint sp);
@@ -26,13 +29,15 @@ namespace PAG
 		Shader& operator=(const Shader& orig) = default;
 		//Returns the Shader's ID
 		GLint getId();
+		void createSubroutineCache();
 		//Uniform set
-		void setUniform(std::string uniform, glm::vec3 vec) const;
-		void setUniform(std::string uniform, glm::mat4 mat) const;
-		void setUniform(std::string uniform, float num) const;
-		void setUniform(std::string uniform, unsigned int num) const;
-		void setUniformSubroutine(std::string uniform, std::string func) const;
-		void setUniformSubroutine(GLuint* param, GLsizei numParams) const;
+		void setUniform(std::string uniform, glm::vec3 vec);
+		void setUniform(std::string uniform, glm::mat4 mat);
+		void setUniform(std::string uniform, float num);
+		void setUniform(std::string uniform, unsigned int num);
+		void setUniformSubroutine(std::string uniform, std::string func);
+		void setSubroutines();
+		void setSPID(GLint id);
 	};
 }
 

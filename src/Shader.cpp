@@ -8,7 +8,7 @@ PAG::Shader::Shader() : shaderType(0)
 
 }
 
-PAG::Shader::Shader(std::string path, std::string name, GLenum type, GLint sp) : filename(path), shaderName(name), id(0), shaderType(type), idSP(sp)
+PAG::Shader::Shader(std::string path, std::string name, GLenum type, GLint sp) : filename(path), shaderName(name), id(0), shaderType(type), idSP(sp), uniformLocation(), numSubroutines(0), subroutineIndex(nullptr)
 {
 	src = "";
 	try
@@ -39,6 +39,7 @@ PAG::Shader::~Shader()
 {
 	if(id != 0)
 		glDeleteShader(id);
+	delete[] subroutineIndex;
 }
 
 std::string PAG::Shader::loadShader()
@@ -76,6 +77,7 @@ void PAG::Shader::createShader()
 		//Attach shaders
 		Log::getInstance()->printMessage(msgType::INFO, "Attaching shaders");
 		glAttachShader(idSP, id);
+
 	}
 	catch (const std::exception& e)
 	{
@@ -88,40 +90,72 @@ GLint PAG::Shader::getId()
 	return id;
 }
 
+void PAG::Shader::createSubroutineCache()
+{
+	Log::getInstance()->printMessage(msgType::INFO, "Creating cache");
+	glGetProgramStageiv(idSP, shaderType, GL_ACTIVE_SUBROUTINE_UNIFORMS, &numSubroutines);
+	if (numSubroutines != 0)
+		subroutineIndex = new GLuint[numSubroutines];
+	else
+		subroutineIndex = nullptr;
+}
+
 std::string& PAG::Shader::getSrc() 
 {
 	return src;
 }
 
-void PAG::Shader::setUniform(std::string uniform, glm::vec3 vec) const
+void PAG::Shader::setUniform(std::string uniform, glm::vec3 vec) 
 {
 	glUniform3fv(getUniformLocation(uniform), 1, &vec[0]);
 }
 
-void PAG::Shader::setUniform(std::string uniform, glm::mat4 mat) const
+void PAG::Shader::setUniform(std::string uniform, glm::mat4 mat) 
 {
 	glUniformMatrix4fv(getUniformLocation(uniform), 1, GL_FALSE, &mat[0][0]);
 }
 
-void PAG::Shader::setUniform(std::string uniform, float num) const
+void PAG::Shader::setUniform(std::string uniform, float num) 
 {
 	glUniform1f(getUniformLocation(uniform), num);
 }
-void PAG::Shader::setUniform(std::string uniform, unsigned int num) const
+void PAG::Shader::setUniform(std::string uniform, unsigned int num) 
 {
 	glUniform1i(getUniformLocation(uniform), num);
 }
 
-void PAG::Shader::setUniformSubroutine(std::string uniform, std::string func) const
+void PAG::Shader::setUniformSubroutine(std::string uniform, std::string func) 
 {
+	//GLuint idLuz = glGetSubroutineUniformLocation(sp->getIdSP(), GL_FRAGMENT_SHADER, "light");
+	//GLuint idCol = glGetSubroutineUniformLocation(sp->getIdSP(), GL_FRAGMENT_SHADER, "color");
+	//sp->subroutineIndex[idLuz] = glGetSubroutineIndex(sp->getIdSP(), GL_FRAGMENT_SHADER, "ambientColor");
+	//sp->subroutineIndex[idCol] = glGetSubroutineIndex(sp->getIdSP(), GL_FRAGMENT_SHADER, "textured");
 	//unsigned int subId = glGetSubroutineUniformLocation(idSP, shaderType, func.c_str());
-	GLuint idFunc = glGetSubroutineIndex(idSP, shaderType, func.c_str());
-	glUniformSubroutinesuiv(shaderType, 1, &idFunc);
+	//Check the uniform name
+	if (uniformLocation.find(uniform) == uniformLocation.end())
+	{
+		GLuint idFunc = glGetSubroutineIndex(idSP, shaderType, uniform.c_str());
+		assert(idFunc != GL_INVALID_INDEX);
+		uniformLocation[uniform] = idFunc;
+	}
+	//Then check the selected subroutine
+	if (uniformLocation.find(func) == uniformLocation.end())
+	{
+		GLuint idSub = glGetSubroutineUniformLocation(idSP, shaderType, func.c_str());
+		assert(idSub != GL_INVALID_INDEX);
+		uniformLocation[func] = idSub;
+	}
+	subroutineIndex[uniformLocation[func]] = uniformLocation[uniform];
 }
 
-void PAG::Shader::setUniformSubroutine(GLuint* param, GLsizei numParams) const
+void PAG::Shader::setSubroutines() 
 {
-	glUniformSubroutinesuiv(shaderType, numParams, param);
+	glUniformSubroutinesuiv(shaderType, numSubroutines, subroutineIndex);
+}
+
+void PAG::Shader::setSPID(GLint id)
+{
+	shaderProgramID = id;
 }
 
 void PAG::Shader::checkErrors(GLint status, GLint shaderId, std::string msg)
@@ -137,11 +171,16 @@ void PAG::Shader::checkErrors(GLint status, GLint shaderId, std::string msg)
 	}
 }
 
-GLint PAG::Shader::getUniformLocation(std::string uniform) const
-{
-	
-	GLint loc = glGetUniformLocation(idSP, uniform.c_str());
-	if (loc != GL_INVALID_INDEX)
-		return loc;
-	Log::getInstance()->printMessage(msgType::WARNING, "Shader::getUniformLocation()->Couldn't find the uniform location "+uniform);
+GLint PAG::Shader::getUniformLocation(std::string uniform)
+{	
+	if (uniformLocation.find(uniform) == uniformLocation.end())
+	{
+		GLint loc = glGetUniformLocation(idSP, uniform.c_str());
+		assert(loc != GL_INVALID_INDEX);
+		uniformLocation[uniform] = loc;
+	}
+	return uniformLocation[uniform];
+	//if (loc != GL_INVALID_INDEX)
+	//	return loc;
+	//Log::getInstance()->printMessage(msgType::WARNING, "Shader::getUniformLocation()->Couldn't find the uniform location "+uniform);
 }

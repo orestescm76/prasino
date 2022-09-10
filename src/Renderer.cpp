@@ -200,13 +200,13 @@ void PAG::Renderer::activateLight(Light& l, ShaderProgram* sp, Model* model)
 	switch (l.type)
 	{
 	case LightType::AMBIENT:
-		//sp->getFragmentShader().setUniformSubroutine("", "ambientColor");
+		sp->getFragmentShader().setUniformSubroutine("ambientColor", "light");
 		sp->getFragmentShader().setUniform("Ia", l.ambient);
 		sp->getFragmentShader().setUniform("Ka", model->getMaterial().ambient);
 		break;
 	//WORKS
 	case LightType::POINT:
-		sp->getFragmentShader().setUniformSubroutine("", "point");
+		sp->getFragmentShader().setUniformSubroutine("point", "light");
 		sp->getFragmentShader().setUniform("Id", l.diffuse);
 		sp->getFragmentShader().setUniform("Is", l.specular);
 		//Apply transform
@@ -222,7 +222,7 @@ void PAG::Renderer::activateLight(Light& l, ShaderProgram* sp, Model* model)
 		viewCL = glm::lookAt(glm::vec3(5) * -l.direction, glm::vec3(0), glm::vec3(0, 1, 0));
 		projCL = glm::ortho(-3.0, 3.0, -3.0, 3.0, .1, 10.0);
 		shadowMat = shadowMat * projCL * viewCL * model->getModelMatrix();
-		sp->getFragmentShader().setUniformSubroutine("", "directional");
+		sp->getFragmentShader().setUniformSubroutine("directional", "light");
 		sp->getFragmentShader().setUniform("Id", l.diffuse);
 		sp->getFragmentShader().setUniform("Is", l.specular);
 		//Apply transform
@@ -243,7 +243,7 @@ void PAG::Renderer::activateLight(Light& l, ShaderProgram* sp, Model* model)
 		viewCL = glm::lookAt(l.position, l.position + l.direction, glm::vec3(0, 1, 0));
 		projCL = glm::perspective(2 * glm::radians(l.angle), 2048.0f / 2048.0f, .1f, 10.0f);
 		shadowMat = shadowMat * projCL * viewCL * model->getModelMatrix();
-		sp->getFragmentShader().setUniformSubroutine("", "spot");
+		sp->getFragmentShader().setUniformSubroutine("spot", "light");
 		sp->getFragmentShader().setUniform("sAngle", glm::radians(l.angle));
 		sp->getFragmentShader().setUniform("Id", l.diffuse);
 		sp->getFragmentShader().setUniform("Is", l.specular);

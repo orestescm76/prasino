@@ -1,14 +1,15 @@
 #pragma once
+//Estructuras de datos
+#include <vector>
+#include <map>
 //LIBRERÍAS ESTÁNDAR
 #include <iostream>
 #include <string>
 #include <fstream>
 #include <sstream>
 #include <memory>
-//Estructuras de datos
-#include <vector>
-#include <map>
-//en este orden que si no la jodemos
+#include <cassert>
+//en este orden que si no la jodemos, OpenGL
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 //glm

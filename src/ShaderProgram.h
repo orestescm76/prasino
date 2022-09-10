@@ -21,8 +21,7 @@ namespace PAG
 		void useProgram();
 		void deactivate();
 		//Setting up the uniforms is a Shader thing.
-		const Shader& getVertexShader();
-		const Shader& getFragmentShader();
-		GLuint* subroutineIndex;
+		Shader& getVertexShader();
+		Shader& getFragmentShader();
 	};
 }

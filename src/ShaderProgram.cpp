@@ -15,9 +15,11 @@ PAG::ShaderProgram::ShaderProgram(std::string filevs, std::string filefs) try :
 {
 	//Todo bien, los creamos
 	linkShaders();
-	int numRutinas = 0;
-	glGetProgramStageiv(idSP, GL_FRAGMENT_SHADER, GL_ACTIVE_SUBROUTINE_UNIFORMS, &numRutinas);
-	subroutineIndex = new GLuint[numRutinas];
+	vertexShader.setSPID(idSP);
+	fragmentShader.setSPID(idSP);
+	fragmentShader.createSubroutineCache();
+	linkShaders();
+
 }
 catch (const std::exception& e)
 {
@@ -31,8 +33,10 @@ PAG::ShaderProgram::ShaderProgram(const ShaderProgram& sp) try :
 {
 	idSP = glCreateProgram();
 	//Todo bien, los creamos
+	vertexShader.setSPID(idSP);
+	fragmentShader.setSPID(idSP);
+	fragmentShader.createSubroutineCache();
 	linkShaders();
-
 }
 catch (const std::exception& e)
 {
@@ -43,7 +47,6 @@ PAG::ShaderProgram::~ShaderProgram()
 {
 	if(idSP != 0)
 		glDeleteProgram(idSP);
-	delete[] subroutineIndex;
 }
 
 void PAG::ShaderProgram::linkShaders()
@@ -56,6 +59,7 @@ void PAG::ShaderProgram::linkShaders()
 		glLinkProgram(idSP);
 		glGetProgramiv(idSP, GL_LINK_STATUS, &status);
 		checkErrors(status, idSP, "Couldn't link the shaders");
+
 	}
 	catch (const std::runtime_error& e)
 	{
@@ -92,12 +96,12 @@ void PAG::ShaderProgram::deactivate()
 	glUseProgram(0);
 }
 
-const PAG::Shader& PAG::ShaderProgram::getVertexShader()
+PAG::Shader& PAG::ShaderProgram::getVertexShader()
 {
 	return vertexShader;
 }
 
-const PAG::Shader& PAG::ShaderProgram::getFragmentShader()
+PAG::Shader& PAG::ShaderProgram::getFragmentShader()
 {
 	return fragmentShader;
 }
