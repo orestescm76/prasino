@@ -126,11 +126,6 @@ void PAG::Shader::setUniform(std::string uniform, unsigned int num)
 
 void PAG::Shader::setUniformSubroutine(std::string uniform, std::string func) 
 {
-	//GLuint idLuz = glGetSubroutineUniformLocation(sp->getIdSP(), GL_FRAGMENT_SHADER, "light");
-	//GLuint idCol = glGetSubroutineUniformLocation(sp->getIdSP(), GL_FRAGMENT_SHADER, "color");
-	//sp->subroutineIndex[idLuz] = glGetSubroutineIndex(sp->getIdSP(), GL_FRAGMENT_SHADER, "ambientColor");
-	//sp->subroutineIndex[idCol] = glGetSubroutineIndex(sp->getIdSP(), GL_FRAGMENT_SHADER, "textured");
-	//unsigned int subId = glGetSubroutineUniformLocation(idSP, shaderType, func.c_str());
 	//Check the uniform name
 	if (uniformLocation.find(uniform) == uniformLocation.end())
 	{

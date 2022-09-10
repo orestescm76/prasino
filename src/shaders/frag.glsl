@@ -102,15 +102,21 @@ vec3 spot(vec3 difColor)
 subroutine (getColor)
 vec3 textured()
 {
-
 	return texture(texSampler, inputVS.texCoords).rgb;
 }
 
 subroutine (getColor)
-vec3 simpleColor()
+vec3 simpleColorAmbient()
 {
 	return Ka;
 }
+
+subroutine (getColor)
+vec3 simpleColorDiffuse()
+{
+	return Kd;
+}
+
 
 void main()
 {

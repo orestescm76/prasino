@@ -286,6 +286,8 @@ void PAG::Model::createLightCube()
 		1, 4, 0,
 		4, 5, 6,
 		4, 6, 7 };
+	Material m(glm::vec3(1, 1, 1), glm::vec3(1, 1, 1), glm::vec3(1, 1, 1), 255);
+	this->material = m;
 }
 
 void PAG::Model::createQuad()
@@ -394,9 +396,9 @@ void PAG::Model::initModel()
 
 void PAG::Model::draw()
 {
-	for (size_t i = 0; i < textures.size(); i++)
+	if (drawTexture)
 	{
-		if (drawTexture)
+		for (size_t i = 0; i < textures.size(); i++)
 		{
 			sp->getFragmentShader().setUniform("texSampler", textures[i]->getTexID());
 			sp->getFragmentShader().setUniformSubroutine("textured", "color");
@@ -408,8 +410,10 @@ void PAG::Model::draw()
 				textures[i]->activate();
 			}
 		}
-
 	}
+	else
+		sp->getFragmentShader().setUniformSubroutine("simpleColorDiffuse", "color");
+
 	//Bind the vertices and indices
 	glBindVertexArray(idVAO);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, idIBO);
@@ -418,7 +422,7 @@ void PAG::Model::draw()
 	{
 	case RenderType::WIRE:
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		//sp->getFragmentShader().setUniformSubroutine("", "wire");
+		sp->getFragmentShader().setUniformSubroutine("wire", "light");
 		break;
 	case RenderType::SOLID:
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);

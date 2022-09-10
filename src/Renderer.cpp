@@ -22,7 +22,6 @@ PAG::Renderer::Renderer() :
 	try
 	{
 		shaderProgram = std::make_unique<ShaderProgram>("vertex.glsl", "frag.glsl");
-		spLightCube = std::make_unique<ShaderProgram>("pag09-vs.glsl", "pag08-light-fs.glsl");
 		//shaderProgramTexture = std::make_shared<ShaderProgram>("pag10-vs.glsl", "pag10-fs-tex.glsl");
 		shaderProgramTextureNM = std::make_shared<ShaderProgram>("vertex.glsl", "frag.glsl");
 		shaderProgramShadow = std::make_shared<ShaderProgram>("vertex_shadow.glsl", "frag_shadow.glsl");
@@ -33,16 +32,16 @@ PAG::Renderer::Renderer() :
 	}
 
 	
-	lightCube = std::make_unique<Model>(spLightCube, ModelType::LIGHT_CUBE);
+	lightCube = std::make_unique<Model>(shaderProgram, ModelType::LIGHT_CUBE);
 	Light ambL(glm::vec3(.18));
 	Light point(glm::vec3(.3), glm::vec3(1), glm::vec3(-.5,.5,.2), LightType::POINT);
 	Light dir(glm::vec3(.1,.1,.3), glm::vec3(.9),glm::vec3(1,0,0), LightType::DIRECTIONAL);
-	Light spot(glm::vec3(1), glm::vec3(1.0f), glm::vec3(3,2,3), glm::vec3(-3,-2,-3), 128.0f);
+	Light spot(glm::vec3(0,1,1), glm::vec3(1.0f), glm::vec3(3,4,3), glm::vec3(-3,-4,-3), 128.0f);
 
 	lights.push_back(ambL);
 	//lights.push_back(point);
 	//lights.push_back(dir);
-	//lights.push_back(spot);
+	lights.push_back(spot);
 
 	backColor = { 0,0,0,1 };
 
@@ -58,7 +57,6 @@ PAG::Renderer::Renderer() :
 	models.push_back(std::make_unique<Model>(shaderProgram, ModelType::QUAD, qMat));
 	models[0]->addTexture(textures["grass"]);
 	models[0]->setDrawTexture(true);
-	//models[0]->setShaderProgram(shaderProgram);
 
 	//Create FBO
 	glGenFramebuffers(1, &fboShadowId);
@@ -124,10 +122,8 @@ void PAG::Renderer::setTextureToActiveModel()
 	{
 		Model* model = models[activeModel].get();
 		//If it is not drawing texture
-		model->setShaderProgram(shaderProgram);
 		if (!model->isDrawingTexture())
 		{
-		
 			//Check models
 			if (model->name() == "cow")
 				model->addTexture(textures["cow"]);
@@ -201,6 +197,7 @@ void PAG::Renderer::activateLight(Light& l, ShaderProgram* sp, Model* model)
 	{
 	case LightType::AMBIENT:
 		sp->getFragmentShader().setUniformSubroutine("ambientColor", "light");
+		sp->getFragmentShader().setUniformSubroutine("simpleColorAmbient", "color");
 		sp->getFragmentShader().setUniform("Ia", l.ambient);
 		sp->getFragmentShader().setUniform("Ka", model->getMaterial().ambient);
 		break;
@@ -287,10 +284,13 @@ void PAG::Renderer::drawLightCube(Light& l)
 {
 	if (l.type == LightType::AMBIENT)
 		return;
-	spLightCube->useProgram();
 	glm::mat4 projviewmod = camera.getProjMatrix() * camera.getViewMatrix() * glm::translate(glm::mat4(1), l.position);
-	spLightCube->getVertexShader().setUniform("matProjViewModel", projviewmod);
-	spLightCube->getFragmentShader().setUniform("lightColor", l.diffuse);
+	shaderProgram->useProgram();
+	shaderProgram->getVertexShader().setUniform("matProjViewModel", projviewmod);
+	//shaderProgram->getFragmentShader().setUniform("lightColor", l.diffuse);
+	lightCube->setDrawTexture(false);
+	shaderProgram->getFragmentShader().setUniform("Kd", l.diffuse);
+	shaderProgram->getFragmentShader().setUniformSubroutine("wire", "light");
 	lightCube->draw();
 }
 
