@@ -35,13 +35,13 @@ PAG::Renderer::Renderer() :
 	lightCube = std::make_unique<Model>(shaderProgram, ModelType::LIGHT_CUBE);
 	Light ambL(glm::vec3(.18));
 	Light point(glm::vec3(.3), glm::vec3(1), glm::vec3(-.5,.5,.2), LightType::POINT);
-	Light dir(glm::vec3(.1,.1,.3), glm::vec3(.9),glm::vec3(1,0,0), LightType::DIRECTIONAL);
+	Light dir(glm::vec3(1,1,.6), glm::vec3(.6),glm::vec3(-.7,-.7,-.7), LightType::DIRECTIONAL);
 	Light spot(glm::vec3(0,1,1), glm::vec3(1.0f), glm::vec3(3,4,3), glm::vec3(-3,-4,-3), 128.0f);
 
 	lights.push_back(ambL);
 	//lights.push_back(point);
-	//lights.push_back(dir);
-	lights.push_back(spot);
+	lights.push_back(dir);
+	//lights.push_back(spot);
 
 	backColor = { 0,0,0,1 };
 
@@ -143,7 +143,7 @@ void PAG::Renderer::setTextureToActiveModel()
 		{
 			model->setDrawTexture(false);
 			model->setNormalMapping(false);
-			model->setShaderProgram(shaderProgram);
+			//model->setShaderProgram(shaderProgram);
 			model->unBindTexture();
 		}
 	}
@@ -383,7 +383,7 @@ void PAG::Renderer::minusColor()
 
 void PAG::Renderer::printInfo()
 {
-	std::string renderer((const char*)glGetString(GL_RENDERER));
+	std::string renderer = ((const char*)glGetString(GL_RENDERER));
 	std::string vendor = (const char*)glGetString(GL_VENDOR);
 	std::string openglversion = (const char*)glGetString(GL_VERSION);
 	std::string shadingVersion = (const char*)glGetString(GL_SHADING_LANGUAGE_VERSION);
@@ -456,7 +456,7 @@ bool PAG::Renderer::checkExistingModel(std::string name)
 void PAG::Renderer::createShadowMap(Light& l)
 {
 	glGenTextures(1, &l.texID);
-	GLfloat borde[] = { 1.0, 1.0, 1.0, 1.0 };
+	GLfloat borde[] = { 1.0f, 1.0f, 1.0f, 1.0f };
 	//PLACEHOLDER
 	GLsizei _anchoMS = 2048; 
 	GLsizei _altoMS = 2048;
@@ -623,7 +623,7 @@ void PAG::Renderer::addModel(std::string filename, std::string name)
 		if (name == "rook")
 		{
 			model->move({ 2,-.5,2 });
-			model->scale(glm::vec3(.07));
+			model->scale(glm::vec3(.075));
 
 		}
 		if (name == "knight")

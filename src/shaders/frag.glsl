@@ -63,7 +63,10 @@ subroutine (lightMode)
 vec3 directional(vec3 difColor)
 {
 	float shadow = textureProj(samplerShadow, inputVS.shadowCoords);
+	if(inputVS.shadowCoords.z > 1.0)
+		shadow = 1.0;
 	float shadowFactor = clamp(shadow, 0.005, 1.0);
+
 	vec3 n = normalize(inputVS.normal);
 	vec3 l = -lDir;
 	vec3 v = normalize(-inputVS.pos);

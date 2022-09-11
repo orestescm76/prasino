@@ -1,6 +1,6 @@
-# PAG 21-22
+# Prásino
 
-## [ENGLISH] Graphics Application Programming Practices.
+## [ENGLISH] Prasino, a simple OpenGl application.
 
 It is a project based on OpenGL using the GLFW and GLAD libraries.
 It is a model viewer. Basic graphics implementations are: normal mapping, projected shadows, basic lighting 
@@ -29,7 +29,7 @@ Mouse wheel to change the color and zoom!
 
 ![Demo](https://i.imgur.com/NQgzRT2.png)
 
-## [SPANISH] Prácticas de Programación de Aplicaciones Gráficas.
+## [SPANISH] Prásino, una aplicación OpenGL sencilla.
 
 Es un proyecto basado en OpenGL mediante la librería GLFW y GLAD.
 Es un visor de modelos. La implementación gráfica basica es: _normal mapping_, sombras proyectadas y luces básicas.
@@ -51,7 +51,7 @@ Lista de controles:
 * 'r' para reiniciar la cámara
 * 'd' borra el modelo activo
 * 'u' añade textura al modelo activo
-* 'i' añade mapa de normales al modelo activo
+* 'i' añade mapa de normales al modelo activo, si fuera posible
 * 'z' bloquea el ratón en la ventana
 * 'TAB' cambia el modelo activo iterando sobre los que haya en la escena
 Rueda del ratón para hacer zoom y cambiar el color del cielo.

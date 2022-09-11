@@ -168,7 +168,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 			PAG::Renderer::getInstance()->setTextureToActiveModel();
 			break;
 		case GLFW_KEY_I:
-			PAG::Renderer::getInstance()->setNormalMappingToActiveModel();
+			//PAG::Renderer::getInstance()->setNormalMappingToActiveModel();
 			break;
 		case GLFW_KEY_TAB:
 			PAG::Renderer::getInstance()->step();
