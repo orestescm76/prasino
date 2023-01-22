@@ -2,7 +2,7 @@
 * @author orestescm76
 * @brief main
 * VERSION 1.0.0
-* 
+* i'd love to add imgui but that's for another day
 */
 #include "pch.h"
 #include "Renderer.h"
