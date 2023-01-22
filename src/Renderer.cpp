@@ -223,7 +223,7 @@ void PAG::Renderer::activateLight(Light& l, ShaderProgram* sp, Model* model)
 		sp->getFragmentShader().setUniform("Id", l.diffuse);
 		sp->getFragmentShader().setUniform("Is", l.specular);
 		//Apply transform
-		glm::vec3 lDir = glm::vec3(mInvTrans * glm::vec4(l.direction, 0));
+		lDir = glm::vec3(mInvTrans * glm::vec4(l.direction, 0));
 		lDir = glm::normalize(lDir);
 		//lDir = glm::vec3(glm::normalize(mInvTrans * glm::vec4(l.direction, 0)));
 		sp->getFragmentShader().setUniform("lDir", lDir);
@@ -346,7 +346,7 @@ void PAG::Renderer::start()
 {
 	configBackColor({0,0,0,1});
 	activeZBuffer();
-	//Polilínea, sólidos de revolución
+	//Polilï¿½nea, sï¿½lidos de revoluciï¿½n
 	//glPrimitiveRestartIndex(0xFFFF);
 	//glEnable(GL_PRIMITIVE_RESTART);
 	
@@ -358,7 +358,7 @@ void PAG::Renderer::start()
 void PAG::Renderer::activeZBuffer()
 {
 	// - Le decimos a OpenGL que tenga en cuenta la profundidad a la hora de dibujar.
-	//   No tiene por qué ejecutarse en cada paso por el ciclo de eventos.
+	//   No tiene por quï¿½ ejecutarse en cada paso por el ciclo de eventos.
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
 }

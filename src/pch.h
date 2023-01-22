@@ -2,7 +2,7 @@
 //Estructuras de datos
 #include <vector>
 #include <map>
-//LIBRERÍAS ESTÁNDAR
+//LIBRERï¿½AS ESTï¿½NDAR
 #include <iostream>
 #include <string>
 #include <fstream>
@@ -23,3 +23,4 @@
 #include <assimp/postprocess.h>
 //LODEPNG
 #include <lodepng.h>
+

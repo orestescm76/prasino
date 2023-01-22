@@ -32,7 +32,7 @@ namespace PAG
 		MovType movType = MovType::LOCK;
 		void updateCameraAxis();
 		float getFovY();
-		Light* light = nullptr;
+		Light* light;
 	public:
 		Camera();
 		Camera(float w, float h);

@@ -374,3 +374,6 @@ log.txt
 /Librerias
 pag*.glsl
 /Mierda
+/build
+/.vscode
+/src/lodepng.cpp

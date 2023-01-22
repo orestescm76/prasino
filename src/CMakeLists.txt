@@ -1,0 +1,6 @@
+find_package(glfw3 3.3 REQUIRED)
+find_package(GLEW REQUIRED)
+find_package(OpenGL REQUIRED)
+find_package(assimp)
+add_executable(prasino main.cpp Camera.cpp Light.cpp Log.cpp Material.cpp Model.cpp pch.cpp Renderer.cpp Shader.cpp ShaderProgram.cpp Texture.cpp lodepng.cpp)
+target_link_libraries(prasino OpenGL::GL GLEW::GLEW glfw assimp)

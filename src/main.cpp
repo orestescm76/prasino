@@ -69,7 +69,7 @@ void window_refresh_callback(GLFWwindow* window)
 	glfwSwapBuffers(window);
 	//std::cout << "Ventana redibujada" << std::endl;
 }
-//callback al redimensionar ventana - C400, parámetro formal sin referencia
+//callback al redimensionar ventana - C400, parï¿½metro formal sin referencia
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
 	PAG::Renderer::getInstance()->configViewport(width, height);
@@ -181,7 +181,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	}
 	
 }
-//callback de botones del ratón
+//callback de botones del ratï¿½n
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
 	mods;
@@ -198,7 +198,7 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 		//std::cout << "Se ha soltado " << button << std::endl;
 	}
 }
-//callback rueda ratón
+//callback rueda ratï¿½n
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
 	xoffset;
@@ -224,25 +224,25 @@ void mouse_moved_callback(GLFWwindow* window, double xpos, double ypos)
 
 int main()
 {
-	// - Inicializa GLFW. Es un proceso que sólo debe realizarse una vez en la aplicación
+	// - Inicializa GLFW. Es un proceso que sï¿½lo debe realizarse una vez en la aplicaciï¿½n
 	if (glfwInit() != GLFW_TRUE)
 	{
 		PAG::Log::getInstance()->printMessage(PAG::msgType::ERROR, "Failed to initialize GLFW");
 		return -1;
 	}
 
-	// - Definimos las características que queremos que tenga el contexto gráfico
-	//   OpenGL de la ventana que vamos a crear. Por ejemplo, el número de muestras o el
+	// - Definimos las caracterï¿½sticas que queremos que tenga el contexto grï¿½fico
+	//   OpenGL de la ventana que vamos a crear. Por ejemplo, el nï¿½mero de muestras o el
 	//   modo Core Profile.
 	glfwWindowHint(GLFW_SAMPLES, 4); // - Activa antialising con 4 muestras
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); // - Esta y las 2
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4); // siguientes activan un contexto
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1); // OpenGL Core Profile 4.1
-	// - Definimos el puntero para guardar la dirección de la ventana de la aplicación y la creamos
+	// - Definimos el puntero para guardar la direcciï¿½n de la ventana de la aplicaciï¿½n y la creamos
 	GLFWwindow* window;
-	// - Tamaño, título de la ventana, en ventana y no en pantalla completa, sin compartir recursos con otras ventanas.
-	window = glfwCreateWindow(1280, 720, "PAG2122-[ColominaMonsalve-Orestes]", nullptr, nullptr);
-	//¿salió bien?
+	// - Tamaï¿½o, tï¿½tulo de la ventana, en ventana y no en pantalla completa, sin compartir recursos con otras ventanas.
+	window = glfwCreateWindow(1280, 720, "Prasino 1.0", nullptr, nullptr);
+	//ï¿½saliï¿½ bien?
 	if (!window)
 	{
 		PAG::Log::getInstance()->printMessage(PAG::msgType::ERROR, "Failed to open GLFW window");
@@ -253,7 +253,7 @@ int main()
     //   ser el contexto actual de OpenGL para las siguientes llamadas a la biblioteca
  	glfwMakeContextCurrent(window);
 	// - Ahora inicializamos GLEW.
-    //   IMPORTANTE: GLEW debe inicializarse siempre DESPUÉS de que se haya
+    //   IMPORTANTE: GLEW debe inicializarse siempre DESPUï¿½S de que se haya
     //               inicializado GLFW y creado la ventana
 	glewExperimental = true;
 	if (glewInit() != GLEW_OK)
@@ -266,7 +266,7 @@ int main()
 	//Start the renderer.
 	try
 	{
-		PAG::Log::getInstance()->printMessage(PAG::msgType::INFO, "Starting PAG 2122 " + PAG::Renderer::getInstance()->version);
+		PAG::Log::getInstance()->printMessage(PAG::msgType::INFO, "Starting Prasino " + PAG::Renderer::getInstance()->version);
 	}
 	catch (const std::exception& e)
 	{
@@ -297,16 +297,17 @@ int main()
 	}
 	std::cout << "Press 'h' to print keybinds" << std::endl;
 	glfwGetCursorPos(window, &xold, &yold);
+	glfwSwapInterval(1);
 	//Ciclo de eventos
 	while (!glfwWindowShouldClose(window))
 	{
-		glfwWaitEvents();
+		glfwPollEvents();
 	}
 	glfwDestroyWindow(window);
 	window = nullptr;
 	glfwTerminate();
 	delete PAG::Renderer::getInstance();
-	PAG::Log::getInstance()->printMessage(PAG::msgType::INFO, "PAR2122 is finished!");
+	PAG::Log::getInstance()->printMessage(PAG::msgType::INFO, "Prasino is finished!");
 	//std::cout << "Press enter to continue..." << std::endl;
 	//std::cin.get();
 	return 0;

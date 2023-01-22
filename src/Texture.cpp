@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "Texture.h"
 #include "Log.h"
+#include <lodepng.h>
 
 PAG::Texture::Texture(std::string filename, TextureType type): textureType(type)
 {
