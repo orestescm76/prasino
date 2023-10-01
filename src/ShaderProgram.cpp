@@ -72,7 +72,7 @@ void PAG::ShaderProgram::checkErrors(GLint status, GLint id, std::string msg)
 {
 	if (status == GL_FALSE)
 	{
-		Log::getInstance()->printMessage(msgType::ERROR, msg);
+		Log::getInstance()->printMessage(msgType::LOG_ERROR, msg);
 		char log[1024];
 		GLsizei buff;
 		glGetProgramInfoLog(id, sizeof(log), &buff, log);

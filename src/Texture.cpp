@@ -53,7 +53,7 @@ void PAG::Texture::initTexture(std::string filename)
 	Log::getInstance()->printMessage(msgType::INFO, "Loading "+filename);
 	if (error)
 	{
-		Log::getInstance()->printMessage(msgType::ERROR, "Cannot load " + filename);
+		Log::getInstance()->printMessage(msgType::LOG_ERROR, "Cannot load " + filename);
 		Log::getInstance()->printMessage(msgType::INFO, lodepng_error_text(error));
 		throw std::runtime_error("PAG::Texture::initTexture(std::string filename)");
 	}

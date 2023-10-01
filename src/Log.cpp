@@ -34,7 +34,7 @@ void PAG::Log::printMessage(PAG::msgType _tipoMensaje, std::string msg)
 		std::cout << "<WARNING>: " << msg << std::endl;
 		file << "<WARNING>: " << msg << std::endl;
 		break;
-	case msgType::ERROR:
+	case msgType::LOG_ERROR:
 		std::cout << "<ERROR>: " << msg << std::endl;
 		file << "<ERROR>: " << msg << std::endl;
 		break;

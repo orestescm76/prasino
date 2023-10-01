@@ -14,6 +14,47 @@ bool hideMouse = false;
 
 void printHelp()
 {
+#ifdef _WIN32
+	OPENFILENAME ofl;
+	wchar_t filename[MAX_PATH] = L"";
+	ofl.lStructSize = sizeof(OPENFILENAME);
+	ofl.hwndOwner = NULL;
+	ofl.lpstrFile = filename;
+	ofl.lpstrFilter = L"All\0*.*\0Text\0*.TXT\0";
+	ofl.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+	ofl.nMaxFile = sizeof(filename);
+	ofl.nFilterIndex = 1;
+	ofl.lpstrFileTitle = NULL;
+	ofl.nMaxFileTitle = 0;
+	ofl.lpstrInitialDir = NULL;
+	if (GetOpenFileName(&ofl) == TRUE)
+	{
+		MessageBox(NULL, ofl.lpstrFile, L"", MB_OK);
+	}
+	MessageBox(NULL, LR"("'1' adds the triangle
+'2' adds the tetrahedron
+'3' adds the cow
+'4' adds the Rook
+'5' adds the Tottenham Spurs cube (NM)
+'6' adds the Fallen Knight (NM)
+'p' for panning
+'t' for tilting
+'o' for orbit
+'c' for crane
+'f' for dolly
+'z' to hide/show cursor
+'l' to lock the camera
+'v' to set the render to Fill
+'b' to set the render to Wire
+'r' to reset the camera
+'d' deletes the active model
+'u' adds the texture to the active model
+'i' adds normal mapping to the active model, if possible
+'z' locks the cursor inside the window
+'TAB' changes the active model
+Mouse wheel to change the color and zoom!")", L"Help", 0);
+#endif // _WIN32
+
 	std::cout
 		<< "'1' adds the triangle" << std::endl
 		<< "'2' adds the tetrahedron" << std::endl
@@ -61,7 +102,7 @@ void window_refresh_callback(GLFWwindow* window)
 	}
 	catch (const std::exception& e)
 	{
-		PAG::Log::getInstance()->printMessage(PAG::msgType::ERROR, (std::string)e.what());
+		PAG::Log::getInstance()->printMessage(PAG::msgType::LOG_ERROR, (std::string)e.what());
 
 		glfwSetWindowShouldClose(window, GLFW_TRUE);
 	}
@@ -227,7 +268,7 @@ int main()
 	// - Inicializa GLFW. Es un proceso que s�lo debe realizarse una vez en la aplicaci�n
 	if (glfwInit() != GLFW_TRUE)
 	{
-		PAG::Log::getInstance()->printMessage(PAG::msgType::ERROR, "Failed to initialize GLFW");
+		PAG::Log::getInstance()->printMessage(PAG::msgType::LOG_ERROR, "Failed to initialize GLFW");
 		return -1;
 	}
 
@@ -245,7 +286,7 @@ int main()
 	//�sali� bien?
 	if (!window)
 	{
-		PAG::Log::getInstance()->printMessage(PAG::msgType::ERROR, "Failed to open GLFW window");
+		PAG::Log::getInstance()->printMessage(PAG::msgType::LOG_ERROR, "Failed to open GLFW window");
 		glfwTerminate();
 		return -2;
 	}
@@ -258,7 +299,7 @@ int main()
 	glewExperimental = true;
 	if (glewInit() != GLEW_OK)
 	{
-		PAG::Log::getInstance()->printMessage(PAG::msgType::ERROR, "Failed to initialize GLEW");
+		PAG::Log::getInstance()->printMessage(PAG::msgType::LOG_ERROR, "Failed to initialize GLEW");
 		glfwDestroyWindow(window);
 		glfwTerminate();
 		return -3;
@@ -270,7 +311,7 @@ int main()
 	}
 	catch (const std::exception& e)
 	{
-		PAG::Log::getInstance()->printMessage(PAG::msgType::ERROR, e.what());
+		PAG::Log::getInstance()->printMessage(PAG::msgType::LOG_ERROR, e.what());
 		return -1;
 	}
 	PAG::Renderer::getInstance()->configViewport(1280, 720);
@@ -311,4 +352,8 @@ int main()
 	//std::cout << "Press enter to continue..." << std::endl;
 	//std::cin.get();
 	return 0;
+}
+int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hInstPrev, PSTR cmdLine, int cmdshow)
+{
+	return main();
 }

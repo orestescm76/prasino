@@ -120,7 +120,7 @@ normals(), vertices(), indices(), material(mat), mName(name), textures()
 	const aiScene* scene = importer.ReadFile(filename, aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace);
 	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 	{
-		Log::getInstance()->printMessage(msgType::ERROR, "Failed to load the model! Maybe I couldn't find it?");
+		Log::getInstance()->printMessage(msgType::LOG_ERROR, "Failed to load the model! Maybe I couldn't find it?");
 		throw std::runtime_error("Failed to load the model");
 	}
 	processNode(scene->mRootNode, scene);

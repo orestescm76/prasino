@@ -1,4 +1,10 @@
 #pragma once
+#ifdef _WIN32
+#include <Windows.h>
+
+#endif // _WIN32
+
+
 //Estructuras de datos
 #include <vector>
 #include <map>
@@ -23,4 +29,6 @@
 #include <assimp/postprocess.h>
 //LODEPNG
 #include <lodepng.h>
+
+
 

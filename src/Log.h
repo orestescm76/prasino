@@ -1,13 +1,12 @@
 #pragma once
 
-
 namespace PAG
 {
 	enum class msgType
 	{
 		INFO,
 		WARNING,
-		ERROR,
+		LOG_ERROR,
 		OK
 	};
 

@@ -157,7 +157,7 @@ void PAG::Shader::checkErrors(GLint status, GLint shaderId, std::string msg)
 {
 	if (status == GL_FALSE)
 	{
-		Log::getInstance()->printMessage(msgType::ERROR, msg);
+		Log::getInstance()->printMessage(msgType::LOG_ERROR, msg);
 		char log[1024];
 		GLsizei buff;
 		glGetShaderInfoLog(shaderId, sizeof(log), &buff, log);
